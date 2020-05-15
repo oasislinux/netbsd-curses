@@ -29,15 +29,6 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-#ifndef lint
-#if 0
-static char sccsid[] = "@(#)newwin.c	8.3 (Berkeley) 7/27/94";
-#else
-__RCSID("$NetBSD: newwin.c,v 1.57 2019/06/09 07:40:14 blymn Exp $");
-#endif
-#endif				/* not lint */
-
 #include <stdlib.h>
 
 #include "curses.h"

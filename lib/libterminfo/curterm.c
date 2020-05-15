@@ -27,9 +27,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-__RCSID("$NetBSD: curterm.c,v 1.13 2017/05/04 09:42:23 roy Exp $");
-
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>

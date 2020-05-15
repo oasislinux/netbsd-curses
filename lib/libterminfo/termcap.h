@@ -30,10 +30,6 @@
 #ifndef _TERMCAP_H_
 #define	_TERMCAP_H_
 
-#include <sys/cdefs.h>
-
-__BEGIN_DECLS
-
 /* Output functions.
  * These are still valid for terminfo. */
 int		putp(const char *);
@@ -50,5 +46,4 @@ int		tgetflag(const char *);
 int		tgetnum(const char *);
 char *		tgoto(const char *, int, int);
 
-__END_DECLS
 #endif

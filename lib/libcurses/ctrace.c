@@ -29,15 +29,6 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-#ifndef lint
-#if 0
-static char sccsid[] = "@(#)ctrace.c	8.2 (Berkeley) 10/5/93";
-#else
-__RCSID("$NetBSD: ctrace.c,v 1.23 2018/10/29 00:31:57 uwe Exp $");
-#endif
-#endif				/* not lint */
-
 #ifdef DEBUG
 #include <stdarg.h>
 #include <stdio.h>

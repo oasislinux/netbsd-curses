@@ -27,9 +27,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-__RCSID("$NetBSD: tputs.c,v 1.5 2019/10/03 18:02:05 christos Exp $");
-
 #include <assert.h>
 #include <ctype.h>
 #include <stdio.h>

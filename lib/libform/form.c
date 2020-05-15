@@ -29,9 +29,6 @@
  *
  */
 
-#include <sys/cdefs.h>
-__RCSID("$NetBSD: form.c,v 1.16 2016/03/09 19:47:13 christos Exp $");
-
 #include <stdlib.h>
 #include <strings.h>
 #include <form.h>

@@ -29,15 +29,6 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-#ifndef lint
-#if 0
-static char sccsid[] = "@(#)refresh.c	8.7 (Berkeley) 8/13/94";
-#else
-__RCSID("$NetBSD: refresh.c,v 1.112 2020/02/24 12:20:29 rin Exp $");
-#endif
-#endif				/* not lint */
-
 #include <poll.h>
 #include <stdlib.h>
 #include <string.h>

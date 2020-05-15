@@ -29,11 +29,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-#ifndef lint
-__RCSID("$NetBSD: background.c,v 1.25 2018/11/19 20:37:04 uwe Exp $");
-#endif				/* not lint */
-
 #include <stdlib.h>
 #include "curses.h"
 #include "curses_private.h"

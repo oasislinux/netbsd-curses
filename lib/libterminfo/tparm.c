@@ -27,8 +27,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-__RCSID("$NetBSD: tparm.c,v 1.18 2020/03/27 15:11:57 christos Exp $");
 #include <sys/param.h>
 
 #include <assert.h>

@@ -29,9 +29,6 @@
  *
  */
 
-#include <sys/cdefs.h>
-__RCSID("$NetBSD: type_ipv4.c,v 1.11 2016/03/09 19:47:13 christos Exp $");
-
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>

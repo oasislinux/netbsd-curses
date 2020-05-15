@@ -28,9 +28,6 @@
  *
  */
 
-#include <sys/cdefs.h>
-__RCSID("$NetBSD: field.c,v 1.31 2016/03/09 19:47:13 christos Exp $");
-
 #include <sys/param.h>
 #include <stdlib.h>
 #include <strings.h>

@@ -26,9 +26,6 @@
  *
  */
 
-#include <sys/cdefs.h>
-__RCSID("$NetBSD: userptr.c,v 1.9 2003/03/09 01:08:48 lukem Exp $");
-
 #include <menu.h>
 #include <stdlib.h>
 #include <string.h>

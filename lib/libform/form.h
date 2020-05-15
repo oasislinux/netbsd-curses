@@ -297,8 +297,6 @@ struct _form_struct {
 };
 
 /* Public function prototypes. */
-__BEGIN_DECLS
-
 FIELD       *current_field(FORM *);
 int          data_ahead(FORM *);
 int          data_behind(FORM *);
@@ -376,7 +374,5 @@ int          set_form_win(FORM *, WINDOW *);
 int          set_max_field(FIELD *, int);
 int          set_new_page(FIELD *, int);
 int          unpost_form(FORM *);
-
-__END_DECLS
 
 #endif /* FORM_H */

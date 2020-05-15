@@ -29,11 +29,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-#ifndef lint
-__RCSID("$NetBSD: attributes.c,v 1.31 2019/07/25 20:18:50 uwe Exp $");
-#endif				/* not lint */
-
 #include "curses.h"
 #include "curses_private.h"
 

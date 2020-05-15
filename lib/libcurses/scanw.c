@@ -29,15 +29,6 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-#ifndef lint
-#if 0
-static char sccsid[] = "@(#)scanw.c	8.3 (Berkeley) 5/4/94";
-#else
-__RCSID("$NetBSD: scanw.c,v 1.23 2019/06/30 22:16:20 blymn Exp $");
-#endif
-#endif				/* not lint */
-
 /*
  * scanw and friends.
  */

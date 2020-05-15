@@ -29,11 +29,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-#ifndef lint
-__RCSID("$NetBSD: keyname.c,v 1.8 2019/06/11 10:17:24 blymn Exp $");
-#endif				/* not lint */
-
 #include <stdlib.h>
 #include <string.h>
 

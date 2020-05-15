@@ -26,9 +26,6 @@
  *
  */
 
-#include <sys/cdefs.h>
-__RCSID("$NetBSD: menu.c,v 1.18 2012/12/30 12:27:09 blymn Exp $");
-
 #include <ctype.h>
 #include <menu.h>
 #include <string.h>

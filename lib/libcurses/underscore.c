@@ -29,11 +29,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-#ifndef lint
-__RCSID("$NetBSD: underscore.c,v 1.12 2017/01/06 13:53:18 roy Exp $");
-#endif				/* not lint */
-
 #include "curses.h"
 #include "curses_private.h"
 

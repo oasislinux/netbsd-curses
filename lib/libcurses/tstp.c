@@ -29,15 +29,6 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-#ifndef lint
-#if 0
-static char sccsid[] = "@(#)tstp.c	8.3 (Berkeley) 5/4/94";
-#else
-__RCSID("$NetBSD: tstp.c,v 1.44 2018/10/18 07:53:13 roy Exp $");
-#endif
-#endif				/* not lint */
-
 #include <sys/ioctl.h>
 #include <sys/param.h>
 

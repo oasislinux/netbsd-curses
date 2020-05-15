@@ -29,11 +29,6 @@
  *
  */
 
-#include <sys/cdefs.h>
-#ifndef lint
-__RCSID("$NetBSD: copywin.c,v 1.19 2019/06/09 07:40:14 blymn Exp $");
-#endif				/* not lint */
-
 #include <ctype.h>
 #include <string.h>
 #include "curses.h"

@@ -35,11 +35,6 @@
 #include "nbtool_config.h"
 #endif
 
-#include <sys/cdefs.h>
-__RCSID("$NetBSD: cdbw.c,v 1.6 2017/11/11 18:05:31 alnsn Exp $");
-
-#include "namespace.h"
-
 #if !HAVE_NBTOOL_CONFIG_H || HAVE_SYS_ENDIAN_H
 #include <sys/endian.h>
 #endif
