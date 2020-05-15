@@ -35,13 +35,6 @@
 #include "nbtool_config.h"
 #endif
 
-#include <sys/cdefs.h>
-__RCSID("$NetBSD: cdbr.c,v 1.2 2017/01/10 23:06:06 christos Exp $");
-
-#if !defined(_KERNEL) && !defined(_STANDALONE)
-#include "namespace.h"
-#endif
-
 #if !HAVE_NBTOOL_CONFIG_H
 #include <sys/bitops.h>
 #endif

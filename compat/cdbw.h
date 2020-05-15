@@ -34,13 +34,10 @@
 #ifndef	_CDBW_H
 #define	_CDBW_H
 
-#include <sys/cdefs.h>
 #include <inttypes.h>
 #include <stddef.h>
 
 struct cdbw;
-
-__BEGIN_DECLS
 
 struct cdbw	*cdbw_open(void);
 int		 cdbw_put(struct cdbw *, const void *, size_t,
@@ -53,7 +50,5 @@ uint32_t	 cdbw_stable_seeder(void);
 int		 cdbw_output(struct cdbw *, int, const char[16],
     uint32_t (*)(void));
 void		 cdbw_close(struct cdbw *);
-
-__END_DECLS
 
 #endif /* _CDBW_H */

@@ -34,11 +34,6 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-#ifndef lint
-__RCSID("$NetBSD: echo_wchar.c,v 1.3 2018/11/22 22:16:45 uwe Exp $");
-#endif						  /* not lint */
-
 #include "curses.h"
 #include "curses_private.h"
 

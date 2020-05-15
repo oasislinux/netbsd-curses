@@ -29,11 +29,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-#ifndef lint
-__RCSID("$NetBSD: version.c,v 1.3 2019/09/03 13:43:34 roy Exp $");
-#endif
-
 #include "curses.h"
 
 #ifndef CURSES_VERSION

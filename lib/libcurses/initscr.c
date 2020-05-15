@@ -29,15 +29,6 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-#ifndef lint
-#if 0
-static char sccsid[] = "@(#)initscr.c	8.2 (Berkeley) 5/4/94";
-#else
-__RCSID("$NetBSD: initscr.c,v 1.35 2020/03/12 15:50:11 roy Exp $");
-#endif
-#endif	/* not lint */
-
 #include <stdlib.h>
 
 #include "curses.h"

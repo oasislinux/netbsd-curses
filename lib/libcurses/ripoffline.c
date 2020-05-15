@@ -29,11 +29,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-#ifndef lint
-__RCSID("$NetBSD: ripoffline.c,v 1.5 2018/10/03 13:22:29 roy Exp $");
-#endif				/* not lint */
-
 #include "curses.h"
 #include "curses_private.h"
 

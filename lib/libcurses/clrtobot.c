@@ -29,15 +29,6 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-#ifndef lint
-#if 0
-static char sccsid[] = "@(#)clrtobot.c	8.2 (Berkeley) 5/4/94";
-#else
-__RCSID("$NetBSD: clrtobot.c,v 1.27 2020/03/15 01:18:43 uwe Exp $");
-#endif
-#endif				/* not lint */
-
 #include <stdlib.h>
 #include "curses.h"
 #include "curses_private.h"

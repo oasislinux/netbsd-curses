@@ -29,11 +29,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-#ifndef lint
-__RCSID("$NetBSD: fileio.c,v 1.7 2020/02/24 12:20:29 rin Exp $");
-#endif				/* not lint */
-
 #include "curses.h"
 #include "curses_private.h"
 #include "fileio.h"

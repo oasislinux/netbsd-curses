@@ -29,11 +29,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-#ifndef lint
-__RCSID("$NetBSD: pause.c,v 1.10 2017/01/06 13:53:18 roy Exp $");
-#endif				/* not lint */
-
 #include <stdarg.h>
 #include <stdlib.h>
 #include <sys/time.h>

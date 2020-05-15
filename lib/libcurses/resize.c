@@ -28,15 +28,6 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-#ifndef lint
-#if 0
-static char sccsid[] = "@(#)resize.c   blymn 2001/08/26";
-#else
-__RCSID("$NetBSD: resize.c,v 1.30 2018/11/02 04:17:39 blymn Exp $");
-#endif
-#endif				/* not lint */
-
 #include <stdlib.h>
 
 #include "curses.h"

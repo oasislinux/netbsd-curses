@@ -29,9 +29,6 @@
  *
  */
 
-#include <sys/cdefs.h>
-__RCSID("$NetBSD: type_integer.c,v 1.8 2004/10/28 21:14:52 dsl Exp $");
-
 #include <stdlib.h>
 #include <strings.h>
 #include <ctype.h>

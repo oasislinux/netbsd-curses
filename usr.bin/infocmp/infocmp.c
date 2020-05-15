@@ -27,9 +27,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-__RCSID("$NetBSD: infocmp.c,v 1.17 2020/03/31 12:44:15 roy Exp $");
-
 #include <sys/ioctl.h>
 
 #include <ctype.h>

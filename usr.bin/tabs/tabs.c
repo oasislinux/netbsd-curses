@@ -29,13 +29,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-#ifndef lint
-__COPYRIGHT("@(#) Copyright (c) 2008 \
-The NetBSD Foundation, inc. All rights reserved.");
-__RCSID("$NetBSD: tabs.c,v 1.5 2019/02/01 08:29:04 mrg Exp $");
-#endif /* not lint */
-
 #include <sys/ioctl.h>
 #include <sys/types.h>
 

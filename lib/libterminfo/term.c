@@ -27,9 +27,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-__RCSID("$NetBSD: term.c,v 1.34 2020/04/05 14:53:39 martin Exp $");
-
 #include <sys/stat.h>
 
 #include <assert.h>

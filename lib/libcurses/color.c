@@ -29,11 +29,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-#ifndef lint
-__RCSID("$NetBSD: color.c,v 1.41 2017/01/06 13:53:18 roy Exp $");
-#endif				/* not lint */
-
 #include "curses.h"
 #include "curses_private.h"
 

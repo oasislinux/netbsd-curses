@@ -41,7 +41,6 @@
 #define	_CURSES_H_
 
 #include <sys/types.h>
-#include <sys/cdefs.h>
 #include <wchar.h>
 
 #include <stdio.h>
@@ -283,9 +282,7 @@ typedef struct __screen SCREEN;
 
 #define	NUM_ACS	128
 
-__BEGIN_DECLS
 extern chtype _acs_char[NUM_ACS];
-__END_DECLS
 #ifdef __cplusplus
 #define __UC_CAST(a)	static_cast<unsigned char>(a)
 #else
@@ -329,9 +326,7 @@ __END_DECLS
 #define	ACS_STERLING	_acs_char[__UC_CAST('}')]
 
 #ifdef HAVE_WCHAR
-__BEGIN_DECLS
 extern cchar_t _wacs_char[NUM_ACS];
-__END_DECLS
 
 #define	WACS_RARROW     (&_wacs_char[(unsigned char)'+'])
 #define	WACS_LARROW     (&_wacs_char[(unsigned char)','])
@@ -403,7 +398,6 @@ __END_DECLS
 #define	PAIR_NUMBER(n)	(((__UINT32_CAST(n)) & A_COLOR) >> 17)
 
 /* Curses external declarations. */
-__BEGIN_DECLS
 extern WINDOW	*curscr;		/* Current screen. */
 extern WINDOW	*stdscr;		/* Standard screen. */
 
@@ -416,7 +410,6 @@ extern int	 COLOR_PAIRS;		/* Max color pairs on the screen. */
 
 extern int	 ESCDELAY;		/* Delay between keys in esc seq's. */
 extern int	 TABSIZE;		/* Size of a tab. */
-__END_DECLS
 
 #ifndef OK
 #define	ERR	(-1)			/* Error return. */
@@ -533,7 +526,6 @@ __END_DECLS
 
 #else
 /* Use functions not macros... */
-__BEGIN_DECLS
 int	 addbytes(const char *, int);
 int	 addch(chtype);
 int	 addchnstr(const chtype *, int);
@@ -612,7 +604,6 @@ int	 mvwgetnstr(WINDOW *, int, int, char *, int);
 int	 mvwgetstr(WINDOW *, int, int, char *);
 chtype	 mvwinch(WINDOW *, int, int);
 int	 mvwinsch(WINDOW *, int, int, chtype);
-__END_DECLS
 #endif /* _CURSES_USE_MACROS */
 
 #define	getyx(w, y, x)		(y) = getcury(w), (x) = getcurx(w)
@@ -639,7 +630,6 @@ __END_DECLS
 
 
 /* Public function prototypes. */
-__BEGIN_DECLS
 int	 assume_default_colors(short, short);
 int	 baudrate(void);
 int	 beep(void);
@@ -1057,6 +1047,5 @@ int	 __waddbytes(WINDOW *, const char *, int, attr_t);
 #ifdef HAVE_WCHAR
 int __cputwchar( wchar_t );
 #endif /* HAVE_WCHAR */
-__END_DECLS
 
 #endif /* !_CURSES_H_ */

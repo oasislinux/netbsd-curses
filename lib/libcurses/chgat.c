@@ -29,9 +29,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-__RCSID("$NetBSD: chgat.c,v 1.5 2012/09/28 06:05:19 blymn Exp $");
-
 #include "curses.h"
 #include "curses_private.h"
 

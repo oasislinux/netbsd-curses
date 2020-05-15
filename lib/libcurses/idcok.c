@@ -29,15 +29,6 @@
  *
  */
 
-#include <sys/cdefs.h>
-#ifndef lint
-#if 0
-static char sccsid[] = "@(#)idcok.c	blymn 2002/06/06";
-#else
-__RCSID("$NetBSD: idcok.c,v 1.2 2017/01/06 13:53:18 roy Exp $");
-#endif
-#endif				/* not lint */
-
 #include "curses.h"
 #include "curses_private.h"
 

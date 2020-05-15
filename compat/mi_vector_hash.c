@@ -42,9 +42,6 @@
 #include "nbtool_config.h"
 #endif
 
-#include <sys/cdefs.h>
-__RCSID("$NetBSD: mi_vector_hash.c,v 1.1 2013/12/11 01:24:08 joerg Exp $");
-
 #if !HAVE_NBTOOL_CONFIG_H || HAVE_SYS_ENDIAN_H
 #include <sys/endian.h>
 #endif
@@ -54,7 +51,6 @@ __RCSID("$NetBSD: mi_vector_hash.c,v 1.1 2013/12/11 01:24:08 joerg Exp $");
 #include <sys/systm.h>
 #include <lib/libkern/libkern.h>
 #else
-#include "namespace.h"
 
 #include <stdint.h>
 #include <stdlib.h>

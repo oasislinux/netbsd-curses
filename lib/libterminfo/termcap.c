@@ -27,9 +27,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-__RCSID("$NetBSD: termcap.c,v 1.24 2020/04/05 14:53:39 martin Exp $");
-
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>

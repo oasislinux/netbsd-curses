@@ -35,11 +35,6 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-#ifndef lint
-__RCSID("$NetBSD: inchstr.c,v 1.10 2019/06/09 07:40:14 blymn Exp $");
-#endif				/* not lint */
-
 #include "curses.h"
 #include "curses_private.h"
 

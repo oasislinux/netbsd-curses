@@ -29,14 +29,6 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-#ifndef lint
-#if 0
-static char sccsid[] = "@(#)map.c	8.1 (Berkeley) 6/9/93";
-#endif
-__RCSID("$NetBSD: map.c,v 1.13 2011/09/06 18:34:12 joerg Exp $");
-#endif /* not lint */
-
 #include <sys/types.h>
 #include <err.h>
 #include <errno.h>

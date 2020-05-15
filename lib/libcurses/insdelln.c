@@ -29,11 +29,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-#ifndef lint
-__RCSID("$NetBSD: insdelln.c,v 1.18 2017/01/06 13:53:18 roy Exp $");
-#endif				/* not lint */
-
 /*
  * Based on deleteln.c and insertln.c -
  * Copyright (c) 1981, 1993, 1994

@@ -29,11 +29,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-#ifndef lint
-__RCSID("$NetBSD: addchnstr.c,v 1.8 2019/06/09 07:40:14 blymn Exp $");
-#endif				/* not lint */
-
 #include <stdlib.h>
 
 #include "curses.h"

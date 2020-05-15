@@ -138,7 +138,6 @@ struct __menu {
 
 
 /* Public function prototypes. */
-__BEGIN_DECLS
 int  menu_driver(MENU *, int);
 int scale_menu(MENU *, int *, int *);
 int set_top_row(MENU *, int);
@@ -204,7 +203,5 @@ int set_item_opts(ITEM *, OPTIONS);
 int set_item_term(MENU *, Menu_Hook);
 int set_item_userptr(ITEM *, char *);
 int set_item_value(ITEM *, int);
-
-__END_DECLS
 
 #endif /* !_MENU_H_ */

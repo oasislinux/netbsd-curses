@@ -29,9 +29,6 @@
  *
  */
 
-#include <sys/cdefs.h>
-__RCSID("$NetBSD: internals.c,v 1.39 2018/11/08 06:34:40 msaitoh Exp $");
-
 #include <limits.h>
 #include <ctype.h>
 #include <stdio.h>

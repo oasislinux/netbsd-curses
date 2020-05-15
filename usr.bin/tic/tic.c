@@ -31,9 +31,6 @@
 #include "nbtool_config.h"
 #endif
 
-#include <sys/cdefs.h>
-__RCSID("$NetBSD: tic.c,v 1.40 2020/03/30 00:09:06 roy Exp $");
-
 #include <sys/types.h>
 #include <sys/queue.h>
 #include <sys/stat.h>

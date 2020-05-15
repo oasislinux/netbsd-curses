@@ -31,9 +31,6 @@
 #include "nbtool_config.h"
 #endif
 
-#include <sys/cdefs.h>
-__RCSID("$NetBSD: compile.c,v 1.25 2020/04/05 12:31:02 roy Exp $");
-
 #if !HAVE_NBTOOL_CONFIG_H || HAVE_SYS_ENDIAN_H
 #include <sys/endian.h>
 #endif

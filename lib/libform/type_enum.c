@@ -29,9 +29,6 @@
  *
  */
 
-#include <sys/cdefs.h>
-__RCSID("$NetBSD: type_enum.c,v 1.12 2016/03/09 19:47:13 christos Exp $");
-
 #include <ctype.h>
 #include <stdlib.h>
 #include <strings.h>
