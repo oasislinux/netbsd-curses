@@ -1,0 +1,17 @@
+*.o
+/config.mk
+/lib/libterminfo/compiled_terms.c
+/lib/libterminfo/hash.c
+/lib/libterminfo/termcap_hash.c
+/libcurses.a
+/libform.a
+/libmenu.a
+/libpanel.a
+/libterminfo.a
+/host-nbperf
+/host-tic
+/infocmp
+/tabs
+/tic
+/tput
+/tset
