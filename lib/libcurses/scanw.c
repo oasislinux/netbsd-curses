@@ -119,4 +119,8 @@ vw_scanw(WINDOW *win, const char *fmt, va_list ap)
 	return ret;
 }
 
-__strong_alias(vwscanw, vw_scanw)
+int
+vwscanw(WINDOW *win, const char *fmt, va_list ap)
+{
+	return vwscanw(win, fmt, ap);
+}

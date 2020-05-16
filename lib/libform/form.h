@@ -353,7 +353,7 @@ int          set_field_init(FORM *, Form_Hook);
 int          set_field_just(FIELD *, int);
 int          set_field_opts(FIELD *, Form_Options);
 int          set_field_pad(FIELD *, int);
-int          set_field_printf(FIELD *, int, char *, ...) __printflike(3, 4);
+int          set_field_printf(FIELD *, int, char *, ...);
 int          set_field_status(FIELD *, int);
 int          set_field_term(FORM *, Form_Hook);
 int          set_field_type(FIELD *, FIELDTYPE *, ...);

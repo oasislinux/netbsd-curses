@@ -32,11 +32,11 @@ int
 show_panel(PANEL *p)
 {
 
-	if (__predict_false(p == NULL))
+	if (p == NULL)
 		return ERR;
 
 	/* unlike top_panel() */
-	if (__predict_false(!PANEL_HIDDEN(p)))
+	if (!PANEL_HIDDEN(p))
 		return ERR;
 
 	DECK_INSERT_TOP(p);

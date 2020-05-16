@@ -44,8 +44,6 @@
  * inchstr, inchnstr --
  *	Return an array of characters at cursor position from stdscr.
  */
-__warn_references(inchstr,
-    "warning: this program uses inchstr(), which is unsafe.");
 int
 inchstr(chtype *chstr)
 {
@@ -64,8 +62,6 @@ inchnstr(chtype *chstr, int n)
  * mvinchstr, mvinchnstr --
  *      Return an array of characters at position (y, x) from stdscr.
  */
-__warn_references(mvinchstr,
-    "warning: this program uses mvinchstr(), which is unsafe.");
 int
 mvinchstr(int y, int x, chtype *chstr)
 {
@@ -84,8 +80,6 @@ mvinchnstr(int y, int x, chtype *chstr, int n)
  * mvwinchstr, mvwinchnstr --
  *      Return an array characters at position (y, x) from the given window.
  */
-__warn_references(mvwinchstr,
-    "warning: this program uses mvwinchstr(), which is unsafe.");
 int
 mvwinchstr(WINDOW *win, int y, int x, chtype *chstr)
 {
@@ -112,8 +106,6 @@ mvwinchnstr(WINDOW *win, int y, int x, chtype *chstr, int n)
  * winchstr, winchnstr --
  *	Return an array of characters at cursor position.
  */
-__warn_references(winchstr,
-    "warning: this program uses winchstr(), which is unsafe.");
 int
 winchstr(WINDOW *win, chtype *chstr)
 {

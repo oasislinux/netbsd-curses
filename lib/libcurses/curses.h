@@ -43,6 +43,7 @@
 #include <sys/types.h>
 #include <wchar.h>
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdbool.h>
 
@@ -695,8 +696,8 @@ int	 meta(WINDOW *, bool);
 int	 mvcur(int, int, int, int);
 int      mvderwin(WINDOW *, int, int);
 int	 mvhline(int, int, chtype, int);
-int	 mvprintw(int, int, const char *, ...) __printflike(3, 4);
-int	 mvscanw(int, int, const char *, ...) __scanflike(3, 4);
+int	 mvprintw(int, int, const char *, ...);
+int	 mvscanw(int, int, const char *, ...);
 int	 mvvline(int, int, chtype, int);
 int	 mvwhline(WINDOW *, int, int, chtype, int);
 int	 mvwvline(WINDOW *, int, int, chtype, int);
@@ -705,8 +706,8 @@ int	 mvwinchnstr(WINDOW *, int, int, chtype *, int);
 int	 mvwinchstr(WINDOW *, int, int, chtype *);
 int	 mvwinnstr(WINDOW *, int, int, char *, int);
 int	 mvwinstr(WINDOW *, int, int, char *);
-int	 mvwprintw(WINDOW *, int, int, const char *, ...) __printflike(4, 5);
-int	 mvwscanw(WINDOW *, int, int, const char *, ...) __scanflike(4, 5);
+int	 mvwprintw(WINDOW *, int, int, const char *, ...);
+int	 mvwscanw(WINDOW *, int, int, const char *, ...);
 int	 napms(int);
 WINDOW	*newpad(int, int);
 SCREEN  *newterm(char *, FILE *, FILE *);
@@ -726,7 +727,7 @@ int	 pair_content(short, short *, short *);
 int	 pechochar(WINDOW *, const chtype);
 int	 pnoutrefresh(WINDOW *, int, int, int, int, int, int);
 int	 prefresh(WINDOW *, int, int, int, int, int, int);
-int	 printw(const char *, ...) __printflike(1, 2);
+int	 printw(const char *, ...);
 int	 putwin(WINDOW *, FILE *);
 void	 qiflush(void);
 int	 raw(void);
@@ -738,7 +739,7 @@ int      resizeterm(int, int);
 int	 resize_term(int, int);
 int	 ripoffline(int, int (*)(WINDOW *, int));
 int	 savetty(void);
-int	 scanw(const char *, ...) __scanflike(1, 2);
+int	 scanw(const char *, ...);
 int	 scroll(WINDOW *);
 int	 scrollok(WINDOW *, bool);
 int	 setterm(char *);
@@ -760,10 +761,10 @@ int	 untouchwin(WINDOW *);
 int	 use_default_colors(void);
 void	 use_env(bool);
 int	 vline(chtype, int);
-int	 vw_printw(WINDOW *, const char *, __va_list) __printflike(2, 0);
-int	 vw_scanw(WINDOW *, const char *, __va_list) __scanflike(2, 0);
-int	 vwprintw(WINDOW *, const char *, __va_list) __printflike(2, 0);
-int	 vwscanw(WINDOW *, const char *, __va_list) __scanflike(2, 0);
+int	 vw_printw(WINDOW *, const char *, va_list);
+int	 vw_scanw(WINDOW *, const char *, va_list);
+int	 vwprintw(WINDOW *, const char *, va_list);
+int	 vwscanw(WINDOW *, const char *, va_list);
 int	 waddch(WINDOW *, chtype);
 int	 waddchnstr(WINDOW *, const chtype *, int);
 int	 waddchstr(WINDOW *, const chtype *);
@@ -802,11 +803,11 @@ int	 winsertln(WINDOW *);
 int	 winstr(WINDOW *, char *);
 int	 wmove(WINDOW *, int, int);
 int	 wnoutrefresh(WINDOW *);
-int	 wprintw(WINDOW *, const char *, ...)  __printflike(2, 3);
+int	 wprintw(WINDOW *, const char *, ...);
 int	 wredrawln(WINDOW *, int, int);
 int	 wrefresh(WINDOW *);
 int      wresize(WINDOW *, int, int);
-int	 wscanw(WINDOW *, const char *, ...) __scanflike(2, 3);
+int	 wscanw(WINDOW *, const char *, ...);
 int	 wscrl(WINDOW *, int);
 int	 wsetscrreg(WINDOW *, int, int);
 int	 wstandend(WINDOW *);

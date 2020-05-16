@@ -142,7 +142,7 @@ print_hash(struct nbperf *nbperf, struct state *state)
 	fprintf(nbperf->output, "%suint32_t\n",
 	    nbperf->static_hash ? "static " : "");
 	fprintf(nbperf->output,
-	    "%s(const void * __restrict key, size_t keylen)\n",
+	    "%s(const void *restrict key, size_t keylen)\n",
 	    nbperf->hash_name);
 	fprintf(nbperf->output, "{\n");
 	if (state->graph.v >= 65536) {

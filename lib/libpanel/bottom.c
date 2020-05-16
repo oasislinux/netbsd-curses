@@ -32,10 +32,10 @@ int
 bottom_panel(PANEL *p)
 {
 
-	if (__predict_false(p == NULL))
+	if (p == NULL)
 		return ERR;
 
-	if (__predict_false(PANEL_HIDDEN(p)))
+	if (PANEL_HIDDEN(p))
 		return ERR;
 
 	(void) hide_panel(p);

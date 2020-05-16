@@ -113,19 +113,23 @@ vw_printw(WINDOW *win, const char *fmt, va_list ap)
 
 	if (win->fp == NULL) {
 		win->fp = open_memstream(&win->buf, &win->buflen);
-		if (__predict_false(win->fp == NULL))
+		if (win->fp == NULL)
 			return ERR;
 	} else
 		rewind(win->fp);
 
 	n = vfprintf(win->fp, fmt, ap);
-	if (__predict_false(n == 0))
+	if (n == 0)
 		return OK;
-	if (__predict_false(n == -1))
+	if (n == -1)
 		return ERR;
-	if (__predict_false(fflush(win->fp) != 0))
+	if (fflush(win->fp) != 0)
 		return ERR;
 	return waddnstr(win, win->buf, n);
 }
 
-__strong_alias(vwprintw, vw_printw)
+int
+vwprintw(WINDOW *win, const char *fmt, va_list ap)
+{
+	return vwprintw(win, fmt, ap);
+}

@@ -49,10 +49,10 @@ struct __panel {
 
 /* Deck of panels in Z-order from bottom to top. */
 DECK_HEAD(deck);
-extern struct deck _deck __dso_hidden;
+extern struct deck _deck;
 
 /* Fake stdscr panel at the bottom, not user visible */
-extern PANEL _stdscr_panel __dso_hidden;
+extern PANEL _stdscr_panel;
 
 
 /*

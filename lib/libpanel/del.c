@@ -35,7 +35,7 @@ int
 del_panel(PANEL *p)
 {
 
-	if (__predict_false(p == NULL))
+	if (p == NULL)
 		return ERR;
 
 	(void) hide_panel(p);

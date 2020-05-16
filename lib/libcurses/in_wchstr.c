@@ -41,8 +41,6 @@
  * in_wchstr, in_wchnstr --
  *	Return an array of wide characters at cursor position from stdscr.
  */
-__warn_references(in_wchstr,
-	"warning: this program uses in_wchstr(), which is unsafe.");
 int
 in_wchstr(cchar_t *wchstr)
 {
@@ -59,8 +57,6 @@ in_wchnstr(cchar_t *wchstr, int n)
  * mvin_wchstr, mv_winchnstr --
  *  Return an array of wide characters at position (y, x) from stdscr.
  */
-__warn_references(mvin_wchstr,
-	"warning: this program uses mvin_wchstr(), which is unsafe.");
 int
 mvin_wchstr(int y, int x, cchar_t *wchstr)
 {
@@ -77,8 +73,6 @@ mvin_wchnstr(int y, int x, cchar_t *wchstr, int n)
  * mvwin_wchstr, mvwin_wchnstr --
  *  Return an array wide characters at position (y, x) from the given window.
  */
-__warn_references(mvwin_wchstr,
-	"warning: this program uses mvwin_wchstr(), which is unsafe.");
 int
 mvwin_wchstr(WINDOW *win, int y, int x, cchar_t *wchstr)
 {
@@ -101,8 +95,6 @@ mvwin_wchnstr(WINDOW *win, int y, int x, cchar_t *wchstr, int n)
  * win_wchstr, win_wchnstr --
  *	Return an array of characters at cursor position.
  */
-__warn_references(win_wchstr,
-	"warning: this program uses win_wchstr(), which is unsafe.");
 int
 win_wchstr(WINDOW *win, cchar_t *wchstr)
 {

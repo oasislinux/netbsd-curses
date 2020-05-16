@@ -32,11 +32,11 @@ int
 top_panel(PANEL *p)
 {
 
-	if (__predict_false(p == NULL))
+	if (p == NULL)
 		return ERR;
 
 	/* unlike show_panel() */
-	if (__predict_false(PANEL_HIDDEN(p)))
+	if (PANEL_HIDDEN(p))
 		return ERR;
 
 	/* XXX: use common internal functions instead */

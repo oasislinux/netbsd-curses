@@ -33,10 +33,10 @@ hide_panel(PANEL *p)
 {
 	PANEL *other;
 
-	if (__predict_false(p == NULL))
+	if (p == NULL)
 		return ERR;
 
-	if (__predict_false(PANEL_HIDDEN(p)))
+	if (PANEL_HIDDEN(p))
 		return OK;
 
 	DECK_REMOVE(p);

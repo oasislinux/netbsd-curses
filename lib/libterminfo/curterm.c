@@ -60,12 +60,12 @@ _ti_setospeed(TERMINAL *term)
 	speed_t os;
 	size_t i;
 
-	_DIAGASSERT(term != NULL);
+	assert(term != NULL);
 
 	term->_ospeed = 0;
 	if (tcgetattr(term->fildes, &termios) == 0) {
 		os = cfgetospeed(&termios);
-		for (i = 0; i < __arraycount(bauds); i++)
+		for (i = 0; i < sizeof(bauds) / sizeof(bauds[0]); i++)
 			if (bauds[i] == os) {
 				term->_ospeed = (short)i;
 				break;
@@ -147,8 +147,8 @@ char *
 termname(void)
 {
 
-        _DIAGASSERT(cur_term != NULL);
-	return __UNCONST(cur_term->name);
+	assert(cur_term != NULL);
+	return (char *)cur_term->name;
 }
 
 static const char * nullname = "";
@@ -157,8 +157,8 @@ char *
 longname(void)
 {
 
-	_DIAGASSERT(cur_term != NULL);
+	assert(cur_term != NULL);
 	if (cur_term->desc == NULL)
-		return __UNCONST(nullname);
-	return __UNCONST(cur_term->desc);
+		return (char *)nullname;
+	return (char *)cur_term->desc;
 }

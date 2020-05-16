@@ -32,7 +32,7 @@ int
 replace_panel(PANEL *p, WINDOW *w)
 {
 
-	if (__predict_false(p == NULL || w == NULL))
+	if (p == NULL || w == NULL)
 		return ERR;
 
 	if (!PANEL_HIDDEN(p)) {

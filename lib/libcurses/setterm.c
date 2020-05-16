@@ -340,13 +340,13 @@ capdup_nodelay(const char *src)
 	char *clean, *dst;
 
 	dst = clean = malloc(strlen(src) + 1);
-	if (__predict_false(clean == NULL))
+	if (clean == NULL)
 		return NULL;
 
 	while (*src != '\0') {
 		if (src[0] == '$' && src[1] == '<') {
 			const char *end = strchr(src + 2, '>');
-			if (__predict_true(end != NULL)) {
+			if (end != NULL) {
 				src = end + 1;
 				continue;
 			}
@@ -374,11 +374,11 @@ does_ctrl_o(const char *exit_cap, const char *acs_cap)
 #endif
 
 	eptr = capdup_nodelay(exit_cap);
-	if (__predict_false(eptr == NULL))
+	if (eptr == NULL)
 		return 0;
 
 	aptr = capdup_nodelay(acs_cap);
-	if (__predict_false(aptr == NULL)) {
+	if (aptr == NULL) {
 		free(eptr);
 		return 0;
 	}

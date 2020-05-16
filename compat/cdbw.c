@@ -44,15 +44,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#ifdef __weak_alias
-__weak_alias(cdbw_close,_cdbw_close)
-__weak_alias(cdbw_open,_cdbw_open)
-__weak_alias(cdbw_output,_cdbw_output)
-__weak_alias(cdbw_put,_cdbw_put)
-__weak_alias(cdbw_put_data,_cdbw_put_data)
-__weak_alias(cdbw_put_key,_cdbw_put_key)
-#endif
-
 struct key_hash {
 	SLIST_ENTRY(key_hash) link;
 	uint32_t hashes[3];
@@ -452,7 +443,7 @@ compute_size(uint32_t size)
 }
 
 #define COND_FLUSH_BUFFER(n) do { 				\
-	if (__predict_false(cur_pos + (n) >= sizeof(buf))) {	\
+	if (cur_pos + (n) >= sizeof(buf)) {			\
 		ret = write(fd, buf, cur_pos);			\
 		if (ret == -1 || (size_t)ret != cur_pos)	\
 			return -1;				\

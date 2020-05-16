@@ -40,6 +40,11 @@
 #include <string.h>
 #include <term.h>
 #include <unistd.h>
+#if __STDC_VERSION__ >= 201112L
+#include <stdnoreturn.h>
+#else
+#define noreturn
+#endif
 
 #define NSTOPS 20
 
@@ -60,7 +65,7 @@ static const struct tabspec tabspecs[] = {
 };
 static const size_t ntabspecs = sizeof(tabspecs) / sizeof(tabspecs[0]);
 
-__dead static void
+static noreturn void
 usage(void)
 {
 	fprintf(stderr,

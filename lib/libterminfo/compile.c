@@ -48,7 +48,7 @@
 #include <term_private.h>
 #include <term.h>
 
-static void __printflike(2, 3)
+static void
 dowarn(int flags, const char *fmt, ...)
 {
 	va_list va;
@@ -171,7 +171,7 @@ _ti_grow_tbuf(TBUF *tbuf, size_t len)
 	char *buf;
 	size_t l;
 
-	_DIAGASSERT(tbuf != NULL);
+	assert(tbuf != NULL);
 
 	l = tbuf->bufpos + len;
 	if (l > tbuf->buflen) {
@@ -194,7 +194,7 @@ _ti_find_cap(TIC *tic, TBUF *tbuf, char type, short ind)
 	uint16_t num;
 	const char *cap;
 
-	_DIAGASSERT(tbuf != NULL);
+	assert(tbuf != NULL);
 
 	cap = tbuf->buf;
 	for (n = tbuf->entries; n > 0; n--) {
@@ -226,8 +226,8 @@ _ti_find_extra(TIC *tic, TBUF *tbuf, const char *code)
 	uint16_t num;
 	const char *cap;
 
-	_DIAGASSERT(tbuf != NULL);
-	_DIAGASSERT(code != NULL);
+	assert(tbuf != NULL);
+	assert(code != NULL);
 
 	cap = tbuf->buf;
 	for (n = tbuf->entries; n > 0; n--) {
@@ -297,7 +297,7 @@ _ti_store_extra(TIC *tic, int wrn, const char *id, char type, char flag,
 {
 	size_t l, capl;
 
-	_DIAGASSERT(tic != NULL);
+	assert(tic != NULL);
 
 	if (strcmp(id, "use") != 0) {
 		if (_ti_find_extra(tic, &tic->extras, id) != NULL)
@@ -366,8 +366,8 @@ _ti_flatten(uint8_t **buf, const TIC *tic)
 	size_t buflen, len, alen, dlen;
 	char *cap;
 
-	_DIAGASSERT(buf != NULL);
-	_DIAGASSERT(tic != NULL);
+	assert(buf != NULL);
+	assert(tic != NULL);
 
 	len = strlen(tic->name) + 1;
 	if (tic->alias == NULL)
@@ -598,7 +598,7 @@ _ti_compile(char *cap, int flags)
 	TBUF buf;
 	TIC *tic;
 
-	_DIAGASSERT(cap != NULL);
+	assert(cap != NULL);
 
 	name = _ti_get_token(&cap, ',');
 	if (name == NULL) {

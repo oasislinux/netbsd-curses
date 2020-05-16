@@ -47,12 +47,12 @@ char *BC;
 
 /* ARGSUSED */
 int
-tgetent(__unused char *bp, const char *name)
+tgetent(char *bp, const char *name)
 {
 	int errret;
 	static TERMINAL *last = NULL;
 
-	_DIAGASSERT(name != NULL);
+	assert(name != NULL);
 
 	/* Free the old term */
 	if (cur_term != NULL) {
@@ -69,8 +69,8 @@ tgetent(__unused char *bp, const char *name)
 
 	if (pad_char != NULL)
 		PC = pad_char[0];
-	UP = __UNCONST(cursor_up);
-	BC = __UNCONST(cursor_left);
+	UP = (char *)cursor_up;
+	BC = (char *)cursor_left;
 	return 1;
 }
 
@@ -86,7 +86,7 @@ tgetflag(const char *id2)
 		return 0;
 
 	ind = _t_flaghash((const unsigned char *)id, strlen(id));
-	if (ind < __arraycount(_ti_cap_flagids)) {
+	if (ind < sizeof(_ti_cap_flagids) / sizeof(_ti_cap_flagids[0])) {
 		if (strcmp(id, _ti_cap_flagids[ind].id) == 0)
 			return cur_term->flags[_ti_cap_flagids[ind].ti];
 	}
@@ -111,7 +111,7 @@ tgetnum(const char *id2)
 		return -1;
 
 	ind = _t_numhash((const unsigned char *)id, strlen(id));
-	if (ind < __arraycount(_ti_cap_numids)) {
+	if (ind < sizeof(_ti_cap_numids) / sizeof(_ti_cap_numids[0])) {
 		te = &_ti_cap_numids[ind];
 		if (strcmp(id, te->id) == 0) {
 			if (!VALID_NUMERIC(cur_term->nums[te->ti]))
@@ -144,7 +144,7 @@ tgetstr(const char *id2, char **area)
 
 	str = NULL;
 	ind = _t_strhash((const unsigned char *)id, strlen(id));
-	if (ind < __arraycount(_ti_cap_strids)) {
+	if (ind < sizeof(_ti_cap_strids) / sizeof(_ti_cap_strids[0])) {
 		if (strcmp(id, _ti_cap_strids[ind].id) == 0) {
 			str = cur_term->strs[_ti_cap_strids[ind].ti];
 			if (str == NULL)
@@ -170,13 +170,13 @@ tgetstr(const char *id2, char **area)
 		return s;
 	}
 
-	return __UNCONST(str);
+	return (char *)str;
 }
 
 char *
 tgoto(const char *cm, int destcol, int destline)
 {
-	_DIAGASSERT(cm != NULL);
+	assert(cm != NULL);
 	return tiparm(cm, destline, destcol);
 }
 
@@ -187,7 +187,7 @@ flagname(const char *key)
 	uint32_t idx;
 
 	idx = _t_flaghash((const unsigned char *)key, strlen(key));
-	if (idx < __arraycount(_ti_cap_flagids) &&
+	if (idx < sizeof(_ti_cap_flagids) / sizeof(_ti_cap_flagids[0]) &&
 	    strcmp(key, _ti_cap_flagids[idx].id) == 0)
 		return _ti_flagid(_ti_cap_flagids[idx].ti);
 	return key;
@@ -199,7 +199,7 @@ numname(const char *key)
 	uint32_t idx;
 
 	idx = _t_numhash((const unsigned char *)key, strlen(key));
-	if (idx < __arraycount(_ti_cap_numids) &&
+	if (idx < sizeof(_ti_cap_numids) / sizeof(_ti_cap_numids[0]) &&
 	    strcmp(key, _ti_cap_numids[idx].id) == 0)
 		return _ti_numid(_ti_cap_numids[idx].ti);
 	return key;
@@ -211,7 +211,7 @@ strname(const char *key)
 	uint32_t idx;
 
 	idx = _t_strhash((const unsigned char *)key, strlen(key));
-	if (idx < __arraycount(_ti_cap_strids) &&
+	if (idx < sizeof(_ti_cap_strids) / sizeof(_ti_cap_strids[0]) &&
 	    strcmp(key, _ti_cap_strids[idx].id) == 0)
 		return _ti_strid(_ti_cap_strids[idx].ti);
 
@@ -488,12 +488,12 @@ captoinfo(char *cap)
 	char *info, *ip, *token, *val, *p, tok[3];
 	const char *name;
 	size_t len, lp, nl, vl, rl;
-	int defs[__arraycount(def_infos)], fv;
+	int defs[sizeof(def_infos) / sizeof(def_infos[0])], fv;
 
-	_DIAGASSERT(cap != NULL);
+	assert(cap != NULL);
 
 	len = strlen(cap) * 2;
-	len += __arraycount(def_infos) * (5 + 4 + 3); /* reserve for defs */
+	len += sizeof(def_infos) / sizeof(def_infos[0]) * (5 + 4 + 3); /* reserve for defs */
 	info = ip = malloc(len);
 	if (info == NULL)
 		return NULL;
@@ -539,7 +539,7 @@ captoinfo(char *cap)
 		}
 
 		/* See if this sets a default. */
-		for (nl = 0; nl < __arraycount(def_infos); nl++) {
+		for (nl = 0; nl < sizeof(def_infos) / sizeof(def_infos[0]); nl++) {
 			if (strcmp(name, def_infos[nl].name) == 0) {
 				defs[nl] = 1;
 				break;
@@ -583,7 +583,7 @@ captoinfo(char *cap)
 	}
 
 	/* Add any defaults not set above. */
-	for (nl = 0; nl < __arraycount(def_infos); nl++) {
+	for (nl = 0; nl < sizeof(def_infos) / sizeof(def_infos[0]); nl++) {
 		if (defs[nl] == 0) {
 			*ip++ = ',';
 			*ip++ = ' ';

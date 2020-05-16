@@ -35,7 +35,7 @@ panel_below(PANEL *p)
 
 	if (p == NULL)
 		below = TAILQ_LAST(&_deck, deck);
-	else if (__predict_true(!PANEL_HIDDEN(p)))
+	else if (!PANEL_HIDDEN(p))
 		below = PANEL_BELOW(p);
 	else
 		return NULL;

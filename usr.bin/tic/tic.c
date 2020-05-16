@@ -72,7 +72,7 @@ static int error_exit;
 static int Sflag;
 static size_t nterm, nalias;
 
-static void __printflike(1, 2)
+static void
 dowarn(const char *fmt, ...)
 {
 	va_list va;
@@ -132,7 +132,7 @@ find_term(const char *name)
 {
 	ENTRY elem, *elemp;
 
-	elem.key = __UNCONST(name);
+	elem.key = (char *)name;
 	elem.data = NULL;
 	elemp = hsearch(elem, FIND);
 	return elemp ? (TERM *)elemp->data : NULL;
@@ -476,8 +476,8 @@ merge_use(int flags)
 				dowarn("%s: use no longer exists - impossible",
 					rtic->name);
 			else {
-				char *scap = __UNCONST(
-				    cap - (4 + sizeof(uint16_t)));
+				char *scap = (char *)cap -
+				    (4 + sizeof(uint16_t));
 				cap++;
 				num = _ti_decode_16(&cap);
 				cap += num;
@@ -586,7 +586,7 @@ write_database(const char *dbname)
 	if (cdbw_output(db, fd, "NetBSD terminfo", cdbw_stable_seeder))
 		err(EXIT_FAILURE,
 		    "writing temporary database %s failed", tmp_dbname);
-	if (fchmod(fd, DEFFILEMODE))
+	if (fchmod(fd, 0666))
 		err(EXIT_FAILURE, "fchmod failed");
 	if (close(fd))
 		err(EXIT_FAILURE,

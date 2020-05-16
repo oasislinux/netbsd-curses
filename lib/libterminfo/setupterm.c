@@ -79,7 +79,7 @@ ti_setupterm(TERMINAL **nterm, const char *term, int fildes, int *errret)
 	int error;
 	struct winsize win;
 
-	_DIAGASSERT(nterm != NULL);
+	assert(nterm != NULL);
 
 	if (term == NULL)
 		term = getenv("TERM");

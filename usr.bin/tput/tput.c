@@ -40,8 +40,13 @@
 #include <term_private.h>
 #include <term.h>
 #include <unistd.h>
+#if __STDC_VERSION__ >= 201112L
+#include <stdnoreturn.h>
+#else
+#define noreturn
+#endif
 
-static void   usage(void) __dead;
+static noreturn void usage(void);
 static char **process(const char *, const char *, char **);
 
 int

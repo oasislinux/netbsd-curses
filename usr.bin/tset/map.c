@@ -70,7 +70,7 @@ add_mapping(const char *port, char *arg)
 	char *copy, *p, *termp;
 
 	copy = strdup(arg);
-	mapp = malloc((u_int)sizeof(MAP));
+	mapp = malloc(sizeof(MAP));
 	if (copy == NULL || mapp == NULL)
 		err(1, "malloc");
 	mapp->next = NULL;

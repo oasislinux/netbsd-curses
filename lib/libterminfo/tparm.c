@@ -554,8 +554,8 @@ ti_tiparm(TERMINAL *term, const char *str, ...)
 	va_list va;
 	char *ret;
 
-	_DIAGASSERT(term != NULL);
-	_DIAGASSERT(str != NULL);
+	assert(term != NULL);
+	assert(str != NULL);
 
 	va_start(va, str);
 	ret = _ti_tiparm(term, str, VA_CHAR_INT, va);
@@ -569,7 +569,7 @@ tiparm(const char *str, ...)
 	va_list va;
 	char *ret;
 
-	_DIAGASSERT(str != NULL);
+	assert(str != NULL);
 
 	va_start(va, str);
 	ret = _ti_tiparm(NULL, str, VA_CHAR_INT, va);
@@ -584,8 +584,8 @@ ti_tlparm(TERMINAL *term, const char *str, ...)
 	va_list va;
 	char *ret;
 
-	_DIAGASSERT(term != NULL);
-	_DIAGASSERT(str != NULL);
+	assert(term != NULL);
+	assert(str != NULL);
 
 	va_start(va, str);
 	ret = _ti_tiparm(term, str, VA_CHAR_LONG, va);
@@ -599,7 +599,7 @@ tlparm(const char *str, ...)
 	va_list va;
 	char *ret;
 
-	_DIAGASSERT(str != NULL);
+	assert(str != NULL);
 
 	va_start(va, str);
 	ret = _ti_tiparm(NULL, str, VA_CHAR_LONG, va);
@@ -614,7 +614,7 @@ _tparm(const char *str, ...)
 	va_list va;
 	char *ret;
 
-	_DIAGASSERT(str != NULL);
+	assert(str != NULL);
 
 	va_start(va, str);
 	ret = _ti_tiparm(NULL, str, VA_LONG_LONG, va);

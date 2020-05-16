@@ -52,8 +52,6 @@ getnstr(char *str, int n)
  * getstr --
  *	Get a string from stdscr starting at (cury, curx).
  */
-__warn_references(getstr,
-    "warning: this program uses getstr(), which is unsafe.");
 int
 getstr(char *str)
 {
@@ -74,8 +72,6 @@ mvgetnstr(int y, int x, char *str, int n)
  * mvgetstr --
  *      Get a string from stdscr starting at (y, x).
  */
-__warn_references(mvgetstr,
-    "warning: this program uses mvgetstr(), which is unsafe.");
 int
 mvgetstr(int y, int x, char *str)
 {
@@ -100,8 +96,6 @@ mvwgetnstr(WINDOW *win, int y, int x, char *str, int n)
  * mvwgetstr --
  *      Get a string from the given window starting at (y, x).
  */
-__warn_references(mvgetstr,
-    "warning: this program uses mvgetstr(), which is unsafe.");
 int
 mvwgetstr(WINDOW *win, int y, int x, char *str)
 {
@@ -117,8 +111,6 @@ mvwgetstr(WINDOW *win, int y, int x, char *str)
  * wgetstr --
  *	Get a string starting at (cury, curx).
  */
-__warn_references(wgetstr,
-    "warning: this program uses wgetstr(), which is unsafe.");
 int
 wgetstr(WINDOW *win, char *str)
 {
@@ -160,7 +152,7 @@ __wgetnstr(WINDOW *win, char *str, int n)
 	ec = erasechar();
 	kc = killchar();
 	xpos = oldx = win->curx;
-	_DIAGASSERT(n == -1 || n > 1);
+	assert(n == -1 || n > 1);
 	remain = n - 1;
 
 	while ((c = wgetch(win)) != ERR && c != '\n' && c != '\r') {
