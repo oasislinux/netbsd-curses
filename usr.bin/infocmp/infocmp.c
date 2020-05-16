@@ -694,7 +694,7 @@ main(int argc, char **argv)
 			fprintf(stderr,
 			    "usage: %s [-1acnqux] [-A database] [-B database] "
 			    "[-w cols] [term]\n",
-			    getprogname());
+			    argv[0] ? argv[0] : "infocmp");
 			return EXIT_FAILURE;
 		}
 	cols--;

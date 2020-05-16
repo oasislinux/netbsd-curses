@@ -142,14 +142,14 @@ main(int argc, char *argv[])
 			break;
 		case '?':
 		default:
-			usage();
+			usage(argv[0]);
 		}
 	}
 	argc -= optind;
 	argv += optind;
 
 	if (argc > 1)
-		usage();
+		usage(argv[0]);
 
 	ttype = get_terminfo_entry(*argv);
 
@@ -278,10 +278,10 @@ obsolete(char *argv[])
 }
 
 static void
-usage(void)
+usage(const char *argv0)
 {
 	(void)fprintf(stderr,
 "usage: %s [-EIQrSs] [-] [-e ch] [-i ch] [-k ch] [-m mapping] [terminal]\n",
-	getprogname());
+	argv0 ? argv0 : "tset");
 	exit(1);
 }

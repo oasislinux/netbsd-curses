@@ -55,12 +55,12 @@
 static int predictable;
 
 static noreturn
-void usage(void)
+void usage(const char *argv0)
 {
 	fprintf(stderr,
 	    "%s [-ps] [-c utilisation] [-i iterations] [-n name] "
 	    "[-o output] input\n",
-	    getprogname());
+	    argv0 ? argv0 : "nbperf");
 	exit(1);
 }
 
@@ -191,15 +191,15 @@ main(int argc, char **argv)
 			nbperf.static_hash = 1;
 			break;
 		default:
-			usage();
+			usage(argv[0]);
 		}
 	}
 
+	if (argc > 1 + optind)
+		usage(argv[0]);
+
 	argc -= optind;
 	argv += optind;
-
-	if (argc > 1)
-		usage();
 
 	if (argc == 1) {
 		input = fopen(argv[0], "r");
