@@ -73,6 +73,7 @@
 #include <sys/types.h>
 #include <assert.h>
 #include <limits.h>
+#include <stdint.h>
 
 #define _TERMINFO
 #define TERMINFO_RTYPE_O1	1
@@ -194,19 +195,19 @@ int _ti_parm_analyse(const char *, int *, int);
 static inline int
 _ti_decode_16(const char **cap)
 {
-	int num = (int16_t)le16dec(*cap);
+	uint8_t *buf = (uint8_t *)*cap;
 
-	*cap += sizeof(uint16_t);
-	return num;
+	*cap += 2;
+	return buf[0] | buf[1] << 8;
 }
 
 static inline int
 _ti_decode_32(const char **cap)
 {
-	int num = (int32_t)le32dec(*cap);
+	uint8_t *buf = (uint8_t *)*cap;
 
-	*cap += sizeof(uint32_t);
-	return num;
+	*cap += 4;
+	return buf[0] | buf[1] << 8 | buf[2] << 16 | buf[3] << 24;
 }
 
 static inline int
@@ -222,17 +223,25 @@ _ti_decode_num(const char **cap, int rtype)
 static inline void
 _ti_encode_16(char **cap, size_t num)
 {
+	uint8_t *buf = (uint8_t *)*cap;
+
 	assert(num <= UINT16_MAX);
-	le16enc(*cap, (uint16_t)num);
-	*cap += sizeof(uint16_t);
+	buf[0] = num;
+	buf[1] = num >> 8;
+	*cap += 2;
 }
 
 static inline void
 _ti_encode_32(char **cap, size_t num)
 {
+	uint8_t *buf = (uint8_t *)*cap;
+
 	assert(num <= UINT32_MAX);
-	le32enc(*cap, (uint32_t)num);
-	*cap += sizeof(uint32_t);
+	buf[0] = num;
+	buf[1] = num >> 8;
+	buf[2] = num >> 16;
+	buf[3] = num >> 24;
+	*cap += 4;
 }
 
 static inline void
@@ -254,17 +263,21 @@ _ti_encode_count_str(char **cap, const char *name, size_t len)
 static inline void
 _ti_encode_buf_16(TBUF *tbuf, size_t num)
 {
+	char *buf = tbuf->buf + tbuf->bufpos;
+
 	assert(num <= UINT16_MAX);
-	le16enc(tbuf->buf + tbuf->bufpos, (uint16_t)num);
-	tbuf->bufpos += sizeof(uint16_t);
+	_ti_encode_16(&buf, num);
+	tbuf->bufpos += 2;
 }
 
 static inline void
 _ti_encode_buf_32(TBUF *tbuf, size_t num)
 {
+	char *buf = tbuf->buf + tbuf->bufpos;
+
 	assert(num <= UINT32_MAX);
-	le32enc(tbuf->buf + tbuf->bufpos, (uint32_t)num);
-	tbuf->bufpos += sizeof(uint32_t);
+	_ti_encode_32(&buf, num);
+	tbuf->bufpos += 4;
 }
 
 static inline void

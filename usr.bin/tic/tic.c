@@ -35,10 +35,6 @@
 #include <sys/queue.h>
 #include <sys/stat.h>
 
-#if !HAVE_NBTOOL_CONFIG_H || HAVE_SYS_ENDIAN_H
-#include <sys/endian.h>
-#endif
-
 #include <cdbw.h>
 #include <ctype.h>
 #include <err.h>

@@ -262,6 +262,13 @@ _ti_checkname(const char *name, const char *termname, const char *termalias)
 #endif
 
 #ifdef TERMINFO_DB
+static uint32_t
+le32dec(const uint8_t *buf)
+{
+	return (uint32_t)buf[0] | ((uint32_t)buf[1] << 8) |
+	    ((uint32_t)buf[2] << 16) | ((uint32_t)buf[3] << 24);
+}
+
 static int
 _ti_dbgetterm(TERMINAL *term, const char *path, const char *name, int flags)
 {
