@@ -39,15 +39,6 @@
 #include <sys/bitops.h>
 #endif
 
-#if defined(_KERNEL) || defined(_STANDALONE)
-#include <sys/cdbr.h>
-#include <sys/kmem.h>
-#include <sys/systm.h>
-#include <lib/libkern/libkern.h>
-#define SET_ERRNO(val)
-#define malloc(size) kmem_alloc(size, KM_SLEEP)
-#define free(ptr) kmem_free(ptr, sizeof(struct cdbr))
-#else
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <cdbr.h>
@@ -60,7 +51,6 @@
 #include <unistd.h>
 #include <mi_vector_hash.h>
 #define SET_ERRNO(val) errno = (val)
-#endif
 
 #if HAVE_NBTOOL_CONFIG_H
 #define	fast_divide32_prepare(d,m,s1,s2)	(void)0

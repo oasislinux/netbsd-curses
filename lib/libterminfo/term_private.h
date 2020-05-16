@@ -74,6 +74,7 @@
 #include <assert.h>
 #include <limits.h>
 #include <stdint.h>
+#include <string.h>
 
 #define _TERMINFO
 #define TERMINFO_RTYPE_O1	1

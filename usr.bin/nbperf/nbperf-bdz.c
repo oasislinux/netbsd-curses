@@ -137,7 +137,6 @@ print_hash(struct nbperf *nbperf, struct state *state)
 	size_t i;
 
 	fprintf(nbperf->output, "#include <stdlib.h>\n");
-	fprintf(nbperf->output, "#include <strings.h>\n\n");
 
 	fprintf(nbperf->output, "%suint32_t\n",
 	    nbperf->static_hash ? "static " : "");

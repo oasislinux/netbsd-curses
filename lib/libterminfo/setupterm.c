@@ -33,7 +33,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <strings.h>
 #include <unistd.h>
 #include <term_private.h>
 #include <term.h>
