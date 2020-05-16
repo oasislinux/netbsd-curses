@@ -42,15 +42,8 @@
 #include "nbtool_config.h"
 #endif
 
-#if defined(_KERNEL) || defined(_STANDALONE)
-#include <sys/types.h>
-#include <sys/systm.h>
-#include <lib/libkern/libkern.h>
-#else
-
 #include <stdint.h>
 #include <stdlib.h>
-#endif
 
 #define mix(a, b, c) do {		\
 	a -= b; a -= c; a ^= (c >> 13);	\

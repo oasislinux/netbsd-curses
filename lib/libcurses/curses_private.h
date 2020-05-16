@@ -39,6 +39,7 @@
  *   wide-character input (used in get_wch())
  */
 
+#include <limits.h>
 #include <term.h>
 #include <termios.h>
 
@@ -300,7 +301,6 @@ struct __screen {
 	struct __slk_label *slk_labels;
 
 #ifdef HAVE_WCHAR
-#define MB_LEN_MAX 8
 #define MAX_CBUF_SIZE MB_LEN_MAX
 	int		cbuf_head;		/* header to cbuf */
 	int		cbuf_tail;		/* tail to cbuf */

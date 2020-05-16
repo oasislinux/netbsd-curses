@@ -38,6 +38,7 @@ chtype _acs_char[NUM_ACS];
 #include <locale.h>
 #include <langinfo.h>
 #include <strings.h>
+#include <string.h>
 
 cchar_t _wacs_char[ NUM_ACS ];
 #endif /* HAVE_WCHAR */
