@@ -79,7 +79,7 @@ usage(void)
 int
 main(int argc, char **argv)
 {
-	char *term, *arg, *token, *end, *tabs = NULL, *p;
+	char *term, *arg, *token, *end, *tabs = NULL;
 	const char *cr, *spec = NULL;
 	int i, n, inc = 8, stops[NSTOPS], nstops, last, cols, margin = 0;
 	size_t j;
@@ -144,10 +144,8 @@ main(int argc, char **argv)
 		last = nstops = 0;
 	else
 		nstops = -1;
-	p = tabs;
-	while ((token = strsep(&p, ", ")) != NULL) {
-		if (*token == '\0')
-			continue;
+	token = strtok(tabs, ", ");
+	while (token != NULL) {
 		if (nstops >= NSTOPS)
 			errx(EXIT_FAILURE,
 			     "too many tab stops (max %d)", NSTOPS);
@@ -164,6 +162,7 @@ main(int argc, char **argv)
 		if (last > n)
 			errx(EXIT_FAILURE, "tab stops may not go backwards");
 		last = stops[nstops++] = n;
+		token = strtok(NULL, ", ");
 	}
 
 	if (term == NULL)
