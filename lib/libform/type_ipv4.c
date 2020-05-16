@@ -57,52 +57,45 @@
 static int
 ipv4_check_field(FIELD *field, char *args)
 {
-	char *buf, *buf1, *keeper, *p, *slash;
-	unsigned int vals[4], style, start, mask;
+	char buf[19], buf1[16], *p, *slash;
+	unsigned int vals[4], style, mask;
 	unsigned long hex_val, working;
 	int i;
 
 	if (args == NULL)
 		return FALSE;
 	
-	if (asprintf(&keeper, "%s", args) < 0)
-		return FALSE;
-
 #ifdef DEBUG
-	_formi_dbg_printf("%s: enter with args of %s\n", __func__, keeper);
+	_formi_dbg_printf("%s: enter with args of %s\n", __func__, args);
 #endif
+	p = args;
 	style = FORMI_DOTTED_QUAD;
-	buf = keeper;
 	hex_val = 0;
 	mask = 0;
 	
 	if ((slash = strchr(p, '/')) != NULL)
 		style = FORMI_CLASSLESS;
 	else {
-		start = _formi_skip_blanks(buf, 0);
-		if ((buf[start] != '\0') && (buf[start + 1] != '\0') &&
-		    (buf[start] == '0') && ((buf[start + 1] == 'x') ||
-					    (buf[start + 1] == 'X')))
+		p += _formi_skip_blanks(p, 0);
+		if ((p[0] != '\0') && (p[1] != '\0') &&
+		    (p[0] == '0') && ((p[1] == 'x') || (p[1] == 'X')))
 			style = FORMI_HEX;
 	}
 
 	switch (style) {
 	case FORMI_CLASSLESS:
-		*slash = '\0';
-		slash++;
-		mask = atoi(slash);
+		mask = atoi(slash + 1);
 		if (mask > 32)
-			goto FAIL;
+			return FALSE;
 		  /* FALLTHROUGH */
 		
 	case FORMI_DOTTED_QUAD:
-		p = buf;
 		for (i = 0; i < 4; i++) {
 			if ((p == NULL) || !isdigit(*p))
-				goto FAIL;
+				return FALSE;
 			vals[i] = atoi(p);
 			if (vals[i] > 255)
-				goto FAIL;
+				return FALSE;
 			if ((p = strchr(p, '.')) != NULL)
 				++p;
 		}
@@ -111,9 +104,9 @@ ipv4_check_field(FIELD *field, char *args)
 		
 	case FORMI_HEX:
 		errno = 0;
-		hex_val = strtoul(buf, NULL, 16);
+		hex_val = strtoul(p, NULL, 16);
 		if ((hex_val == ULONG_MAX) && (errno == ERANGE))
-			goto FAIL;
+			return FALSE;
 		
 		working = hex_val;
 		for (i = 3; i >= 0; i--) {
@@ -124,35 +117,19 @@ ipv4_check_field(FIELD *field, char *args)
 
 	}
 	
-	free(keeper);
-
-	buf1 = NULL;
-	
 	switch (style) {
 	case FORMI_DOTTED_QUAD:
-		if (asprintf(&buf, "%d.%d.%d.%d", vals[0], vals[1], vals[2],
-			     vals[3]) < 0)
-			return FALSE;
-		if (asprintf(&buf1, "%d.%d.%d.%d", vals[0], vals[1],
-			     vals[2], vals[3]) < 0)
-			return FALSE;
+		snprintf(buf, sizeof(buf), "%d.%d.%d.%d", vals[0], vals[1],
+		         vals[2], vals[3]);
 		break;
 
 	case FORMI_CLASSLESS:
-		if (asprintf(&buf, "%d.%d.%d.%d/%d", vals[0], vals[1],
-			     vals[2], vals[3], mask) < 0)
-			return FALSE;
-		if (asprintf(&buf1, "%d.%d.%d.%d", vals[0], vals[1],
-			     vals[2], vals[3]) < 0)
-			return FALSE;
+		snprintf(buf, sizeof(buf), "%d.%d.%d.%d/%d", vals[0],
+		         vals[1], vals[2], vals[3], mask);
 		break;
 
 	case FORMI_HEX:
-		if (asprintf(&buf, "0x%.8lx", hex_val) < 0)
-			return FALSE;
-		if (asprintf(&buf1, "%d.%d.%d.%d", vals[0], vals[1],
-			     vals[2], vals[3]) < 0)
-			return FALSE;
+		snprintf(buf, sizeof(buf), "0x%.8lx", hex_val);
 		break;
 	}
 	
@@ -163,23 +140,18 @@ ipv4_check_field(FIELD *field, char *args)
 	   * Set the field buffer 1 to the dotted quad format regardless
 	   * of the input format, only if buffer 1 exists.
 	   */
-	if (field->nbuf > 1)
+	if (field->nbuf > 1) {
+		snprintf(buf1, sizeof(buf1), "%d.%d.%d.%d", vals[0], vals[1],
+		         vals[2], vals[3]);
 		set_field_buffer(field, 1, buf1);
+	}
 
 #ifdef DEBUG
 	_formi_dbg_printf("%s: buf0 set to %s\n", __func__, buf);
 	_formi_dbg_printf("%s: buf1 set to %s\n", __func__, buf1);
 #endif
-	free(buf);
-	free(buf1);
 	
 	return TRUE;
-
-	  /* bail out point if we got a bad entry */
-  FAIL:
-	free(keeper);
-	return FALSE;
-	
 }
 
 /*
