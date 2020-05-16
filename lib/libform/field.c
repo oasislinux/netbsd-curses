@@ -81,7 +81,7 @@ FIELD _formi_default_field = {
 
 /* internal function prototypes */
 static int
-field_buffer_init(FIELD *field, int buffer, unsigned int len);
+field_buffer_init(FIELD *field, int buffer);
 static FIELD *
 _formi_create_field(FIELD *, int, int, int, int, int, int);
 
@@ -311,7 +311,7 @@ dynamic_field_info(FIELD *field, int *drows, int *dcols, int *max)
  * after the field buffer is set.
  */
 static int
-field_buffer_init(FIELD *field, int buffer, unsigned int len)
+field_buffer_init(FIELD *field, int buffer)
 {
 	int status;
 	char *newp;
@@ -323,14 +323,14 @@ field_buffer_init(FIELD *field, int buffer, unsigned int len)
 		field->cursor_xpos = 0;
 		field->cursor_ypos = 0;
 		field->row_count = 1; /* must be at least one row  XXX need to shift old rows (if any) to free list??? */
-		field->alines->length = len;
+		field->alines->length = field->buffers[buffer].length;
 		if ((newp = realloc(field->alines->string,
-				    (size_t) len + 1)) == NULL)
+		                    field->alines->length + 1)) == NULL)
 			return E_SYSTEM_ERROR;
 		field->alines->string = newp;
-		field->alines->allocated = len + 1;
-		strlcpy(field->alines->string, field->buffers[buffer].string,
-			(size_t) len + 1);
+		field->alines->allocated = field->alines->length + 1;
+		memcpy(field->alines->string, field->buffers[buffer].string,
+		       field->alines->length + 1);
 		field->alines->expanded =
 			_formi_tab_expanded_length(field->alines->string,
 						   0, field->alines->length);
@@ -382,23 +382,27 @@ set_field_printf(FIELD *field, int buffer, char *fmt, ...)
 		return E_BAD_ARGUMENT;
 
 	va_start(args, fmt);
-	  /* check for buffer already existing, free the storage */
-	if (field->buffers[buffer].allocated != 0)
-		free(field->buffers[buffer].string);
-
-	len = vasprintf(&field->buffers[buffer].string, fmt, args);
+	len = vsnprintf(NULL, 0, fmt, args);
 	va_end(args);
 	if (len < 0)
 		return E_SYSTEM_ERROR;
-	
-	field->buffers[buffer].length = len;
-	field->buffers[buffer].allocated = len + 1;
 	if (((field->opts & O_STATIC) == O_STATIC) && (len > field->cols)
 	    && ((field->rows + field->nrows) == 1))
 		len = field->cols;
 
-	field->buffers[buffer].string[len] = '\0';
-	return field_buffer_init(field, buffer, (unsigned int) len);
+	if ((field->buffers[buffer].string = realloc(
+	    field->buffers[buffer].string, len + 1)) == NULL)
+		return E_SYSTEM_ERROR;
+
+	va_start(args, fmt);
+	if (snprintf(field->buffers[buffer].string, len, fmt, args) < 0)
+		return E_SYSTEM_ERROR;
+	va_end(args);
+
+	field->buffers[buffer].length = len;
+	field->buffers[buffer].allocated = len + 1;
+
+	return field_buffer_init(field, buffer);
 }
 	
 /*
@@ -408,7 +412,7 @@ set_field_printf(FIELD *field, int buffer, char *fmt, ...)
 int
 set_field_buffer(FIELD *field, int buffer, const char *value)
 {
-	unsigned int len;
+	size_t len;
 	int status;
 	
 	if (field == NULL)
@@ -417,7 +421,7 @@ set_field_buffer(FIELD *field, int buffer, const char *value)
 	if (buffer >= field->nbuf) /* make sure buffer is valid */
 		return E_BAD_ARGUMENT;
 
-	len = (unsigned int) strlen(value);
+	len = strlen(value);
 	if (((field->opts & O_STATIC) == O_STATIC) && (len > field->cols)
 	    && ((field->rows + field->nrows) == 1))
 		len = field->cols;
@@ -434,13 +438,14 @@ set_field_buffer(FIELD *field, int buffer, const char *value)
 	    field->alines[0].length);
 	
 	if ((field->buffers[buffer].string = realloc(
-	    field->buffers[buffer].string, (size_t) len + 1)) == NULL)
+	    field->buffers[buffer].string, len + 1)) == NULL)
 		return E_SYSTEM_ERROR;
 
-	strlcpy(field->buffers[buffer].string, value, (size_t) len + 1);
+	if (memccpy(field->buffers[buffer].string, value, '\0', len + 1) == NULL)
+		field->buffers[buffer].string[len] = '\0';
 	field->buffers[buffer].length = len;
 	field->buffers[buffer].allocated = len + 1;
-	status = field_buffer_init(field, buffer, len);
+	status = field_buffer_init(field, buffer);
 
 	_formi_dbg_printf("%s: len = %d, value = %s\n", __func__, len, value);
 	_formi_dbg_printf("%s: string = %s, len = %d\n", __func__,
