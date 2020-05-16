@@ -35,10 +35,6 @@
 #include "nbtool_config.h"
 #endif
 
-#if !HAVE_NBTOOL_CONFIG_H
-#include <sys/bitops.h>
-#endif
-
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <cdbr.h>
@@ -51,11 +47,6 @@
 #include <unistd.h>
 #include <mi_vector_hash.h>
 #define SET_ERRNO(val) errno = (val)
-
-#if HAVE_NBTOOL_CONFIG_H
-#define	fast_divide32_prepare(d,m,s1,s2)	(void)0
-#define	fast_remainder32(v,d,m,s1,s2)		(v%d)
-#endif
 
 struct cdbr {
 	void (*unmap)(void *, void *, size_t);
@@ -74,11 +65,6 @@ struct cdbr {
 
 	uint8_t offset_size;
 	uint8_t index_size;
-
-	uint32_t entries_m;
-	uint32_t entries_index_m;
-	uint8_t entries_s1, entries_s2;
-	uint8_t entries_index_s1, entries_index_s2;
 };
 
 #if !defined(_KERNEL) && !defined(_STANDALONE)
@@ -188,16 +174,6 @@ cdbr_open_mem(void *base, size_t size, int flags,
 		return NULL;
 	}
 
-	if (cdbr->entries) {
-		fast_divide32_prepare(cdbr->entries, &cdbr->entries_m,
-		    &cdbr->entries_s1, &cdbr->entries_s2);
-	}
-	if (cdbr->entries_index) {
-		fast_divide32_prepare(cdbr->entries_index,
-		    &cdbr->entries_index_m,
-		    &cdbr->entries_index_s1, &cdbr->entries_index_s2);
-	}
-
 	return cdbr;
 }
 
@@ -263,23 +239,15 @@ cdbr_find(struct cdbr *cdbr, const void *key, size_t key_len,
 
 	mi_vector_hash(key, key_len, cdbr->seed, hashes);
 
-	hashes[0] = fast_remainder32(hashes[0], cdbr->entries_index,
-	    cdbr->entries_index_m, cdbr->entries_index_s1,
-	    cdbr->entries_index_s2);
-	hashes[1] = fast_remainder32(hashes[1], cdbr->entries_index,
-	    cdbr->entries_index_m, cdbr->entries_index_s1,
-	    cdbr->entries_index_s2);
-	hashes[2] = fast_remainder32(hashes[2], cdbr->entries_index,
-	    cdbr->entries_index_m, cdbr->entries_index_s1,
-	    cdbr->entries_index_s2);
+	hashes[0] %= cdbr->entries_index;
+	hashes[1] %= cdbr->entries_index;
+	hashes[2] %= cdbr->entries_index;
 
 	idx = get_uintX(cdbr->hash_base, hashes[0], cdbr->index_size);
 	idx += get_uintX(cdbr->hash_base, hashes[1], cdbr->index_size);
 	idx += get_uintX(cdbr->hash_base, hashes[2], cdbr->index_size);
 
-	return cdbr_get(cdbr, fast_remainder32(idx, cdbr->entries,
-	    cdbr->entries_m, cdbr->entries_s1, cdbr->entries_s2), data,
-	    data_len);
+	return cdbr_get(cdbr, idx % cdbr->entries, data, data_len);
 }
 
 void
