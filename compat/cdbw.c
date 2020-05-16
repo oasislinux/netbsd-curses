@@ -533,13 +533,8 @@ cdbw_output(struct cdbw *cdbw, int fd, const char descr[16],
 		return 0;
 	}
 
-#if HAVE_NBTOOL_CONFIG_H
 	if (seedgen == NULL)
 		seedgen = cdbw_stable_seeder;
-#else
-	if (seedgen == NULL)
-		seedgen = arc4random;
-#endif
 
 	rv = 0;
 
@@ -565,10 +560,7 @@ cdbw_output(struct cdbw *cdbw, int fd, const char descr[16],
 
 	state.seed = 0;
 	do {
-		if (seedgen == cdbw_stable_seeder)
-			++state.seed;
-		else
-			state.seed = (*seedgen)();
+		++state.seed;
 	} while (build_graph(cdbw, &state));
 
 	assign_nodes(&state);
