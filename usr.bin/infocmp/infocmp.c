@@ -37,7 +37,6 @@
 #include <term_private.h>
 #include <term.h>
 #include <unistd.h>
-#include <util.h>
 
 #define SW 8
 
@@ -430,7 +429,9 @@ load_term(const char *name)
 {
 	TERMINAL *t;
 
-	t = ecalloc(1, sizeof(*t));
+	t = calloc(1, sizeof(*t));
+	if (t == NULL)
+		err(EXIT_FAILURE, NULL);
 	if (name == NULL)
 		name = getenv("TERM");
 	if (name == NULL)
@@ -506,7 +507,9 @@ use_terms(TERMINAL *term, size_t nuse, char **uterms)
 	TERMUSERDEF *ud, *tud;
 	size_t i, j, agree, absent, data;
 
-	terms = ecalloc(nuse, sizeof(*terms));
+	terms = calloc(nuse, sizeof(*terms));
+	if (terms == NULL)
+		err(EXIT_FAILURE, NULL);
 	for (i = 0; i < nuse; i++) {
 		if (strcmp(term->name, *uterms) == 0)
 			errx(EXIT_FAILURE, "cannot use same terminal");
@@ -625,8 +628,10 @@ use_terms(TERMINAL *term, size_t nuse, char **uterms)
 			ud = find_userdef(term, terms[i]->_userdefs[j].id);
 			if (ud != NULL)
 				continue; /* We have handled this */
-			term->_userdefs = erealloc(term->_userdefs,
+			term->_userdefs = realloc(term->_userdefs,
 			    sizeof(*term->_userdefs) * (term->_nuserdefs + 1));
+			if (term->_userdefs == NULL)
+				err(EXIT_FAILURE, NULL);
 			tud = &term->_userdefs[term->_nuserdefs++];
 			tud->id = terms[i]->_userdefs[j].id;
 			tud->type = terms[i]->_userdefs[j].flag;
@@ -724,7 +729,9 @@ main(int argc, char **argv)
 		if (t->_alias != NULL) {
 			char *alias, *aliascpy, *delim;
 
-			alias = aliascpy = estrdup(t->_alias);
+			alias = aliascpy = strdup(t->_alias);
+			if (alias == NULL)
+				err(EXIT_FAILURE, NULL);
 			while (alias != NULL && *alias != '\0') {
 				putchar('|');
 				delim = strchr(alias, TERMINFO_VDELIM);

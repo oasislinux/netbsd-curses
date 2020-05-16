@@ -51,7 +51,6 @@
 #include <term_private.h>
 #include <term.h>
 #include <unistd.h>
-#include <util.h>
 
 #define	HASH_SIZE	16384	/* 2012-06-01: 3600 entries */
 
@@ -100,7 +99,9 @@ save_term(struct cdbw *db, TERM *term)
 	if (term->base_term != NULL) {
 		char *cap;
 		len = (ssize_t)(1 + sizeof(uint32_t) + sizeof(uint16_t) + slen);
-		buf = emalloc(len);
+		buf = malloc(len);
+		if (!buf)
+			err(EXIT_FAILURE, NULL);
 		cap = (char *)buf;
 		*cap++ = TERMINFO_ALIAS;
 		_ti_encode_32(&cap, term->base_term->id);
@@ -156,10 +157,16 @@ store_term(const char *name, TERM *base_term)
 	TERM *term;
 	ENTRY elem;
 
-	term = ecalloc(1, sizeof(*term));
-	term->name = estrdup(name);
+	term = calloc(1, sizeof(*term));
+	if (!term)
+		err(EXIT_FAILURE, NULL);
+	term->name = strdup(name);
+	if (!term->name)
+		err(EXIT_FAILURE, NULL);
 	STAILQ_INSERT_TAIL(&terms, term, next);
-	elem.key = estrdup(name);
+	elem.key = strdup(name);
+	if (!elem.key)
+		err(EXIT_FAILURE, NULL);
 	elem.data = term;
 	hsearch(elem, ENTER);
 
@@ -181,7 +188,9 @@ alias_terms(TERM *term)
 	if (term->tic->alias == NULL)
 		return;
 
-	alias = p = estrdup(term->tic->alias);
+	alias = p = strdup(term->tic->alias);
+	if (!alias)
+		err(EXIT_FAILURE, NULL);
 	while (p != NULL && *p != '\0') {
 		e = strchr(p, '|');
 		if (e != NULL)
@@ -574,7 +583,10 @@ write_database(const char *dbname)
 	STAILQ_FOREACH(term, &terms, next)
 		save_term(db, term);
 
-	easprintf(&tmp_dbname, "%s.XXXXXX", dbname);
+	tmp_dbname = malloc(strlen(dbname) + 8);
+	if (!tmp_dbname)
+		err(EXIT_FAILURE, NULL);
+	sprintf(tmp_dbname, "%s.XXXXXX", dbname);
 	fd = mkstemp(tmp_dbname);
 	if (fd == -1)
 		err(EXIT_FAILURE,
@@ -688,10 +700,14 @@ main(int argc, char **argv)
 	if (cflag)
 		return error_exit;
 
-	if (ofile == NULL)
-		easprintf(&dbname, "%s.cdb", source);
-	else
+	if (ofile == NULL) {
+		dbname = malloc(strlen(source) + 5);
+		if (!dbname)
+			err(EXIT_FAILURE, "malloc");
+		sprintf(dbname, "%s.cdb", source);
+	} else {
 		dbname = ofile;
+	}
 	write_database(dbname);
 
 	if (sflag != 0)
