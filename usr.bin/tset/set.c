@@ -29,6 +29,7 @@
  * SUCH DAMAGE.
  */
 
+#define _DEFAULT_SOURCE  /* for XTABS */
 #include <sys/ttydefaults.h>
 #include <err.h>
 #include <stdio.h>
@@ -38,6 +39,14 @@
 #include "extern.h"
 
 #define	CHK(val, dft)	(val <= 0 ? dft : val)
+
+#ifndef	OXTABS
+#ifdef	XTABS			/* SMI uses XTABS. */
+#define	OXTABS	XTABS
+#else
+#define	OXTABS	0
+#endif
+#endif
 
 static int	set_tabs(void);
 
