@@ -77,7 +77,7 @@ copy_numeric_args(char *args)
 	new = (numeric_args *) malloc(sizeof(numeric_args));
 
 	if (new != NULL)
-		bcopy(args, new, sizeof(numeric_args));
+		memcpy(new, args, sizeof(numeric_args));
 
 	return (void *) new;
 }

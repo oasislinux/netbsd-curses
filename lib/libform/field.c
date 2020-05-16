@@ -30,7 +30,7 @@
 
 #include <sys/param.h>
 #include <stdlib.h>
-#include <strings.h>
+#include <string.h>
 #include <stdarg.h>
 #include <form.h>
 #include "internals.h"
@@ -753,7 +753,7 @@ _formi_create_field(FIELD *prototype, int rows, int cols, int frow,
 	}
 
 	  /* copy in the default field info */
-	bcopy(prototype, new, sizeof(FIELD));
+	memcpy(new, prototype, sizeof(FIELD));
 
 	new->nbuf = nbuf + 1;
 	new->rows = rows;
@@ -849,7 +849,7 @@ dup_field(FIELD *field, int frow, int fcol)
 	}
 
 	  /* copy the buffers from the source field into the new copy */
-	bcopy(field->buffers, new->buffers, buf_len);
+	memcpy(new->buffers, field->buffers, buf_len);
 
 	return new;
 }

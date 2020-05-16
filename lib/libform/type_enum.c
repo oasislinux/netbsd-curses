@@ -31,6 +31,7 @@
 
 #include <ctype.h>
 #include <stdlib.h>
+#include <string.h>
 #include <strings.h>
 #include "form.h"
 #include "internals.h"
@@ -121,7 +122,7 @@ copy_enum_args(char *args)
 	new = (enum_args *) malloc(sizeof(enum_args));
 
 	if (new != NULL)
-		bcopy(args, new, sizeof(enum_args));
+		memcpy(new, args, sizeof(enum_args));
 
 	return (void *) new;
 }

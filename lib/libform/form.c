@@ -30,7 +30,7 @@
  */
 
 #include <stdlib.h>
-#include <strings.h>
+#include <string.h>
 #include <form.h>
 #include "internals.h"
 
@@ -489,7 +489,7 @@ new_form(FIELD **fields)
 
 	
 	  /* copy in the defaults... */
-	bcopy(&_formi_default_form, new, sizeof(FORM));
+	memcpy(new, &_formi_default_form, sizeof(FORM));
 
 	if (new->win == NULL)
 		new->scrwin = stdscr; /* something for curses to write to */
