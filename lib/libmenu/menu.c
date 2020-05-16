@@ -79,14 +79,12 @@ set_menu_mark(MENU *m, char *mark)
 	
 	if (m == NULL) menu = &_menui_default_menu;
 	
-          /* if there was an old mark string, free it first */
-        if (menu->mark.string != NULL) free(menu->mark.string);
-
-        if ((menu->mark.string = (char *) malloc(strlen(mark) + 1)) == NULL)
+	menu->mark.length = strlen(mark);
+	if ((menu->mark.string = realloc(menu->mark.string,
+	    menu->mark.length + 1)) == NULL)
                 return E_SYSTEM_ERROR;
 
-        strcpy(menu->mark.string, mark);
-	menu->mark.length = strlen(mark);
+        memcpy(menu->mark.string, mark, menu->mark.length + 1);
 
 	  /* max item size may have changed - recalculate. */
 	_menui_max_item_size(menu);
@@ -115,14 +113,13 @@ set_menu_unmark(MENU *m, char *mark)
 
 	if (m == NULL) menu = &_menui_default_menu;
 	
-          /* if there was an old mark string, free it first */
-        if (menu->unmark.string != NULL) free(menu->unmark.string);
-
-        if ((menu->unmark.string = (char *) malloc(strlen(mark) + 1)) == NULL)
+	menu->unmark.length = strlen(mark);
+	if ((menu->unmark.string = realloc(menu->unmark.string,
+	    menu->unmark.length + 1)) == NULL)
                 return E_SYSTEM_ERROR;
 
-        strcpy(menu->unmark.string, mark);
-	menu->unmark.length = strlen(mark);
+        memcpy(menu->unmark.string, mark, menu->unmark.length + 1);
+
 	  /* max item size may have changed - recalculate. */
 	_menui_max_item_size(menu);
         return E_OK;
