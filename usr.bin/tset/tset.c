@@ -40,11 +40,17 @@
 #include <term.h>
 #include <termios.h>
 #include <unistd.h>
+#if __STDC_VERSION__ >= 201112L
+#include <stdnoreturn.h>
+#else
+#define noreturn
+#endif
+
 #include "extern.h"
 
 static void	obsolete(char *[]);
-static void	report(const char *, int, u_int);
-__dead static void	usage(void);
+static void	report(const char *, int, unsigned);
+static noreturn void	usage(const char *);
 
 struct termios mode, oldmode;
 
@@ -214,9 +220,9 @@ main(int argc, char *argv[])
  * Tell the user if a control key has been changed from the default value.
  */
 static void
-report(const char *name, int which, u_int def)
+report(const char *name, int which, unsigned def)
 {
-	u_int old, new;
+	unsigned old, new;
 
 	new = mode.c_cc[which];
 	old = oldmode.c_cc[which];

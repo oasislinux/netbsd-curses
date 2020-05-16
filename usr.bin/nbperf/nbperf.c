@@ -43,12 +43,17 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#if __STDC_VERSION__ >= 201112L
+#include <stdnoreturn.h>
+#else
+#define noreturn
+#endif
 
 #include "nbperf.h"
 
 static int predictable;
 
-static __dead
+static noreturn
 void usage(void)
 {
 	fprintf(stderr,

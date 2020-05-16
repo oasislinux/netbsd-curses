@@ -64,16 +64,6 @@
 #define SET_ERRNO(val) errno = (val)
 #endif
 
-#if !defined(_KERNEL) && !defined(_STANDALONE)
-#ifdef __weak_alias
-__weak_alias(cdbr_close,_cdbr_close)
-__weak_alias(cdbr_find,_cdbr_find)
-__weak_alias(cdbr_get,_cdbr_get)
-__weak_alias(cdbr_open,_cdbr_open)
-__weak_alias(cdbr_open_mem,_cdbr_open_mem)
-#endif
-#endif
-
 #if HAVE_NBTOOL_CONFIG_H
 #define	fast_divide32_prepare(d,m,s1,s2)	(void)0
 #define	fast_remainder32(v,d,m,s1,s2)		(v%d)
@@ -105,7 +95,7 @@ struct cdbr {
 
 #if !defined(_KERNEL) && !defined(_STANDALONE)
 static void
-cdbr_unmap(void *cookie __unused, void *base, size_t size)
+cdbr_unmap(void *cookie, void *base, size_t size)
 {
 	munmap(base, size);
 }
@@ -149,7 +139,7 @@ cdbr_open(const char *path, int flags)
 #endif
 
 struct cdbr *
-cdbr_open_mem(void *base, size_t size, int flags __unused,
+cdbr_open_mem(void *base, size_t size, int flags,
     void (*unmap)(void *, void *, size_t), void *cookie)
 {
 	struct cdbr *cdbr;

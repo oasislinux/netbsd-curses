@@ -160,7 +160,7 @@ wattr_get(WINDOW *win, attr_t *attr, short *pair, void *opts)
 int
 wattr_on(WINDOW *win, attr_t attr, void *opts)
 {
-	if (__predict_false(opts != NULL))
+	if (opts != NULL)
 		return ERR;
 
 	return __wattr_on(win, attr);
@@ -176,7 +176,7 @@ wattr_on(WINDOW *win, attr_t attr, void *opts)
 int
 wattr_off(WINDOW *win, attr_t attr, void *opts)
 {
-	if (__predict_false(opts != NULL))
+	if (opts != NULL)
 		return ERR;
 
 	return __wattr_off(win, attr);
@@ -194,7 +194,7 @@ wattr_set(WINDOW *win, attr_t attr, short pair, void *opts)
 	__CTRACE(__CTRACE_ATTR, "wattr_set: win %p, attr %08x, pair %d\n",
 	    win, attr, pair);
 #endif
-	if (__predict_false(opts != NULL))
+	if (opts != NULL)
 		return ERR;
 
 	/*

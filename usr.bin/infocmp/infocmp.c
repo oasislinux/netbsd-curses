@@ -127,7 +127,7 @@ setdb(char *db)
 {
 	static const char *ext[] = { ".cdb", ".db" };
 
-	for (size_t i = 0; i < __arraycount(ext); i++) {
+	for (size_t i = 0; i < sizeof(ext) / sizeof(ext[0]); i++) {
 		char *ptr = strstr(db, ext[i]);
 		if (ptr == NULL || ptr[strlen(ext[i])] != '\0')
 			continue;

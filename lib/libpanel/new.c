@@ -37,7 +37,7 @@ _new_panel(WINDOW *w)
 	PANEL *p;
 
 	p = (PANEL *)malloc(sizeof(PANEL));
-	if (__predict_false(p == NULL))
+	if (p == NULL)
 		return NULL;
 
 	p->win = w;
@@ -52,10 +52,10 @@ PANEL *
 new_panel(WINDOW *w)
 {
 
-	if (__predict_false(w == NULL))
+	if (w == NULL)
 		return NULL;
 
-	if (__predict_false(w == stdscr))
+	if (w == stdscr)
 		return NULL;
 
 	/*

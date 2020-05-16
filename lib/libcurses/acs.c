@@ -155,7 +155,7 @@ __init_wacs(SCREEN *screen)
 	if (!strcmp(setlocale(LC_CTYPE, NULL), "C"))
 		setlocale(LC_CTYPE, "");
 	lstr = nl_langinfo(CODESET);
-	_DIAGASSERT(lstr);
+	assert(lstr);
 	if (strcasecmp(lstr, "UTF-8")) {
 #ifdef DEBUG
 		__CTRACE(__CTRACE_INIT, "__init_wacs: setting defaults\n" );

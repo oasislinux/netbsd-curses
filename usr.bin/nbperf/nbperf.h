@@ -39,7 +39,7 @@ struct nbperf {
 	const char *hash_name;
 	int static_hash;
 	size_t n;
-	const void * __restrict * keys;
+	const void *restrict *keys;
 	const size_t *keylens;
 	int first_round, has_duplicates;
 

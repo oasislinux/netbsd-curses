@@ -70,14 +70,8 @@
 
 #define FIXED_SEED	0x9e3779b9	/* Golden ratio, arbitrary constant */
 
-#if !defined(_KERNEL) && !defined(_STANDALONE)
-#ifdef __weak_alias
-__weak_alias(mi_vector_hash, _mi_vector_hash)
-#endif
-#endif
-
 void
-mi_vector_hash(const void * __restrict key, size_t len, uint32_t seed,
+mi_vector_hash(const void *restrict key, size_t len, uint32_t seed,
     uint32_t hashes[3])
 {
 	static const uint32_t mask[4] = {

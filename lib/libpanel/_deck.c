@@ -27,5 +27,5 @@
 
 #include "panel_impl.h"
 
-struct deck _deck __dso_hidden = TAILQ_HEAD_INITIALIZER(_deck);
-PANEL _stdscr_panel __dso_hidden;
+struct deck _deck = TAILQ_HEAD_INITIALIZER(_deck);
+PANEL _stdscr_panel;

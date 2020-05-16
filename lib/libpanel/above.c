@@ -39,7 +39,7 @@ panel_above(PANEL *p)
 		return PANEL_ABOVE(&_stdscr_panel);
 	}
 
-	if (__predict_false(PANEL_HIDDEN(p)))
+	if (PANEL_HIDDEN(p))
 		return NULL;
 
 	return PANEL_ABOVE(p);

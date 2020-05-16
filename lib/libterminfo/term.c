@@ -354,8 +354,8 @@ _ti_findterm(TERMINAL *term, const char *name, int flags)
 	int r;
 	char *c, *e;
 
-	_DIAGASSERT(term != NULL);
-	_DIAGASSERT(name != NULL);
+	assert(term != NULL);
+	assert(name != NULL);
 
 	_ti_database = NULL;
 	r = 0;
@@ -450,7 +450,7 @@ _ti_getterm(TERMINAL *term, const char *name, int flags)
 	if (r == 1)
 		return r;
 
-	for (i = 0; i < __arraycount(compiled_terms); i++) {
+	for (i = 0; i < sizeof(compiled_terms) / sizeof(compiled_terms[0]); i++) {
 		t = &compiled_terms[i];
 		if (strcmp(name, t->name) == 0) {
 			r = _ti_readterm(term, t->cap, t->caplen, flags);

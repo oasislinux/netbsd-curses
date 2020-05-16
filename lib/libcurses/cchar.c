@@ -50,7 +50,7 @@ getcchar(const cchar_t *wcval, wchar_t *wch, attr_t *attrs,
 	wchar_t *wp;
 	size_t len;
 
-	if (__predict_false(opts != NULL))
+	if (opts != NULL)
 		return ERR;
 
 	wp = wmemchr(wcval->vals, L'\0', CCHARW_MAX);
@@ -85,7 +85,7 @@ setcchar(cchar_t *wcval, const wchar_t *wch, const attr_t attrs,
 	int i;
 	size_t len;
 
-	if (__predict_false(opts != NULL))
+	if (opts != NULL)
 		return ERR;
 
 	len = wcslen(wch);

@@ -92,28 +92,28 @@ has_mouse(void)
 }
 
 int
-getmouse(__unused MEVENT *event)
+getmouse(MEVENT *event)
 {
 
 	return ERR;
 }
 
 int
-ungetmouse(__unused MEVENT *event)
+ungetmouse(MEVENT *event)
 {
 
 	return ERR;
 }
 
 mmask_t
-mousemask(__unused mmask_t newmask, __unused mmask_t *oldmask)
+mousemask(mmask_t newmask, mmask_t *oldmask)
 {
 
 	return 0;
 }
 
 int
-mouseinterval(__unused int erval)
+mouseinterval(int erval)
 {
 
 	return DEFAULT_MAXCLICK;

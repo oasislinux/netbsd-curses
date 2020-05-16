@@ -80,7 +80,7 @@ _ti_outputdelay(int delay, short os, char pc,
 {
 	int mspc10;
 
-	if (delay < 1 || os < 1 || (size_t)os >= __arraycount(tmspc10))
+	if (delay < 1 || os < 1 || (size_t)os >= sizeof(tmspc10) / sizeof(tmspc10[0]))
 		return;
 
 	mspc10 = tmspc10[os];
@@ -131,9 +131,9 @@ ti_puts(const TERMINAL *term, const char *str, int affcnt,
 	int dodelay;
 	char pc;
 
-	_DIAGASSERT(term != NULL);
-	_DIAGASSERT(str != NULL);
-	_DIAGASSERT(outc != NULL);
+	assert(term != NULL);
+	assert(str != NULL);
+	assert(outc != NULL);
 
 	dodelay = (str == t_bell(term) ||
 	    str == t_flash_screen(term) ||
@@ -151,8 +151,8 @@ int
 ti_putp(const TERMINAL *term, const char *str)
 {
 
-	_DIAGASSERT(term != NULL);
-	_DIAGASSERT(str != NULL);
+	assert(term != NULL);
+	assert(str != NULL);
 	return ti_puts(term, str, 1,
 	    (int (*)(int, void *))(void *)putchar, NULL);
 }
@@ -161,8 +161,8 @@ int
 tputs(const char *str, int affcnt, int (*outc)(int))
 {
 
-	_DIAGASSERT(str != NULL);
-	_DIAGASSERT(outc != NULL);
+	assert(str != NULL);
+	assert(outc != NULL);
 	return _ti_puts(1, ospeed, PC, str, affcnt,
 	    (int (*)(int, void *))(void *)outc, NULL);
 }
@@ -171,6 +171,6 @@ int
 putp(const char *str)
 {
 
-	_DIAGASSERT(str != NULL);
+	assert(str != NULL);
 	return tputs(str, 1, putchar);
 }

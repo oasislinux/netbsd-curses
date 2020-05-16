@@ -33,11 +33,11 @@ move_panel(PANEL *p, int y, int x)
 {
 	int oldy, oldx;
 
-	if (__predict_false(p == NULL))
+	if (p == NULL)
 		return ERR;
 
 	getbegyx(p->win, oldy, oldx);
-	if (__predict_false(y == oldy && x == oldx))
+	if (y == oldy && x == oldx)
 		return OK;
 
 	if (!PANEL_HIDDEN(p)) {
