@@ -722,13 +722,6 @@ main(int argc, char **argv)
 		free(term->name);
 		free(term);
 	}
-#ifndef HAVE_NBTOOL_CONFIG_H
-	/*
-	 * hdestroy1 is not standard but we don't really care if we
-	 * leak in the tools version
-	 */
-	hdestroy1(free, NULL);
-#endif
 
 	return EXIT_SUCCESS;
 }
