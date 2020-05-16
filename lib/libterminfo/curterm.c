@@ -77,8 +77,8 @@ TERMINAL *
 set_curterm(TERMINAL *nterm)
 {
 	TERMINAL *oterm;
-	size_t l, n;
-	char *p;
+	size_t l;
+	char *p, *q;
 
 	oterm = cur_term;
 	cur_term = nterm;
@@ -96,26 +96,23 @@ set_curterm(TERMINAL *nterm)
 
 		p = ttytype;
 		l = sizeof(ttytype);
-		if ((n = strlcpy(p, nterm->name, l)) == strlen(p)) {
-			p += n;
-			l -= n;
-			*p++ = '|';
-			l--;
-			if (nterm->_alias  &&
-				(n = strlcpy(p, nterm->_alias, l)) == strlen(p))
+		if ((q = memccpy(p, nterm->name, '\0', l))) {
+			l -= q - p;
+			p = q;
+			p[-1] = '|';
+			if (nterm->_alias &&
+				(q = memccpy(p, nterm->_alias, '\0', l)))
 			{
-				p += n;
-				l -= n;
-				*p++ = '|';
-				l--;
+				l -= q - p;
+				p = q;
+				p[-1] = '|';
 			}
-			if (nterm->desc  &&
-				(n = strlcpy(p, nterm->desc, l)) == strlen(p))
+			if (nterm->desc &&
+				(q = memccpy(p, nterm->desc, '\0', l)))
 			{
-				p += n;
-				l -= n;
-				*p++ = '|';
-				l--;
+				l -= q - p;
+				p = q;
+				p[-1] = '|';
 			}
 			p--;
 		}
