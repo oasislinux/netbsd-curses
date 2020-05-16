@@ -61,6 +61,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <mi_vector_hash.h>
 #define SET_ERRNO(val) errno = (val)
 #endif
 
