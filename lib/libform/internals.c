@@ -33,7 +33,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <strings.h>
+#include <string.h>
 #include <assert.h>
 #include <err.h>
 #include <stdarg.h>
@@ -1833,8 +1833,8 @@ _formi_add_char(FIELD *field, unsigned int pos, char c)
 	}
 
 	if ((field->overlay == 0) && (row->length > pos)) {
-		bcopy(&row->string[pos], &row->string[pos + 1],
-		      (size_t) (row->length - pos + 1));
+		memmove(&row->string[pos + 1], &row->string[pos],
+		        (size_t) (row->length - pos + 1));
 	}
 
 	old_c = row->string[pos];
@@ -1878,8 +1878,8 @@ _formi_add_char(FIELD *field, unsigned int pos, char c)
 			   * wrap failed for some reason, back out the
 			   * char insert
 			   */
-			bcopy(&row->string[pos + 1], &row->string[pos],
-			      (size_t) (row->length - pos));
+			memmove(&row->string[pos], &row->string[pos + 1],
+			        (size_t) (row->length - pos));
 			row->length--;
 			if (pos > 0)
 				pos--;
@@ -2541,8 +2541,8 @@ _formi_manipulate_field(FORM *form, int c)
 		}
 			
 		saved = row->string[start];
-		bcopy(&row->string[start + 1], &row->string[start],
-		      (size_t) (end - start + 1));
+		memmove(&row->string[start], &row->string[start + 1],
+		        (size_t) (end - start + 1));
 		row->string[end] = '\0';
 		row->length--;
 		if (row->length > 0)
@@ -2609,9 +2609,9 @@ _formi_manipulate_field(FORM *form, int c)
 		
 		if ((cur->rows + cur->nrows) > 1) {
 			if (_formi_wrap_field(cur, row) != E_OK) {
-				bcopy(&row->string[start],
-				      &row->string[start + 1],
-				      (size_t) (end - start));
+				memmove(&row->string[start + 1],
+				        &row->string[start],
+				        (size_t) (end - start));
 				row->length++;
 				row->string[start] = saved;
 				_formi_wrap_field(cur, row);
@@ -2672,8 +2672,8 @@ _formi_manipulate_field(FORM *form, int c)
 			   * without losing a char.
 			   */
 			saved = row->string[start - 1];
-			bcopy(&row->string[start], &row->string[start - 1],
-			      (size_t) (end - start + 1));
+			memmove(&row->string[start - 1], &row->string[start],
+			        (size_t) (end - start + 1));
 			row->length--;
 			row->string[row->length] = '\0';
 			row->expanded = _formi_tab_expanded_length(
@@ -2704,9 +2704,9 @@ _formi_manipulate_field(FORM *form, int c)
 			}
 			
 			if ((_formi_wrap_field(cur, row) != E_OK)) {
-				bcopy(&row->string[start - 1],
-				      &row->string[start],
-				      (size_t) (end - start));
+				memmove(&row->string[start],
+				        &row->string[start - 1],
+				        (size_t) (end - start));
 				row->length++;
 				row->string[start - 1] = saved;
 				row->string[row->length] = '\0';
@@ -2794,8 +2794,8 @@ _formi_manipulate_field(FORM *form, int c)
 			start = find_sow(start, &row);
 		str = row->string;
 		  /* XXXX hmmmm what if start and end on diff rows? XXXX */
-		bcopy(&str[end], &str[start],
-		      (size_t) (row->length - end + 1));
+		memmove(&str[start], &str[end],
+		        (size_t) (row->length - end + 1));
 		len = end - start;
 		row->length -= len;
 
@@ -3188,8 +3188,8 @@ _formi_sort_fields(FORM *form)
 	    == NULL)
 		return;
 
-	bcopy(form->fields, sort_area,
-	      (size_t) (sizeof(FIELD *) * form->field_count));
+	memcpy(sort_area, form->fields,
+	       (size_t) (sizeof(FIELD *) * form->field_count));
 	qsort(sort_area, (size_t) form->field_count, sizeof(FIELD *),
 	      field_sort_compare);
 	

@@ -30,7 +30,7 @@
  */
 
 #include <stdlib.h>
-#include <strings.h>
+#include <string.h>
 #include <ctype.h>
 #include "form.h"
 #include "internals.h"
@@ -77,7 +77,7 @@ copy_integer_args(char *args)
 	new = (integer_args *) malloc(sizeof(integer_args));
 
 	if (new != NULL)
-		bcopy(args, new, sizeof(integer_args));
+		memcpy(new, args, sizeof(integer_args));
 
 	return (void *) new;
 }
