@@ -287,8 +287,7 @@ _ti_dbgetterm(TERMINAL *term, const char *path, const char *name, int flags)
 
 	/* Target file *may* be a cdb file without the extension. */
 	if (db == NULL && errno == ENOENT) {
-		len = strlcpy(__ti_database, path, sizeof(__ti_database));
-		if (len < sizeof(__ti_database))
+		if (memccpy(__ti_database, path, '\0', sizeof(__ti_database)))
 			db = cdbr_open(__ti_database, CDBR_DEFAULT);
 	}
 	if (db == NULL)

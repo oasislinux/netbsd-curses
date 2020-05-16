@@ -457,7 +457,7 @@ __init_getch(SCREEN *screen)
 		l = strlen(s) + 1;
 		if (limit < l)
 			continue;
-		strlcpy(p, s, limit);
+		strcpy(p, s);
 		p += l;
 		limit -= l;
 #ifdef DEBUG

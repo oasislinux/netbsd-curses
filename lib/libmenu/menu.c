@@ -457,28 +457,23 @@ new_menu(ITEM **items)
 	  /* make a private copy of the mark string */
 	if (_menui_default_menu.mark.string != NULL) {
 		if ((the_menu->mark.string =
-		     (char *) malloc((unsigned) _menui_default_menu.mark.length + 1))
-		    == NULL) {
+		    malloc(the_menu->mark.length + 1)) == NULL) {
 			free(the_menu);
 			return NULL;
 		}
 
-		strlcpy(the_menu->mark.string, _menui_default_menu.mark.string,
-			(unsigned) _menui_default_menu.mark.length + 1);
+		strcpy(the_menu->mark.string, _menui_default_menu.mark.string);
 	}
 	
 	  /* make a private copy of the unmark string too */
 	if (_menui_default_menu.unmark.string != NULL) {
 		if ((the_menu->unmark.string =
-		     (char *) malloc((unsigned) _menui_default_menu.unmark.length + 1))
-		    == NULL) {
+		    malloc(the_menu->unmark.length + 1)) == NULL) {
 			free(the_menu);
 			return NULL;
 		}
 
-		strlcpy(the_menu->unmark.string,
-			_menui_default_menu.unmark.string,
-			(unsigned) _menui_default_menu.unmark.length+ 1 );
+		strcpy(the_menu->unmark.string, _menui_default_menu.unmark.string);
 	}
 
 	/* default mark needs to be set */
