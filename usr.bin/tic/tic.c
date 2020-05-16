@@ -637,7 +637,7 @@ main(int argc, char **argv)
 	    case '?': /* FALLTHROUGH */
 	    default:
 		    fprintf(stderr, "usage: %s [-acSsx] [-o file] source\n",
-			getprogname());
+			argv[0] ? argv[0] : "tic");
 		    return EXIT_FAILURE;
 	    }
 

@@ -46,7 +46,7 @@
 #define noreturn
 #endif
 
-static noreturn void usage(void);
+static noreturn void usage(const char *);
 static char **process(const char *, const char *, char **);
 
 int
@@ -65,7 +65,7 @@ main(int argc, char **argv)
 			break;
 		case '?':
 		default:
-			usage();
+			usage(argv[0]);
 		}
 	argc -= optind;
 	argv += optind;
@@ -178,10 +178,10 @@ process(const char *cap, const char *str, char **argv)
 }
 
 static void
-usage(void)
+usage(const char *argv0)
 {
 	(void)fprintf(stderr,
 	    "Usage: %s [-T term] attribute [attribute-args] ...\n",
-	    getprogname());
+	    argv0 ? argv0 : "tput");
 	exit(2);
 }
