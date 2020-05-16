@@ -51,8 +51,6 @@
 
 #include "nbperf.h"
 
-static int predictable;
-
 static noreturn
 void usage(const char *argv0)
 {
@@ -63,18 +61,11 @@ void usage(const char *argv0)
 	exit(1);
 }
 
-#if HAVE_NBTOOL_CONFIG_H && !defined(__NetBSD__)
-#define	arc4random() rand()
-#endif
-
 static void
 mi_vector_hash_seed_hash(struct nbperf *nbperf)
 {
 	static uint32_t predictable_counter;
-	if (predictable)
-		nbperf->seed[0] = predictable_counter++;
-	else
-		nbperf->seed[0] = arc4random();
+	nbperf->seed[0] = predictable_counter++;
 }
 
 static void
@@ -184,7 +175,7 @@ main(int argc, char **argv)
 				err(2, "cannot open output file");
 			break;
 		case 'p':
-			predictable = 1;
+			/* no-op */
 			break;
 		case 's':
 			nbperf.static_hash = 1;
