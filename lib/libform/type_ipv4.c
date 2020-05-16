@@ -76,7 +76,7 @@ ipv4_check_field(FIELD *field, char *args)
 	hex_val = 0;
 	mask = 0;
 	
-	if ((slash = index(buf, '/')) != NULL)
+	if ((slash = strchr(p, '/')) != NULL)
 		style = FORMI_CLASSLESS;
 	else {
 		start = _formi_skip_blanks(buf, 0);
