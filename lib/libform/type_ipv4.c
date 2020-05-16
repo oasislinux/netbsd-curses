@@ -96,13 +96,15 @@ ipv4_check_field(FIELD *field, char *args)
 		  /* FALLTHROUGH */
 		
 	case FORMI_DOTTED_QUAD:
+		p = buf;
 		for (i = 0; i < 4; i++) {
-			p = strsep(&buf, ".");
-			if ((p == NULL) || (*p == '\0'))
+			if ((p == NULL) || !isdigit(*p))
 				goto FAIL;
 			vals[i] = atoi(p);
 			if (vals[i] > 255)
 				goto FAIL;
+			if ((p = strchr(p, '.')) != NULL)
+				++p;
 		}
 		break;
 
