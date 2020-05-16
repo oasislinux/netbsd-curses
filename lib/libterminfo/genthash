@@ -41,6 +41,7 @@ cat <<EOF
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <mi_vector_hash.h>
 #include <term_private.h>
 
 EOF

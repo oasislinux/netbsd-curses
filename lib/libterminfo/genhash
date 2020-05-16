@@ -95,6 +95,7 @@ cat <<EOF
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <mi_vector_hash.h>
 #include <term_private.h>
 #include <term.h>
 EOF

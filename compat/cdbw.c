@@ -43,6 +43,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <mi_vector_hash.h>
 
 struct key_hash {
 	SLIST_ENTRY(key_hash) link;
