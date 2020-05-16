@@ -35,9 +35,6 @@
 #include "nbtool_config.h"
 #endif
 
-#if !HAVE_NBTOOL_CONFIG_H || HAVE_SYS_ENDIAN_H
-#include <sys/endian.h>
-#endif
 #include <sys/queue.h>
 #include <cdbw.h>
 #include <stdlib.h>
@@ -451,6 +448,15 @@ compute_size(uint32_t size)
 		cur_pos = 0;					\
 	}							\
 } while (/* CONSTCOND */ 0)
+
+static void
+le32enc(uint8_t *buf, uint32_t num)
+{
+	buf[0] = num;
+	buf[1] = num >> 8;
+	buf[2] = num >> 16;
+	buf[3] = num >> 24;
+}
 
 static int
 print_hash(struct cdbw *cdbw, struct state *state, int fd, const char *descr)

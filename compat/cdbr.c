@@ -38,9 +38,6 @@
 #if !HAVE_NBTOOL_CONFIG_H
 #include <sys/bitops.h>
 #endif
-#if !HAVE_NBTOOL_CONFIG_H || HAVE_SYS_ENDIAN_H
-#include <sys/endian.h>
-#endif
 
 #if defined(_KERNEL) || defined(_STANDALONE)
 #include <sys/cdbr.h>
@@ -139,6 +136,13 @@ cdbr_open(const char *path, int flags)
 }
 #endif
 
+static uint32_t
+le32dec(const uint8_t *buf)
+{
+	return (uint32_t)buf[0] | (uint32_t)buf[1] << 8 |
+	    (uint32_t)buf[2] << 16 | (uint32_t)buf[3] << 24;
+}
+
 struct cdbr *
 cdbr_open_mem(void *base, size_t size, int flags,
     void (*unmap)(void *, void *, size_t), void *cookie)
@@ -213,9 +217,9 @@ get_uintX(const uint8_t *addr, uint32_t idx, int size)
 	addr += idx * size;
 
 	if (size == 4)
-		return /* LINTED */le32toh(*(const uint32_t *)addr);
+		return le32dec(addr);
 	else if (size == 2)
-		return /* LINTED */le16toh(*(const uint16_t *)addr);
+		return (uint32_t)addr[0] | (uint32_t)addr[1] << 8;
 	else
 		return *addr;
 }

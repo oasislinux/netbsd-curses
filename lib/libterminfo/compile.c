@@ -31,10 +31,6 @@
 #include "nbtool_config.h"
 #endif
 
-#if !HAVE_NBTOOL_CONFIG_H || HAVE_SYS_ENDIAN_H
-#include <sys/endian.h>
-#endif
-
 #include <assert.h>
 #include <ctype.h>
 #include <err.h>

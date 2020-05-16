@@ -35,7 +35,6 @@
 #include "nbtool_config.h"
 #endif
 
-#include <sys/endian.h>
 #include <err.h>
 #include <errno.h>
 #include <inttypes.h>
