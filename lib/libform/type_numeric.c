@@ -99,7 +99,7 @@ free_numeric_args(char *args)
 static int
 numeric_check_field(FIELD *field, char *args)
 {
-	int cur;
+	int cur, ret;
 	double number, max, min;
 	int precision;
 	char *buf, *new_buf;
@@ -176,8 +176,13 @@ numeric_check_field(FIELD *field, char *args)
 	if ((min < max) && ((number < min) || (number > max)))
 		return FALSE;
 
-	if (asprintf(&new_buf, "%.*f", precision, number) < 0)
+	ret = snprintf(NULL, 0, "%.*f", precision, number);
+	if (ret < 0 || (new_buf = malloc(ret + 1)) == NULL)
 		return FALSE;
+	if (snprintf(new_buf, ret + 1, "%.*f", precision, number) != ret) {
+		free(new_buf);
+		return FALSE;
+	}
 
 	  /* re-set the field buffer to be the reformatted numeric */
 	set_field_buffer(field, 0, new_buf);

@@ -29,6 +29,7 @@
  *
  */
 
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -98,10 +99,11 @@ free_integer_args(char *args)
 static int
 integer_check_field(FIELD *field, char *args)
 {
-	int cur;
+	int cur, ret;
 	long number, max, min;
 	int precision;
 	char *buf, *new_buf;
+	size_t len;
 
 	if (args == NULL)
 		return FALSE;
@@ -143,7 +145,13 @@ integer_check_field(FIELD *field, char *args)
 	if ((min > max) || ((number < min) || (number > max)))
 		return FALSE;
 
-	if (asprintf(&new_buf, "%.*ld", precision, number) < 0)
+	len = (sizeof(long) * CHAR_BIT + 2) / 3 + 1;
+	if (precision > len - 1)
+		len = precision + 1;
+	if ((new_buf = malloc(len)) == NULL)
+		return FALSE;
+	ret = snprintf(new_buf, len, "%.*ld", precision, number);
+	if (ret < 0 || ret >= len)
 		return FALSE;
 
 	  /* re-set the field buffer to be the reformatted numeric */

@@ -29,6 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <limits.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <time.h>
@@ -61,7 +62,8 @@ napms(int ms)
 int
 delay_output(int ms)
 {
-	char *delstr;
+	char delstr[(sizeof(int) * CHAR_BIT + 2) / 3 + 1];
+	int ret;
 
 #ifdef DEBUG
 	__CTRACE(__CTRACE_MISC, "delay_output: %d\n", ms);
@@ -69,9 +71,9 @@ delay_output(int ms)
 	if (!_cursesi_screen->padchar)
 		return napms(ms);
 
-	if (asprintf(&delstr, "%d", ms) == -1)
+	ret = snprintf(delstr, sizeof(delstr), "%d", ms);
+	if (ret < 0 || ret >= sizeof(delstr))
 		return ERR;
 	tputs(delstr, 0, __cputchar);
-	free(delstr);
 	return OK;
 }
