@@ -32,6 +32,7 @@
  *
  */
 
+#define _DEFAULT_SOURCE  /* for NI_MAXHOST */
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <ctype.h>
