@@ -553,9 +553,9 @@ _ti_encode_buf_id_num(TBUF *tbuf, int ind, int num, size_t len)
 		return 0;
 	_ti_encode_buf_16(tbuf, ind);
 	if (len == sizeof(uint32_t))
-		_ti_encode_buf_32(tbuf, num);
+		_ti_encode_buf_32(tbuf, (uint32_t)num);
 	else
-		_ti_encode_buf_16(tbuf, num);
+		_ti_encode_buf_16(tbuf, (uint16_t)num);
 	tbuf->entries++;
 	return 1;
 }
