@@ -36,8 +36,14 @@
 #endif
 
 #include <sys/mman.h>
+
+/* Not all systems have MAP_FILE|MAP_SHARED defined in sys/mman.h */
+#ifndef MAP_FILE
+#define MAP_FILE 0
+#endif
+
 #include <sys/stat.h>
-#include <cdbr.h>
+#include "cdbr.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
@@ -45,7 +51,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <mi_vector_hash.h>
+#include "mi_vector_hash.h"
 #define SET_ERRNO(val) errno = (val)
 
 struct cdbr {
