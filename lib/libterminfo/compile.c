@@ -1,4 +1,4 @@
-/* $NetBSD: compile.c,v 1.25 2020/04/05 12:31:02 roy Exp $ */
+/* $NetBSD: compile.c,v 1.26 2020/06/21 15:05:23 roy Exp $ */
 
 /*
  * Copyright (c) 2009, 2010, 2011, 2020 The NetBSD Foundation, Inc.
