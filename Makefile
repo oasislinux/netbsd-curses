@@ -214,6 +214,9 @@ host-hash.o: lib/libterminfo/hash.c
 host-tic: $(HOST_TIC_OBJ)
 	$(HOSTCC) $(HOSTLDFLAGS) -o $@ $(HOST_TIC_OBJ)
 
+.c.o:
+	$(CC) $(CFLAGS) -c -o $@ $<
+
 libcurses.a: $(LIBCURSES_OBJ)
 	$(AR) $(ARFLAGS) $@ $(LIBCURSES_OBJ)
 
