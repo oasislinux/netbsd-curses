@@ -29,15 +29,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "curses.h"
+#include "curses_private.h"
+
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 #ifdef HAVE_WCHAR
 #include <wctype.h>
 #endif
-
-#include "curses.h"
-#include "curses_private.h"
 
 /* Terminals with real soft labels have NOT been tested.
  * If you have such a device, please let us know so this comment
