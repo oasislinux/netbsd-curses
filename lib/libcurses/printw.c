@@ -131,5 +131,5 @@ vw_printw(WINDOW *win, const char *fmt, va_list ap)
 int
 vwprintw(WINDOW *win, const char *fmt, va_list ap)
 {
-	return vwprintw(win, fmt, ap);
+	return vw_printw(win, fmt, ap);
 }

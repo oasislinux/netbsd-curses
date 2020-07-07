@@ -122,5 +122,5 @@ vw_scanw(WINDOW *win, const char *fmt, va_list ap)
 int
 vwscanw(WINDOW *win, const char *fmt, va_list ap)
 {
-	return vwscanw(win, fmt, ap);
+	return vw_scanw(win, fmt, ap);
 }
