@@ -507,11 +507,6 @@ assume_default_colors(short fore, short back)
 	return(OK);
 }
 
-/* no_color_video is a terminfo macro, but we need to retain binary compat */
-#ifdef __strong_alias
-#undef no_color_video
-__strong_alias(no_color_video, no_color_attributes)
-#endif
 /*
  * no_color_attributes --
  *	Return attributes that cannot be combined with color.
