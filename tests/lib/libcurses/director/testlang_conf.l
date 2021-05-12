@@ -1,8 +1,9 @@
 %{
-/*	$NetBSD: testlang_conf.l,v 1.9 2020/10/24 04:46:17 blymn Exp $ 	*/
+/*	$NetBSD: testlang_conf.l,v 1.25 2021/02/25 00:50:10 rillig Exp $ 	*/
 
 /*-
  * Copyright 2009 Brett Lymn <blymn@NetBSD.org>
+ * Copyright 2021 Roland Illig <rillig@NetBSD.org>
  *
  * All rights reserved.
  *
@@ -14,7 +15,7 @@
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. The name of the author may not be used to endorse or promote products
- *    derived from this software withough specific prior written permission
+ *    derived from this software without specific prior written permission
  *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
@@ -26,8 +27,6 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- *
  */
 
 #include <curses.h>
@@ -45,7 +44,6 @@
 int yylex(void);
 
 extern size_t line;
-extern char *include_path; 	/* from director.c */
 extern char *cur_file;		/* from director.c */
 
 static int include_stack[MAX_INCLUDES];
@@ -61,9 +59,8 @@ dequote(const char *s, size_t *len)
 	*len = 0;
 	p = (const unsigned char *)s;
 	while (*p) {
-		if (*p == '\\' && *(p+1)) {
-			if (isdigit(*(p+1)) && *(p+2) && isdigit(*(p+2)) &&
-			    *(p+3) && isdigit(*(p+3)))
+		if (*p == '\\' && p[1]) {
+			if (isdigit(p[1]) && isdigit(p[2]) && isdigit(p[3]))
 				p += 3;
 			else
 				++p;
@@ -79,51 +76,59 @@ dequote(const char *s, size_t *len)
 	p = (const unsigned char *)s;
 	q = buf;
 	while (*p) {
-		if (*p == '\\' && *(p+1)) {
+		if (*p == '\\' && p[1]) {
 			++p;
-			if (isdigit(*p)) {
-				if (*(p+1) && isdigit(*(p+1)) && *(p+2) &&
-				    isdigit(*(p+2))) {
-					*q++ = ((*p - '0') * 8 + (*(p+1) - '0')) * 8 + (*(p+2) - '0');
+
+			if (isdigit(p[0])) {
+				if (isdigit(p[1]) && isdigit(p[2])) {
+					*q++ = (p[0] - '0') * 64 +
+					    (p[1] - '0') * 8 +
+					    (p[2] - '0');
 					p += 3;
 				} else {
 					*q++ = *p++;
 				}
-			} else {
-				switch (*p) {
-				case 'e':
-					/* escape */
-					*q++ = '\e';
-					p++;
-					break;
+				continue;
+			}
 
-				case 'n':
-					/* newline */
-					*q++ = '\n';
-					p++;
-					break;
+			switch (*p) {
+			case 'e':
+				/* escape */
+				*q++ = '\e';
+				p++;
+				break;
 
-				case 'r':
-					/* carriage return */
-					*q++ = '\r';
-					p++;
-					break;
+			case 'n':
+				/* newline */
+				*q++ = '\n';
+				p++;
+				break;
 
-				case 't':
-					/* tab */
-					*q++ = '\t';
-					p++;
-					break;
+			case 'r':
+				/* carriage return */
+				*q++ = '\r';
+				p++;
+				break;
 
-				case '\\':
-					/* backslash */
-					*q++ = '\\';
-					p++;
-					break;
+			case 't':
+				/* tab */
+				*q++ = '\t';
+				p++;
+				break;
 
-				default:
-					*q++ = *p++;
-				}
+			case '\\':
+				/* backslash */
+				*q++ = '\\';
+				p++;
+				break;
+
+			default:
+				if (isalpha(*p))
+					errx(2,
+					    "%s:%zu: Invalid escape sequence "
+					    "'\\%c' in string literal",
+					    cur_file, line, *p);
+				*q++ = *p++;
 			}
 		} else
 			*q++ = *p++;
@@ -137,33 +142,34 @@ dequote(const char *s, size_t *len)
 HEX		0[xX][0-9a-zA-Z]+
 STRING		[0-9a-z!#-&(-^ \t%._\\]+
 numeric		[-0-9]+
-PCHAR           (\\.|[^ \t\n])
-ASSIGN		[aA][sS][sS][iI][gG][nN]
-CALL2		[cC][aA][lL][lL]2
-CALL3		[cC][aA][lL][lL]3
-CALL4		[cC][aA][lL][lL]4
-CALL		[cC][aA][lL][lL]
-CHECK		[cC][hH][eE][cC][kK]
-DELAY		[dD][eE][lL][aA][yY]
-INPUT		[iI][nN][pP][uU][tT]
-NOINPUT		[nN][oO][iI][nN][pP][uU][tT]
-OK_RET		[oO][kK]
-ERR_RET		[eE][rR][rR]
-COMPARE		[cC][oO][mM][pP][aA][rR][eE]
-COMPAREND	[cC][oO][mM][pP][aA][rR][eE][Nn][Dd]
+PCHAR           (\\.|[!-~])
+ASSIGN		assign
+CALL2		call2
+CALL3		call3
+CALL4		call4
+CALL		call
+CHECK		check
+DELAY		delay
+INPUT		input
+NOINPUT		noinput
+OK_RET		OK
+ERR_RET		ERR
+COMPARE		compare
+COMPAREND	comparend
 FILENAME	[A-Za-z0-9.][A-Za-z0-9./_-]+
 VARNAME		[A-Za-z][A-Za-z0-9_-]+
 NULL_RET	NULL
 NON_NULL	NON_NULL
-CCHAR		[cC][cC][hH][aA][rR]
-WCHAR		[wW][cC][hH][aA][rR]
+CCHAR		cchar
+WCHAR		wchar
 BYTE		BYTE
 OR		\|
-LHB		\(
-RHB		\)
-LHSB		\[
-RHSB		\]
+LPAREN		\(
+RPAREN		\)
+LBRACK		\[
+RBRACK		\]
 MULTIPLIER	\*
+COMMA		,
 
 %x incl
 %option noinput nounput
@@ -172,34 +178,37 @@ MULTIPLIER	\*
 
 include		BEGIN(incl);
 
-<incl>[ \t]*      /* eat the whitespace */
-<incl>[^ \t\n]+   { /* got the include file name */
-		char inc_file[MAXPATHLEN];
+<incl>[ \t]*	/* eat the whitespace */
+<incl>[^ \t\n]+ { /* got the include file name */
+		char *inc_file;
 
 		if (include_ptr > MAX_INCLUDES) {
-			fprintf(stderr,
-				"Maximum number of nested includes exceeded "
-				"at line %zu of file %s\n", line, cur_file);
-				exit(2);
+			errx(2,
+			    "%s:%zu: Maximum number of nested includes "
+			    "exceeded", cur_file, line);
 		}
 
-		if (yytext[0] != '/') {
-			if (strlcpy(inc_file, include_path, sizeof(inc_file))
-			    >= sizeof(inc_file))
-				err(2, "CHECK_PATH too long");
-			if ((include_path[strlen(include_path) - 1] != '/') &&
-			    ((strlcat(inc_file, "/", sizeof(inc_file))
-			    >= sizeof(inc_file))))
-				err(2, "Could not append / to include file path");
+		const char *dir_begin;
+		int dir_len;
+		if (yytext[0] == '/') {
+			dir_begin = "";
+			dir_len = 0;
 		} else {
-			inc_file[0] = '\0';
+			dir_begin = cur_file;
+			const char *dir_end = strrchr(cur_file, '/');
+			if (dir_end != NULL) {
+				dir_len = (int)(dir_end + 1 - dir_begin);
+			} else {
+				dir_begin = ".";
+				dir_len = 1;
+			}
 		}
 
-		if (strlcat(inc_file, yytext, sizeof(inc_file))
-		    >= sizeof(inc_file))
-			err(2, "Path to include file path overflowed");
+		if (asprintf(&inc_file, "%.*s%s",
+		    dir_len, dir_begin, yytext) == -1)
+			err(2, "Cannot construct include path");
 
-		yyin = fopen(inc_file, "r" );
+		yyin = fopen(inc_file, "r");
 
 		if (!yyin)
 			err(1, "Error opening %s", inc_file);
@@ -208,138 +217,66 @@ include		BEGIN(incl);
 
 		include_stack[include_ptr] = line;
 		include_files[include_ptr++] = cur_file;
-		cur_file = strdup(inc_file);
-		if (cur_file == NULL)
-			err(2, "Cannot allocate new include file string");
-		line = 0;
+		cur_file = inc_file;
+		line = 1;
 		BEGIN(INITIAL);
 	}
 
 <<EOF>>	{
 		yypop_buffer_state();
 
-		if ( !YY_CURRENT_BUFFER )
-		{
+		if (!YY_CURRENT_BUFFER)
 			yyterminate();
-		}
 
 		if (--include_ptr < 0)
-			err(2, "Include stack underflow");
+			errx(2, "Include stack underflow");
 
 		free(cur_file);
 		cur_file = include_files[include_ptr];
 		line = include_stack[include_ptr];
 	}
 
-{ASSIGN}	{
-			return ASSIGN;
-		}
-
-{CALL2}		{
-			return CALL2;
-		}
-
-{CALL3}		{
-			return CALL3;
-		}
-
-{CALL4}		{
-			return CALL4;
-		}
-
-{CALL}		{
-			return CALL;
-		}
-
-{CHECK}		{
-			return CHECK;
-		}
-
-{DELAY}		{
-			return DELAY;
-		}
-
-{INPUT}		{
-			return INPUT;
-		}
-
-{NOINPUT}		{
-			return NOINPUT;
-		}
-
-{COMPARE}	{
-			return COMPARE;
-		}
-
-{COMPAREND}	{
-			return COMPAREND;
-		}
-
-{NON_NULL}	{
-			return NON_NULL;
-		}
-
-{NULL_RET}		{
-			return NULL_RET;
-		}
-
-{OK_RET}		{
-			return OK_RET;
-		}
-
-{ERR_RET}		{
-			return ERR_RET;
-		}
-
-{MULTIPLIER}	{
-			return MULTIPLIER;
-		}
-
-{CCHAR}		{
-			return CCHAR;
-		}
-
-{WCHAR}		{
-			return WCHAR;
-		}
-
-{OR}		{
-			return OR;
-		}
-
-{LHB}		{
-			return LHB;
-		}
-
-{RHB}		{
-			return RHB;
-		}
-
-{LHSB}		{
-			return LHSB;
-		}
-
-{RHSB}		{
-			return RHSB;
-		}
+{ASSIGN}	return ASSIGN;
+{CALL2}		return CALL2;
+{CALL3}		return CALL3;
+{CALL4}		return CALL4;
+{CALL}		return CALL;
+{CHECK}		return CHECK;
+{DELAY}		return DELAY;
+{INPUT}		return INPUT;
+{NOINPUT}	return NOINPUT;
+{COMPARE}	return COMPARE;
+{COMPAREND}	return COMPAREND;
+{NON_NULL}	return NON_NULL;
+{NULL_RET}	return NULL_RET;
+{OK_RET}	return OK_RET;
+{ERR_RET}	return ERR_RET;
+{MULTIPLIER}	return MULTIPLIER;
+{COMMA}		return COMMA;
+{CCHAR}		return CCHAR;
+{WCHAR}		return WCHAR;
+{OR}		return OR;
+{LPAREN}	return LPAREN;
+{RPAREN}	return RPAREN;
+{LBRACK}	return LBRACK;
+{RBRACK}	return RBRACK;
 
 {HEX}		{
 			/* Hex value, convert to decimal and return numeric */
 			unsigned long val;
 
 			if (sscanf(yytext, "%lx", &val) != 1)
-				err(1, "Bad hex conversion");
+				errx(1, "Bad hex conversion");
 
 			asprintf(&yylval.string, "%ld", val);
 			return numeric;
 		}
 
-
-{numeric}		{
+{numeric}	{
 			if ((yylval.string = strdup(yytext)) == NULL)
 				err(1, "Cannot allocate numeric string");
 			return numeric;
-}
+		}
 
 {VARNAME}	{
 			if ((yylval.string = strdup(yytext)) == NULL)
@@ -405,7 +342,7 @@ include		BEGIN(incl);
 			rv = yylval.retval->data_value;
 			for (i = 0; i < len; i += 2)
 				*rv++ = (str[i] << 8) | str[i+1];
-			*rv = __NORMAL | '\0'; /* terminates chtype array */	
+			*rv = __NORMAL | '\0'; /* terminates chtype array */
 			yylval.retval->data_type = data_byte;
 			yylval.retval->data_len = chlen;
 			return BYTE;
@@ -434,23 +371,29 @@ include		BEGIN(incl);
 				err(1, "Cannot allocate string for varname");
 			return VARIABLE;
 		}
-	
-	/* comments, white-outs */
+
+	/* whitespace, comments */
 [ \t\r]		|
 #.*		;
-^#.*\n		|
-#.*\n		|
+
+^[ \t\r]*#.*\n	|
 \\\n		|
-^\n		{ 
-line++; }
+^\n		line++;
 
 	/* eol on a line with data. need to process, return eol */
+#.*\n		|
 \n		{
 			line++;
 			return EOL;
 		}
 
 .		{
+			if (isprint((unsigned char)yytext[0]))
+				errx(1, "%s:%zu: Invalid character '%c'",
+				    cur_file, line + 1, yytext[0]);
+			else
+				errx(1, "%s:%zu: Invalid character '0x%02x'",
+				    cur_file, line + 1, yytext[0]);
 		}
 
 %%

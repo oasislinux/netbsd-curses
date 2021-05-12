@@ -1,8 +1,9 @@
 %{
-/*	$NetBSD: testlang_parse.y,v 1.19 2020/10/24 14:45:06 roy Exp $	*/
+/*	$NetBSD: testlang_parse.y,v 1.52 2021/04/06 01:29:37 rillig Exp $	*/
 
 /*-
  * Copyright 2009 Brett Lymn <blymn@NetBSD.org>
+ * Copyright 2021 Roland Illig <rillig@NetBSD.org>
  *
  * All rights reserved.
  *
@@ -14,7 +15,7 @@
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. The name of the author may not be used to endorse or promote products
- *    derived from this software withough specific prior written permission
+ *    derived from this software without specific prior written permission
  *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
@@ -26,9 +27,8 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- *
  */
+
 #include <assert.h>
 #include <curses.h>
 #include <errno.h>
@@ -51,8 +51,6 @@
 
 extern int verbose;
 extern int check_file_flag;
-extern int cmdpipe[2];
-extern int slvpipe[2];
 extern int master;
 extern struct pollfd readfd;
 extern char *check_path;
@@ -60,7 +58,7 @@ extern char *cur_file;		/* from director.c */
 
 int yylex(void);
 
-size_t line;
+size_t line = 1;
 
 static int input_delay;
 
@@ -84,12 +82,9 @@ static bool no_input;	/* don't need more input */
 static wchar_t *vals = NULL;	/* wchars to attach to a cchar type */
 static unsigned nvals;		/* number of wchars */
 
-#define READ_PIPE  0
-#define WRITE_PIPE 1
-
-const char *enum_names[] = {
-	"unused", "static", "numeric", "string", "byte", "cchar", "wchar", "ERR",
-	"OK", "NULL", "not NULL", "variable", "reference", "returns count",
+const char *enum_names[] = {	/* for data_enum_t */
+	"unused", "numeric", "static", "string", "byte", "cchar", "wchar", "ERR",
+	"OK", "NULL", "not NULL", "variable", "reference", "return count",
 	"slave error"
 };
 
@@ -124,38 +119,46 @@ static var_t *vars; 		/* Variables defined during the test. */
 static int	check_function_table(char *, const char *[], int);
 static int	find_var_index(const char *);
 static void 	assign_arg(data_enum_t, void *);
-static int	assign_var(char *);
+static int	assign_var(const char *);
 void		init_parse_variables(int);
 static void	validate(int, void *);
 static void	validate_return(const char *, const char *, int);
 static void	validate_variable(int, data_enum_t, const void *, int, int);
 static void	validate_byte(ct_data_t *, ct_data_t *, int);
-static void validate_cchar(cchar_t *, cchar_t *, int);
-static void validate_wchar(wchar_t *, wchar_t *, int);
+static void	validate_cchar(cchar_t *, cchar_t *, int);
+static void	validate_wchar(wchar_t *, wchar_t *, int);
 static void	write_cmd_pipe(char *);
 static void	write_cmd_pipe_args(data_enum_t, void *);
 static void	read_cmd_pipe(ct_data_t *);
 static void	write_func_and_args(void);
-static void	compare_streams(char *, bool);
+static void	compare_streams(const char *, bool);
 static void	do_function_call(size_t);
+static void	check(void);
+static void	delay_millis(const char *);
+static void	do_input(const char *);
+static void	do_noinput(void);
 static void	save_slave_output(bool);
 static void	validate_type(data_enum_t, ct_data_t *, int);
-static void	set_var(data_enum_t, char *, void *);
+static void	set_var(data_enum_t, const char *, void *);
 static void	validate_reference(int, void *);
-static char	*numeric_or(char *, char *);
-static char	*get_numeric_var(const char *);
+static char *	numeric_or(char *, char *);
+static char *	get_numeric_var(const char *);
 static void	perform_delay(struct timespec *);
 static void	set_cchar(char *, void *);
-static void set_wchar(char *);
-static wchar_t	*add_to_vals(data_enum_t, void *);
+static void	set_wchar(char *);
+static wchar_t *add_to_vals(data_enum_t, void *);
 
+#define variants(fn) "" fn, "mv" fn, "w" fn, "mvw" fn
 static const char *input_functions[] = {
-	"getch", "mvgetch", "mvwgetch", "wgetch", "getnstr", "getstr", "mvgetnstr",
-	"mvgetstr", "mvwgetnstr", "mvwgetstr", "wgetnstr", "wgetstr", "mvscanw",
-	"mvwscanw", "scanw", "wscanw", "get_wch", "mvget_wch", "mvwget_wch",
-	"wget_wch", "getn_wstr", "get_wstr", "mvgetn_wstr", "mvget_wstr",
-	"mvwgetn_wstr","mvwget_wstr", "wgetn_wstr", "wget_wstr"
+	variants("getch"),
+	variants("getnstr"),
+	variants("getstr"),
+	variants("getn_wstr"),
+	variants("get_wch"),
+	variants("get_wstr"),
+	variants("scanw"),
 };
+#undef variants
 
 static const unsigned ninput_functions =
 	sizeof(input_functions) / sizeof(char *);
@@ -189,359 +192,287 @@ extern saved_data_t saved_output;
 %token <string> ASSIGN
 %token <string> CCHAR
 %token <string> WCHAR
-%token EOL CALL CHECK NOINPUT OR MULTIPLIER LHB RHB LHSB RHSB
-%token CALL2 CALL3 CALL4 DRAIN
+%token EOL CALL CHECK NOINPUT OR MULTIPLIER LPAREN RPAREN LBRACK RBRACK
+%token COMMA
+%token CALL2 CALL3 CALL4
+
+%type <string> attributes expr
+%type <vals> array_elements array_element
 
 %nonassoc OR
 
 %%
 
-statement	:	/* empty */
-		| assign statement
-		| call statement
-		| call2 statement
-		| call3 statement
-		| call4 statement
-		| check statement
-		| delay statement
-		| input statement
-		| noinput statement
-		| compare statement
-		| comparend statement
-		| cchar statement
-		| wchar statement
-		| eol statement
+statements	: /* empty */
+		| statement EOL statements
 		;
 
-assign		: ASSIGN VARNAME numeric {set_var(data_number, $2, $3);} eol
-		| ASSIGN VARNAME LHB expr RHB {set_var(data_number, $2, $<string>4);} eol
-		| ASSIGN VARNAME STRING {set_var(data_string, $2, $3);} eol
-		| ASSIGN VARNAME BYTE {set_var(data_byte, $2, $3);} eol
+statement	: assign
+		| call
+		| call2
+		| call3
+		| call4
+		| check
+		| delay
+		| input
+		| noinput
+		| compare
+		| comparend
+		| cchar
+		| wchar
+		| /* empty */
 		;
 
-cchar		: CCHAR VARNAME attributes char_vals eol
-			{
-				set_cchar($2, $<string>3);
-			}
+assign		: ASSIGN VARNAME numeric {
+			set_var(data_number, $2, $3);
+		}
+		| ASSIGN VARNAME LPAREN expr RPAREN {
+			set_var(data_number, $2, $4);
+		}
+		| ASSIGN VARNAME STRING {
+			set_var(data_string, $2, $3);
+		}
+		| ASSIGN VARNAME BYTE {
+			set_var(data_byte, $2, $3);
+		}
 		;
 
-wchar		: WCHAR VARNAME char_vals eol
-			{
-				set_wchar($2);
-			}
+cchar		: CCHAR VARNAME attributes char_vals {
+			set_cchar($2, $3);
+		}
+		;
+
+wchar		: WCHAR VARNAME char_vals {
+			set_wchar($2);
+		}
 		;
 
 attributes	: numeric
-		| LHB expr RHB
-			{ $<string>$ = $<string>2; }
-		| VARIABLE
-			{ $<string>$ = get_numeric_var($1); }
-		;
-
-char_vals	: numeric
-			{ add_to_vals(data_number, $1); }
-		| LHSB array RHSB
-		| VARIABLE
-			{ add_to_vals(data_var, $1); }
-		| STRING
-			{ add_to_vals(data_string, $1); }
-		| BYTE
-			{ add_to_vals(data_byte, $1); }
-		;
-
-call		: CALL result fn_name args eol {
-	do_function_call(1);
-}
-		;
-
-call2		: CALL2 result result fn_name args eol {
-	do_function_call(2);
-}
-		;
-
-call3		: CALL3 result result result fn_name args eol {
-	do_function_call(3);
-}
-		;
-
-call4		: CALL4 result result result result fn_name args eol {
-	do_function_call(4);
- }
-		;
-
-check		: CHECK var returns eol {
-	ct_data_t retvar;
-	var_t *vptr;
-
-	if (command.returns[0].data_index == -1)
-		err(1, "Undefined variable in check statement, line %zu"
-		    " of file %s", line, cur_file);
-
-	if (command.returns[1].data_type == data_var){
-		vptr = &vars[command.returns[1].data_index];
-		command.returns[1].data_type = vptr->type;
-		command.returns[1].data_len = vptr->len;
-		if (vptr->type != data_cchar)
-			command.returns[1].data_value = vptr->value;
-		else
-			command.returns[1].data_value = &vptr->cchar;
-	}
-
-	if (verbose) {
-		fprintf(stderr, "Checking contents of variable %s for %s\n",
-		    vars[command.returns[0].data_index].name,
-		    enum_names[command.returns[1].data_type]);
-	}
-
-	/*
-	 * Check if var and return have same data types
-	 */
-	if (((command.returns[1].data_type == data_byte) &&
--            (vars[command.returns[0].data_index].type != data_byte)))
-		err(1, "Var type %s (%d) does not match return type %s (%d)",
-		    enum_names[
-		    vars[command.returns[0].data_index].type],
-		    vars[command.returns[0].data_index].type,
-		    enum_names[command.returns[1].data_type],
-		    command.returns[1].data_type);
-
-	switch (command.returns[1].data_type) {
-	case data_err:
-	case data_ok:
-		validate_type(vars[command.returns[0].data_index].type,
-			&command.returns[1], 0);
-		break;
-
-	case data_null:
-		validate_variable(0, data_string, "NULL",
-				  command.returns[0].data_index, 0);
-		break;
-
-	case data_nonnull:
-		validate_variable(0, data_string, "NULL",
-				  command.returns[0].data_index, 1);
-		break;
-
-	case data_string:
-	case data_number:
-		if (verbose) {
-			fprintf(stderr, " %s == returned %s\n",
-			    (const char *)command.returns[1].data_value,
-			    (const char *)
-			    vars[command.returns[0].data_index].value);
+		| LPAREN expr RPAREN {
+			$$ = $2;
 		}
-		validate_variable(0, data_string,
-		    command.returns[1].data_value,
-		    command.returns[0].data_index, 0);
-		break;
+		| VARIABLE {
+			$$ = get_numeric_var($1);
+		}
+		;
 
-	case data_byte:
-		vptr = &vars[command.returns[0].data_index];
-		retvar.data_len = vptr->len;
-		retvar.data_type = vptr->type;
-		retvar.data_value = vptr->value;
-		validate_byte(&retvar, &command.returns[1], 0);
-		break;
+char_vals	: numeric {
+			add_to_vals(data_number, $1);
+		}
+		| LBRACK array_elements RBRACK
+		| VARIABLE {
+			add_to_vals(data_var, $1);
+		}
+		| STRING {
+			add_to_vals(data_string, $1);
+		}
+		| BYTE {
+			add_to_vals(data_byte, $1);
+		}
+		;
 
-	case data_cchar:
-		validate_cchar(&vars[command.returns[0].data_index].cchar,
-			(cchar_t *) command.returns[1].data_value, 0);
-		break;
+call		: CALL result fn_name args {
+			do_function_call(1);
+		}
+		;
 
-	case data_wchar:
-		validate_wchar((wchar_t *) vars[command.returns[0].data_index].value,
-			(wchar_t *) command.returns[1].data_value, 0);
-		break;
+call2		: CALL2 result result fn_name args {
+			do_function_call(2);
+		}
+		;
 
-	default:
-		err(1, "Malformed check statement at line %zu "
-		    "of file %s", line, cur_file);
-		break;
-	}
+call3		: CALL3 result result result fn_name args {
+			do_function_call(3);
+		}
+		;
 
-	init_parse_variables(0);
- }
-	;
+call4		: CALL4 result result result result fn_name args {
+			do_function_call(4);
+		}
+		;
 
-delay		: DELAY numeric eol {
-	/* set the inter-character delay */
-	if (sscanf($2, "%d", &input_delay) == 0)
-		err(1, "delay specification %s could not be converted to "
-		    "numeric at line %zu of file %s", $2, line, cur_file);
-	if (verbose) {
-		fprintf(stderr, "Set input delay to %d ms\n", input_delay);
-	}
+check		: CHECK var returns {
+			check();
+		}
+		;
 
-	if (input_delay < DELAY_MIN)
-		input_delay = DELAY_MIN;
-	/*
-	 * Fill in the timespec structure now ready for use later.
-	 * The delay is specified in milliseconds so convert to timespec
-	 * values
-	 */
-	delay_spec.tv_sec = input_delay / 1000;
-	delay_spec.tv_nsec = (input_delay - 1000 * delay_spec.tv_sec) * 1000;
-	if (verbose) {
-		fprintf(stderr, "set delay to %jd.%jd\n",
-		    (intmax_t)delay_spec.tv_sec,
-		    (intmax_t)delay_spec.tv_nsec);
-	}
+delay		: DELAY numeric {
+			delay_millis($2);
+		}
+		;
 
-	init_parse_variables(0);
- }
-	;
+input		: INPUT STRING {
+			do_input($2);
+		}
+		;
 
-input		: INPUT STRING eol {
-	if (input_str != NULL) {
-		warnx("%s, %zu: Discarding unused input string",
-		    cur_file, line);
-		free(input_str);
-	}
+noinput		: NOINPUT {
+			do_noinput();
+		}
+		;
 
-	if ((input_str = malloc(strlen($2) + 1)) == NULL)
-		err(2, "Cannot allocate memory for input string");
+compare		: COMPARE PATH {
+			compare_streams($2, true);
+		}
+		| COMPARE FILENAME {
+			compare_streams($2, true);
+		}
+		;
 
-	strlcpy(input_str, $2, strlen($2) + 1);
-}
-	;
-
-
-noinput		: NOINPUT eol {
-	if (input_str != NULL) {
-		warnx("%s, %zu: Discarding unused input string",
-		    cur_file, line);
-		free(input_str);
-	}
-
-	no_input = true;
- }
-
-compare		: COMPARE PATH eol
-		| COMPARE FILENAME eol
-{
-	compare_streams($2, true);
-}
-	;
-
-
-comparend	: COMPAREND PATH eol
-		| COMPAREND FILENAME eol
-{
-	compare_streams($2, false);
-}
-	;
+comparend	: COMPAREND PATH {
+			compare_streams($2, false);
+		}
+		| COMPAREND FILENAME {
+			compare_streams($2, false);
+		}
+		;
 
 
 result		: returns
 		| reference
 		;
 
-returns		: numeric { assign_rets(data_number, $1); }
-		| LHB expr RHB { assign_rets(data_number, $<string>2); }
-		| STRING { assign_rets(data_string, $1); }
-		| BYTE { assign_rets(data_byte, (void *) $1); }
-		| ERR_RET { assign_rets(data_err, NULL); }
-		| OK_RET { assign_rets(data_ok, NULL); }
-		| NULL_RET { assign_rets(data_null, NULL); }
-		| NON_NULL { assign_rets(data_nonnull, NULL); }
+returns		: numeric {
+			assign_rets(data_number, $1);
+		}
+		| LPAREN expr RPAREN {
+			assign_rets(data_number, $2);
+		}
+		| STRING {
+			assign_rets(data_string, $1);
+		}
+		| BYTE {
+			assign_rets(data_byte, (void *) $1);
+		}
+		| ERR_RET {
+			assign_rets(data_err, NULL);
+		}
+		| OK_RET {
+			assign_rets(data_ok, NULL);
+		}
+		| NULL_RET {
+			assign_rets(data_null, NULL);
+		}
+		| NON_NULL {
+			assign_rets(data_nonnull, NULL);
+		}
 		| var
 		;
 
 var		: VARNAME {
-	assign_rets(data_var, $1);
- }
+			assign_rets(data_var, $1);
+		}
 		;
 
 reference	: VARIABLE {
-	assign_rets(data_ref, $1);
- }
-
-fn_name		: VARNAME {
-	if (command.function != NULL)
-		free(command.function);
-
-	command.function = malloc(strlen($1) + 1);
-	if (command.function == NULL)
-		err(1, "Could not allocate memory for function name");
-	strcpy(command.function, $1);
- }
+			assign_rets(data_ref, $1);
+		}
 		;
 
-array		: numeric { $<vals>$ = add_to_vals(data_number, $1); };
-		| VARIABLE
-			{ $<vals>$ = add_to_vals(data_number,
-				get_numeric_var($1)); }
-		| BYTE
-			{
-				$<vals>$ = add_to_vals(data_byte, (void *) $1);
-			}
-		| STRING
-			{
-				$<vals>$ = add_to_vals(data_string, (void *) $1);
-			}
-		| numeric MULTIPLIER numeric
-			{
-				unsigned long i;
-				unsigned long acount;
+fn_name		: VARNAME {
+			if (command.function != NULL)
+				free(command.function);
 
-				acount = strtoul($3, NULL, 10);
-				for (i = 0; i < acount; i++) {
-					$<vals>$ = add_to_vals(data_number, $1);
-				}
-			}
-		| VARIABLE MULTIPLIER numeric
-			{
-				unsigned long i, acount;
-				char *val;
+			command.function = malloc(strlen($1) + 1);
+			if (command.function == NULL)
+				err(1, "Could not allocate memory for function name");
+			strcpy(command.function, $1);
+		}
+		;
 
-				acount = strtoul($3, NULL, 10);
-				val = get_numeric_var($1);
-				for (i = 0; i < acount; i++) {
-					$<vals>$ = add_to_vals(data_number, val);
-				}
-			}
-		| BYTE MULTIPLIER numeric
-			{
-				unsigned long i, acount;
+array_elements	: array_element
+		| array_element COMMA array_elements
+		;
 
-				acount = strtoul($3, NULL, 10);
-				for (i = 0; i < acount; i++) {
-					$<vals>$ = add_to_vals(data_byte, (void *) $1); 
-				}
-			}
-		| STRING MULTIPLIER numeric
-			{
-				unsigned long i, acount;
+array_element	: numeric {
+			$$ = add_to_vals(data_number, $1);
+		}
+		| VARIABLE {
+			$$ = add_to_vals(data_number, get_numeric_var($1));
+		}
+		| BYTE {
+			$$ = add_to_vals(data_byte, (void *) $1);
+		}
+		| STRING {
+			$$ = add_to_vals(data_string, (void *) $1);
+		}
+		| numeric MULTIPLIER numeric {
+			unsigned long i;
+			unsigned long acount;
 
-				acount = strtoul($3, NULL, 10);
-				for (i = 0; i < acount; i++) {
-					$<vals>$ = add_to_vals(data_string,
-					    (void *) $1); 
-				}
+			acount = strtoul($3, NULL, 10);
+			for (i = 0; i < acount; i++) {
+				$$ = add_to_vals(data_number, $1);
 			}
-		| array array
+		}
+		| VARIABLE MULTIPLIER numeric {
+			unsigned long i, acount;
+			char *val;
+
+			acount = strtoul($3, NULL, 10);
+			val = get_numeric_var($1);
+			for (i = 0; i < acount; i++) {
+				$$ = add_to_vals(data_number, val);
+			}
+		}
+		| BYTE MULTIPLIER numeric {
+			unsigned long i, acount;
+
+			acount = strtoul($3, NULL, 10);
+			for (i = 0; i < acount; i++) {
+				$$ = add_to_vals(data_byte, (void *) $1);
+			}
+		}
+		| STRING MULTIPLIER numeric {
+			unsigned long i, acount;
+
+			acount = strtoul($3, NULL, 10);
+			for (i = 0; i < acount; i++) {
+				$$ = add_to_vals(data_string, (void *) $1);
+			}
+		}
 		;
 
 expr		: numeric
-		| VARIABLE
-			{ $<string>$ = get_numeric_var($1); }
-		| expr OR expr
-			{ $<string>$ = numeric_or($<string>1, $<string>3); }
+		| VARIABLE {
+			$$ = get_numeric_var($1);
+		}
+		| expr OR expr {
+			$$ = numeric_or($1, $3);
+		}
 		;
 
 args		: /* empty */
-		| LHB expr RHB { assign_arg(data_static, $<string>2); } args
-		| numeric { assign_arg(data_static, $1); } args
-		| STRING { assign_arg(data_static, $1); } args
-		| BYTE { assign_arg(data_byte, $1); } args
-		| PATH { assign_arg(data_static, $1); } args
-		| FILENAME { assign_arg(data_static, $1); } args
-		| VARNAME { assign_arg(data_static, $1); } args
-		| VARIABLE  { assign_arg(data_var, $1); } args
-		| NULL_RET { assign_arg(data_null, $1); } args
+		| arg args
 		;
 
-eol		: EOL
+arg		: LPAREN expr RPAREN {
+			assign_arg(data_static, $2);
+		}
+		| numeric {
+			assign_arg(data_static, $1);
+		}
+		| STRING {
+			assign_arg(data_static, $1);
+		}
+		| BYTE {
+			assign_arg(data_byte, $1);
+		}
+		| PATH {
+			assign_arg(data_static, $1);
+		}
+		| FILENAME {
+			assign_arg(data_static, $1);
+		}
+		| VARNAME {
+			assign_arg(data_static, $1);
+		}
+		| VARIABLE {
+			assign_arg(data_var, $1);
+		}
+		| NULL_RET {
+			assign_arg(data_null, $1);
+		}
 		;
 
 %%
@@ -559,7 +490,7 @@ excess(const char *fname, size_t lineno, const char *func, const char *comment,
 	if (strnvisx(dst, dstlen, data, datalen, VIS_WHITE | VIS_OCTAL) == -1)
 		err(1, "strnvisx");
 
-	warnx("%s, %zu: [%s] Excess %zu bytes%s [%s]",
+	warnx("%s:%zu: [%s] Excess %zu bytes%s [%s]",
 	    fname, lineno, func, datalen, comment, dst);
 	free(dst);
 }
@@ -574,10 +505,10 @@ get_numeric_var(const char *var)
 	int i;
 
 	if ((i = find_var_index(var)) < 0)
-		err(1, "Variable %s is undefined", var);
+		errx(1, "Variable %s is undefined", var);
 
 	if (vars[i].type != data_number)
-		err(1, "Variable %s is not a numeric type", var);
+		errx(1, "Variable %s is not a numeric type", var);
 
 	return vars[i].value;
 }
@@ -626,7 +557,8 @@ perform_delay(struct timespec *ts)
 /*
  * Add to temporary vals array
  */
-static wchar_t	*add_to_vals(data_enum_t argtype, void *arg)
+static wchar_t *
+add_to_vals(data_enum_t argtype, void *arg)
 {
 	wchar_t *retval = NULL;
 	int have_malloced;
@@ -663,8 +595,8 @@ static wchar_t	*add_to_vals(data_enum_t argtype, void *arg)
 
 	case data_var:
 		if ((i = find_var_index((char *) arg)) < 0)
-			err(1, "Variable %s is undefined at line %zu "
-			    "of file %s", (char *) arg, line, cur_file);
+			errx(1, "%s:%zu: Variable %s is undefined",
+			    cur_file, line, (const char *) arg);
 
 		switch (vars[i].type) {
 
@@ -675,17 +607,17 @@ static wchar_t	*add_to_vals(data_enum_t argtype, void *arg)
 			break;
 
 		default:
-			err(1, "Variable %s is not a valid type for cchar"
-			    " at line %zu of file %s", (char *) arg, line,
-			    cur_file);
+			errx(1,
+			    "%s:%zu: Variable %s has invalid type for cchar",
+			    cur_file, line, (const char *) arg);
 			break;
 
 		}
 		break;
 
 	default:
-		err(1, "add_to_vals: Unhandled type for vals array "
-		    "at line %zu of file %s", line, cur_file);
+		errx(1, "%s:%zu: Internal error: Unhandled type for vals array",
+		    cur_file, line);
 
 		/* if we get here without a value then tidy up */
 		if ((nvals == 0) && (have_malloced == 1)) {
@@ -703,7 +635,7 @@ static wchar_t	*add_to_vals(data_enum_t argtype, void *arg)
  * Assign the value given to the named variable.
  */
 static void
-set_var(data_enum_t type, char *name, void *value)
+set_var(data_enum_t type, const char *name, void *value)
 {
 	int i;
 	char *number;
@@ -743,16 +675,17 @@ set_cchar(char *name, void *attributes)
 	attr_t attribs;
 
 	if (nvals >= CURSES_CCHAR_MAX)
-		err(1, "%s: too many characters in complex char type at "
-			"line %zu of file %s", __func__, line, cur_file);
+		errx(1, "%s:%zu: %s: too many characters in complex char type",
+		    cur_file, line, __func__);
 
 	i = find_var_index(name);
 	if (i < 0)
 		i = assign_var(name);
 
 	if (sscanf((char *) attributes, "%d", &attribs) != 1)
-		err(1, "%s: conversion of attributes to integer failed at"
-			"line %zu of file %s", __func__, line, cur_file);
+		errx(1,
+		    "%s:%zu: %s: conversion of attributes to integer failed",
+		    cur_file, line, __func__);
 
 	vars[i].type = data_cchar;
 	vars[i].cchar.attributes = attribs;
@@ -798,7 +731,7 @@ set_wchar(char *name)
  * when a test function call returns.
  */
 static int
-assign_var(char *varname)
+assign_var(const char *varname)
 {
 	var_t *temp;
 	char *name;
@@ -840,8 +773,8 @@ assign_arg(data_enum_t arg_type, void *arg)
 	if (cur.arg_type == data_var) {
 		cur.var_index = find_var_index(arg);
 		if (cur.var_index < 0)
-			err(1, "Invalid variable %s at line %zu of file %s",
-			    str, line, cur_file);
+			errx(1, "%s:%zu: Invalid variable %s",
+			    cur_file, line, str);
 	} else if (cur.arg_type == data_byte) {
 		ret = arg;
 		cur.arg_len = ret->data_len;
@@ -899,7 +832,7 @@ assign_rets(data_enum_t ret_type, void *ret)
 			       cur.data_len);
 		} else if (ret_type == data_ref) {
 			if ((cur.data_index = find_var_index(ret)) < 0)
-				err(1, "Undefined variable reference");
+				errx(1, "Undefined variable reference");
 		}
 	} else {
 		cur.data_index = find_var_index(ret);
@@ -941,14 +874,13 @@ find_var_index(const char *var_name)
  * Check the given function name in the given table of names, return 1 if
  * there is a match.
  */
-static int check_function_table(char *function, const char *table[],
-				int nfunctions)
+static int
+check_function_table(char *function, const char *table[], int nfunctions)
 {
 	int i;
 
 	for (i = 0; i < nfunctions; i++) {
-		if ((strlen(function) == strlen(table[i])) &&
-		    (strcmp(function, table[i]) == 0))
+		if (strcmp(function, table[i]) == 0)
 			return 1;
 	}
 
@@ -960,7 +892,7 @@ static int check_function_table(char *function, const char *table[],
  * any differences.
  */
 static void
-compare_streams(char *filename, bool discard)
+compare_streams(const char *filename, bool discard)
 {
 	char check_file[PATH_MAX], drain[100], ref, data;
 	struct pollfd fds[2];
@@ -975,35 +907,37 @@ compare_streams(char *filename, bool discard)
 	if (filename[0] != '/') {
 		if (strlcpy(check_file, check_path, sizeof(check_file))
 		    >= sizeof(check_file))
-			err(2, "CHECK_PATH too long");
+			errx(2, "CHECK_PATH too long");
 
 		if (strlcat(check_file, "/", sizeof(check_file))
 		    >= sizeof(check_file))
-			err(2, "Could not append / to check file path");
+			errx(2, "Could not append / to check file path");
 	} else {
 		check_file[0] = '\0';
 	}
 
 	if (strlcat(check_file, filename, sizeof(check_file))
 	    >= sizeof(check_file))
-		err(2, "Path to check file path overflowed");
+		errx(2, "Path to check file path overflowed");
 
 	int create_check_file = 0;
 
 	if (check_file_flag == (GEN_CHECK_FILE | FORCE_GEN))
 		create_check_file = 1;
-	else if ((check_fd = open(check_file, O_RDONLY, 0)) < 0){
+	else if ((check_fd = open(check_file, O_RDONLY, 0)) < 0) {
 		if (check_file_flag & GEN_CHECK_FILE)
 			create_check_file = 1;
 		else
-			err(2, "failed to open file %s line %zu of file %s",
-				check_file, line, cur_file);
+			err(2, "%s:%zu: failed to open file %s",
+			    cur_file, line, check_file);
 	}
 
-	if (create_check_file)
-		if ((check_fd = open(check_file, O_WRONLY | O_CREAT, 0644)) < 0){
-			err(2, "failed to create file %s line %zu of file %s",
-				check_file, line, cur_file);
+	if (create_check_file) {
+		check_fd = open(check_file, O_WRONLY | O_CREAT, 0644);
+		if (check_fd < 0) {
+			err(2, "%s:%zu: failed to create file %s",
+			    cur_file, line, check_file);
+		}
 	}
 
 	fds[0].fd = check_fd;
@@ -1022,12 +956,12 @@ compare_streams(char *filename, bool discard)
 	offs = 0;
 	while (poll(fds, nfd, 500) == nfd) {
 		/* Read from check file if doing comparison */
-		if (!create_check_file){
+		if (!create_check_file) {
 			if (fds[0].revents & POLLIN) {
 				if ((result = read(check_fd, &ref, 1)) < 1) {
 					if (result != 0) {
-						err(2,
-							"Bad read on file %s", check_file);
+						err(2, "Bad read on file %s",
+						    check_file);
 					} else {
 						break;
 					}
@@ -1051,15 +985,10 @@ compare_streams(char *filename, bool discard)
 				continue;
 		}
 
-		if (create_check_file){
-			if ((result = write(check_fd, &data, 1)) < 1) {
-				if (result != 0) {
-					err(2,
-						"Bad write on file %s", check_file);
-				}
-			}
-			else
-				ref = data;
+		if (create_check_file) {
+			if ((result = write(check_fd, &data, 1)) < 1)
+				err(2, "Bad write on file %s", check_file);
+			ref = data;
 		}
 
 		if (verbose) {
@@ -1076,9 +1005,9 @@ compare_streams(char *filename, bool discard)
 		}
 
 		if (!create_check_file && ref != data) {
-			errx(2, "%s, %zu: refresh data from slave does "
-			    "not match expected from file %s offs %zu "
-			    "[reference 0x%x (%c) != slave 0x%x (%c)]",
+			errx(2, "%s:%zu: refresh data from slave does "
+			    "not match expected from file %s offset %zu "
+			    "[reference 0x%02x (%c) != slave 0x%02x (%c)]",
 			    cur_file, line, check_file, offs,
 			    ref, (ref >= ' ') ? ref : '-',
 			    data, (data >= ' ') ? data : '-');
@@ -1091,9 +1020,9 @@ compare_streams(char *filename, bool discard)
 	 * if creating a check file, there shouldn't be
 	 * anymore saved output
 	 */
-	if (saved_output.count > 0){
+	if (saved_output.count > 0) {
 		if (create_check_file)
-			err(2, "Slave output not flushed correctly");
+			errx(2, "Slave output not flushed correctly");
 		else
 			excess(cur_file, line, __func__, " from slave",
 				&saved_output.data[saved_output.readp], saved_output.count);
@@ -1161,7 +1090,7 @@ do_function_call(size_t nresults)
 	 */
 	read_cmd_pipe(&returns_count);
 	if (returns_count.data_type != data_count)
-		err(2, "expected return type of data_count but received %s",
+		errx(2, "expected return type of data_count but received %s",
 		    enum_names[returns_count.data_type]);
 
 	perform_delay(&delay_post_call); /* let slave catch up */
@@ -1178,22 +1107,22 @@ do_function_call(size_t nresults)
 		}
 
 		if (input_str == NULL)
-			errx(2, "%s, %zu: Call to input function "
+			errx(2, "%s:%zu: Call to input function "
 			    "but no input defined", cur_file, line);
 
-		fds[0].fd = slvpipe[READ_PIPE];
+		fds[0].fd = from_slave;
 		fds[0].events = POLLIN;
 		fds[1].fd = master;
 		fds[1].events = POLLOUT;
  		p = input_str;
 		save_slave_output(false);
-		while(*p != '\0') {
+		while (*p != '\0') {
 			perform_delay(&delay_spec);
 
 			if (poll(fds, 2, 0) < 0)
 				err(2, "poll failed");
 			if (fds[0].revents & POLLIN) {
-				warnx("%s, %zu: Slave function "
+				warnx("%s:%zu: Slave function "
 				    "returned before end of input string",
 				    cur_file, line);
 				break;
@@ -1205,7 +1134,7 @@ do_function_call(size_t nresults)
 				    *p);
 			}
 			if (write(master, p, 1) != 1) {
-				warn("%s, %zu: Slave function write error",
+				warn("%s:%zu: Slave function write error",
 				    cur_file, line);
 				break;
 			}
@@ -1224,10 +1153,10 @@ do_function_call(size_t nresults)
 	}
 
 	if (verbose) {
-		fds[0].fd = slvpipe[READ_PIPE];
+		fds[0].fd = to_slave;
 		fds[0].events = POLLIN;
 
-		fds[1].fd = slvpipe[WRITE_PIPE];
+		fds[1].fd = from_slave;
 		fds[1].events = POLLOUT;
 
 		fds[2].fd = master;
@@ -1256,11 +1185,11 @@ do_function_call(size_t nresults)
 	 */
 	if ((returns_count.data_len > 0) &&
 	    (response[0].data_type == data_slave_error))
-		err(2, "Slave returned error: %s",
+		errx(2, "Slave returned error: %s",
 		    (const char *)response[0].data_value);
 
 	if (returns_count.data_len != nresults)
-		err(2, "Incorrect number of returns from slave, expected %zu "
+		errx(2, "Incorrect number of returns from slave, expected %zu "
 		    "but received %zu", nresults, returns_count.data_len);
 
 	if (verbose) {
@@ -1332,6 +1261,151 @@ write_func_and_args(void)
 	write_cmd_pipe(NULL); /* signal end of arguments */
 }
 
+static void
+check(void)
+{
+	ct_data_t retvar;
+	var_t *vptr;
+
+	if (command.returns[0].data_index == -1)
+		errx(1, "%s:%zu: Undefined variable in check statement",
+		    cur_file, line);
+
+	if (command.returns[1].data_type == data_var) {
+		vptr = &vars[command.returns[1].data_index];
+		command.returns[1].data_type = vptr->type;
+		command.returns[1].data_len = vptr->len;
+		if (vptr->type != data_cchar)
+			command.returns[1].data_value = vptr->value;
+		else
+			command.returns[1].data_value = &vptr->cchar;
+	}
+
+	if (verbose) {
+		fprintf(stderr, "Checking contents of variable %s for %s\n",
+		    vars[command.returns[0].data_index].name,
+		    enum_names[command.returns[1].data_type]);
+	}
+
+	/*
+	 * Check if var and return have same data types
+	 */
+	if (((command.returns[1].data_type == data_byte) &&
+	     (vars[command.returns[0].data_index].type != data_byte)))
+		errx(1, "Var type %s (%d) does not match return type %s (%d)",
+		    enum_names[vars[command.returns[0].data_index].type],
+		    vars[command.returns[0].data_index].type,
+		    enum_names[command.returns[1].data_type],
+		    command.returns[1].data_type);
+
+	switch (command.returns[1].data_type) {
+	case data_err:
+	case data_ok:
+		validate_type(vars[command.returns[0].data_index].type,
+			&command.returns[1], 0);
+		break;
+
+	case data_null:
+		validate_variable(0, data_string, "NULL",
+				  command.returns[0].data_index, 0);
+		break;
+
+	case data_nonnull:
+		validate_variable(0, data_string, "NULL",
+				  command.returns[0].data_index, 1);
+		break;
+
+	case data_string:
+	case data_number:
+		if (verbose) {
+			fprintf(stderr, " %s == returned %s\n",
+			    (const char *)command.returns[1].data_value,
+			    (const char *)
+			    vars[command.returns[0].data_index].value);
+		}
+		validate_variable(0, data_string,
+		    command.returns[1].data_value,
+		    command.returns[0].data_index, 0);
+		break;
+
+	case data_byte:
+		vptr = &vars[command.returns[0].data_index];
+		retvar.data_len = vptr->len;
+		retvar.data_type = vptr->type;
+		retvar.data_value = vptr->value;
+		validate_byte(&retvar, &command.returns[1], 0);
+		break;
+
+	case data_cchar:
+		validate_cchar(&vars[command.returns[0].data_index].cchar,
+			(cchar_t *) command.returns[1].data_value, 0);
+		break;
+
+	case data_wchar:
+		validate_wchar((wchar_t *) vars[command.returns[0].data_index].value,
+			(wchar_t *) command.returns[1].data_value, 0);
+		break;
+
+	default:
+		errx(1, "%s:%zu: Malformed check statement", cur_file, line);
+		break;
+	}
+
+	init_parse_variables(0);
+}
+
+static void
+delay_millis(const char *millis)
+{
+	/* set the inter-character delay */
+	if (sscanf(millis, "%d", &input_delay) == 0)
+		errx(1, "%s:%zu: Delay specification %s must be an int",
+		    cur_file, line, millis);
+	if (verbose) {
+		fprintf(stderr, "Set input delay to %d ms\n", input_delay);
+	}
+
+	if (input_delay < DELAY_MIN)
+		input_delay = DELAY_MIN;
+	/*
+	 * Fill in the timespec structure now ready for use later.
+	 * The delay is specified in milliseconds so convert to timespec
+	 * values
+	 */
+	delay_spec.tv_sec = input_delay / 1000;
+	delay_spec.tv_nsec = (input_delay - 1000 * delay_spec.tv_sec) * 1000;
+	if (verbose) {
+		fprintf(stderr, "set delay to %jd.%jd\n",
+		    (intmax_t)delay_spec.tv_sec,
+		    (intmax_t)delay_spec.tv_nsec);
+	}
+
+	init_parse_variables(0);
+}
+
+static void
+do_input(const char *s)
+{
+	if (input_str != NULL) {
+		warnx("%s:%zu: Discarding unused input string", cur_file, line);
+		free(input_str);
+	}
+
+	if ((input_str = strdup(s)) == NULL)
+		err(2, "Cannot allocate memory for input string");
+}
+
+static void
+do_noinput(void)
+{
+	if (input_str != NULL) {
+		warnx("%s:%zu: Discarding unused input string", cur_file, line);
+		free(input_str);
+	}
+
+	no_input = true;
+}
+
 /*
  * Initialise the command structure - if initial is non-zero then just set
  * everything to sane values otherwise free any memory that was allocated
@@ -1357,7 +1431,7 @@ init_parse_variables(int initial)
 		}
 		free(command.args);
 	} else {
-		line = 0;
+		line = 1;
 		input_delay = 0;
 		vars = NULL;
 		nvars = 0;
@@ -1389,7 +1463,7 @@ init_parse_variables(int initial)
 	if (result < 0)
 		err(2, "Poll of slave pty failed");
 	else if (result > 0)
-		warnx("%s, %zu: Unexpected data from slave", cur_file, line);
+		warnx("%s:%zu: Unexpected data from slave", cur_file, line);
 }
 
 /*
@@ -1409,11 +1483,11 @@ validate(int i, void *data)
 		if ((byte_response->data_type == data_byte) ||
 		    (byte_response->data_type == data_err) ||
 		    (byte_response->data_type == data_ok))
-			err(1, "%s: expecting type %s, received type %s"
-			    " at line %zu of file %s", __func__,
+			errx(1,
+			    "%s:%zu: %s: expecting type %s, received type %s",
+			    cur_file, line, __func__,
 			    enum_names[command.returns[i].data_type],
-			    enum_names[byte_response->data_type],
-			    line, cur_file);
+			    enum_names[byte_response->data_type]);
 
 		response = byte_response->data_value;
 	}
@@ -1450,8 +1524,7 @@ validate(int i, void *data)
 		break;
 
 	default:
-		err(1, "Malformed statement at line %zu of file %s",
-		    line, cur_file);
+		errx(1, "%s:%zu: Malformed statement", cur_file, line);
 		break;
 	}
 }
@@ -1499,9 +1572,8 @@ validate_reference(int i, void *data)
 		break;
 
 	default:
-		err(1,
-		    "Invalid return type for reference at line %zu of file %s",
-		    line, cur_file);
+		errx(1, "%s:%zu: Invalid return type for reference",
+		    cur_file, line);
 		break;
 	}
 }
@@ -1515,17 +1587,18 @@ validate_type(data_enum_t expected, ct_data_t *value, int check)
 {
 	if (((check == 0) && (expected != value->data_type)) ||
 	    ((check == 1) && (expected == value->data_type)))
-		err(1, "Validate expected type %s %s %s line %zu of file %s",
+		errx(1, "%s:%zu: Validate expected type %s %s %s",
+		    cur_file, line,
 		    enum_names[expected],
 		    (check == 0)? "matching" : "not matching",
-		    enum_names[value->data_type], line, cur_file);
+		    enum_names[value->data_type]);
 
 	if (verbose) {
-		fprintf(stderr, "Validate expected type %s %s %s line %zu"
-		    " of file %s\n",
+		fprintf(stderr, "%s:%zu: Validated expected type %s %s %s\n",
+		    cur_file, line,
 		    enum_names[expected],
 		    (check == 0)? "matching" : "not matching",
-		    enum_names[value->data_type], line, cur_file);
+		    enum_names[value->data_type]);
 	}
 }
 
@@ -1538,15 +1611,18 @@ validate_return(const char *expected, const char *value, int check)
 {
 	if (((check == 0) && strcmp(expected, value) != 0) ||
 	    ((check == 1) && strcmp(expected, value) == 0))
-		errx(1, "Validate expected >%s< %s >%s< line %zu of file %s",
+		errx(1, "%s:%zu: Validate expected >%s< %s >%s<",
+		    cur_file, line,
 		    expected,
-		    (check == 0)? "matching" : "not matching", value,
-		    line, cur_file);
+		    (check == 0)? "matching" : "not matching",
+		    value);
 	if (verbose) {
-		fprintf(stderr, "Validated expected value >%s< %s >%s< "
-		    "at line %zu of file %s\n", expected,
+		fprintf(stderr,
+		    "%s:%zu: Validated expected value >%s< %s >%s<\n",
+		    cur_file, line,
+		    expected,
 		    (check == 0)? "matches" : "does not match",
-		    value, line, cur_file);
+		    value);
 	}
 }
 
@@ -1579,8 +1655,10 @@ validate_byte(ct_data_t *expected, ct_data_t *value, int check)
 	 * No chance of a match if lengths differ...
 	 */
 	if ((check == 0) && (expected->data_len != value->data_len))
-	    errx(1, "Byte validation failed, length mismatch, expected %zu,"
-		"received %zu", expected->data_len, value->data_len);
+		errx(1,
+		    "Byte validation failed, length mismatch, "
+		    "expected %zu, received %zu",
+		    expected->data_len, value->data_len);
 
 	/*
 	 * If check is 0 then we want to throw an error IFF the byte streams
@@ -1592,14 +1670,13 @@ validate_byte(ct_data_t *expected, ct_data_t *value, int check)
 	    ((check == 1) && (expected->data_len == value->data_len) &&
 	     memcmp(expected->data_value, value->data_value,
 		    value->data_len) == 0))
-		errx(1, "Validate expected %s byte stream at line %zu"
-		    "of file %s",
-		    (check == 0)? "matching" : "not matching", line, cur_file);
+		errx(1, "%s:%zu: Validate expected %s byte stream",
+		    cur_file, line,
+		    (check == 0)? "matching" : "not matching");
 	if (verbose) {
-		fprintf(stderr, "Validated expected %s byte stream "
-		    "at line %zu of file %s\n",
-		    (check == 0)? "matching" : "not matching",
-		    line, cur_file);
+		fprintf(stderr, "%s:%zu: Validated expected %s byte stream\n",
+		    cur_file, line,
+		    (check == 0)? "matching" : "not matching");
 	}
 }
 
@@ -1615,15 +1692,17 @@ validate_cchar(cchar_t *expected, cchar_t *value, int check)
 	/*
 	 * No chance of a match if elements count differ...
 	 */
-	if ((expected->elements != value->elements)){
+	if ((expected->elements != value->elements)) {
 		if (check == 0)
-			errx(1, "cchar validation failed, elements count mismatch, "
-			"expected %d, received %d", expected->elements, value->elements);
+			errx(1,
+			    "cchar validation failed, elements count mismatch, "
+			    "expected %d, received %d",
+			    expected->elements, value->elements);
 		else {
 			if (verbose)
-				fprintf(stderr, "Validated expected %s cchar"
-					"at line %zu of file %s\n", "not matching",
-					line, cur_file);
+				fprintf(stderr,
+				    "%s:%zu: Validated expected %s cchar",
+				    cur_file, line, "not matching");
 			return;
 		}
 	}
@@ -1633,16 +1712,18 @@ validate_cchar(cchar_t *expected, cchar_t *value, int check)
 	 */
 
 	if ((expected->attributes & WA_ATTRIBUTES) !=
-			(value->attributes & WA_ATTRIBUTES )){
+			(value->attributes & WA_ATTRIBUTES )) {
 		if (check == 0)
-			errx(1, "cchar validation failed,attributes mismatch, expected "
-			"0x%x, received 0x%x", expected->attributes & WA_ATTRIBUTES,
-			value->attributes & WA_ATTRIBUTES);
+			errx(1,
+			    "cchar validation failed, attributes mismatch, "
+			    "expected 0x%x, received 0x%x",
+			    expected->attributes & WA_ATTRIBUTES,
+			    value->attributes & WA_ATTRIBUTES);
 		else {
 			if (verbose)
-				fprintf(stderr, "Validated expected %s cchar"
-					"at line %zu of file %s\n", "not matching",
-					line, cur_file);
+				fprintf(stderr,
+				    "%s:%zu: Validated expected %s cchar\n",
+				    cur_file, line, "not matching");
 			return;
 		}
 	}
@@ -1655,23 +1736,25 @@ validate_cchar(cchar_t *expected, cchar_t *value, int check)
 	for(j = 0; j < expected->elements; j++) {
 		if (expected->vals[j] != value->vals[j]) {
 			if (check == 0)
-				errx(1, "cchar validation failed, vals mismatch,expected 0x%x,"
-				"received 0x%x", expected->vals[j], value->vals[j]);
+				errx(1,
+				    "cchar validation failed, vals mismatch, "
+				    "expected 0x%x, received 0x%x",
+				    expected->vals[j], value->vals[j]);
 			else {
 				if (verbose)
-					fprintf(stderr, "Validated expected %s cchar"
-						"at line %zu of file %s\n", "not matching",
-						line, cur_file);
+					fprintf(stderr,
+					    "%s:%zu: Validated expected %s "
+					    "cchar\n",
+					    cur_file, line, "not matching");
 				return;
 			}
 		}
 	}
 
 	if (verbose) {
-		fprintf(stderr, "Validated expected %s cchar "
-		    "at line %zu of file %s\n",
-		    (check == 0)? "matching" : "not matching",
-		    line, cur_file);
+		fprintf(stderr,
+		    "%s:%zu: Validated expected %s cchar\n",
+		    cur_file, line, (check == 0)? "matching" : "not matching");
 	}
 }
 
@@ -1689,25 +1772,27 @@ validate_wchar(wchar_t *expected, wchar_t *value, int check)
 	wchar_t *p;
 
 	p = expected;
-	while(*p++ != L'\0')
+	while (*p++ != L'\0')
 		len1++;
 
 	p = value;
-	while(*p++ != L'\0')
+	while (*p++ != L'\0')
 		len2++;
 
 	/*
 	 * No chance of a match if length differ...
 	 */
-	if (len1 != len2){
+	if (len1 != len2) {
 		if (check == 0)
-			errx(1, "wchar string validation failed, length mismatch, "
-			"expected %d, received %d", len1, len2);
+			errx(1,
+			    "wchar string validation failed, length mismatch, "
+			    "expected %d, received %d",
+			    len1, len2);
 		else {
 			if (verbose)
-				fprintf(stderr, "Validated expected %s wchar"
-					"at line %zu of file %s\n", "not matching",
-					line, cur_file);
+				fprintf(stderr,
+				    "%s:%zu: Validated expected %s wchar\n",
+				    cur_file, line, "not matching");
 			return;
 		}
 	}
@@ -1724,19 +1809,19 @@ validate_wchar(wchar_t *expected, wchar_t *value, int check)
 				"received %d", j, expected[j], value[j]);
 			else {
 				if (verbose)
-					fprintf(stderr, "Validated expected %s wchar"
-						"at line %zu of file %s\n", "not matching",
-						line, cur_file);
+					fprintf(stderr,
+					    "%s:%zu: Validated expected %s wchar\n",
+					    cur_file, line, "not matching");
 				return;
 			}
 		}
 	}
 
 	if (verbose) {
-		fprintf(stderr, "Validated expected %s wchar "
-		    "at line %zu of file %s\n",
-		    (check == 0)? "matching" : "not matching",
-		    line, cur_file);
+		fprintf(stderr,
+		    "%s:%zu: Validated expected %s wchar\n",
+		    cur_file, line,
+		    (check == 0)? "matching" : "not matching");
 	}
 }
 
@@ -1756,31 +1841,32 @@ validate_variable(int ret, data_enum_t type, const void *value, int i,
 	varptr = &vars[command.returns[ret].data_index];
 
 	if (varptr->value == NULL)
-		err(1, "Variable %s has no value assigned to it", varptr->name);
+		errx(1, "Variable %s has no value assigned to it", varptr->name);
 
 
 	if (varptr->type != type)
-		err(1, "Variable %s is not the expected type", varptr->name);
+		errx(1, "Variable %s is not the expected type", varptr->name);
 
 	if (type != data_byte) {
 		if ((((check == 0) && strcmp(value, varptr->value) != 0))
 		    || ((check == 1) && strcmp(value, varptr->value) == 0))
-			err(1, "Variable %s contains %s instead of %s"
-			    " value %s at line %zu of file %s",
+			errx(1, "%s:%zu: Variable %s contains %s instead of %s"
+			    " value %s",
+			    cur_file, line,
 			    varptr->name, (const char *)varptr->value,
 			    (check == 0)? "expected" : "not matching",
-			    (const char *)value,
-			    line, cur_file);
+			    (const char *)value);
 		if (verbose) {
-			fprintf(stderr, "Variable %s contains %s value "
-			    "%s at line %zu of file %s\n",
+			fprintf(stderr,
+			    "%s:%zu: Variable %s contains %s value %s\n",
+			    cur_file, line,
 			    varptr->name,
 			    (check == 0)? "expected" : "not matching",
-			    (const char *)varptr->value, line, cur_file);
+			    (const char *)varptr->value);
 		}
 	} else {
 		if ((check == 0) && (retval->data_len != varptr->len))
-			err(1, "Byte validation failed, length mismatch");
+			errx(1, "Byte validation failed, length mismatch");
 
 		/*
 		 * If check is 0 then we want to throw an error IFF
@@ -1792,15 +1878,14 @@ validate_variable(int ret, data_enum_t type, const void *value, int i,
 		    ((check == 1) && (retval->data_len == varptr->len) &&
 		     memcmp(retval->data_value, varptr->value,
 			    varptr->len) == 0))
-			err(1, "Validate expected %s byte stream at line %zu"
-			    " of file %s",
-			    (check == 0)? "matching" : "not matching",
-			    line, cur_file);
+			errx(1, "%s:%zu: Validate expected %s byte stream",
+			    cur_file, line,
+			    (check == 0)? "matching" : "not matching");
 		if (verbose) {
-			fprintf(stderr, "Validated expected %s byte stream "
-			    "at line %zu of file %s\n",
-			    (check == 0)? "matching" : "not matching",
-			    line, cur_file);
+			fprintf(stderr,
+			    "%s:%zu: Validated expected %s byte stream\n",
+			    cur_file, line,
+			    (check == 0)? "matching" : "not matching");
 		}
 	}
 }
@@ -1886,7 +1971,7 @@ write_cmd_pipe_args(data_enum_t type, void *data)
 		    enum_names[send_type]);
 	}
 
-	if (write(cmdpipe[WRITE_PIPE], &send_type, sizeof(int)) < 0)
+	if (write(to_slave, &send_type, sizeof(int)) < 0)
 		err(1, "command pipe write for type failed");
 
 	if (verbose) {
@@ -1901,7 +1986,7 @@ write_cmd_pipe_args(data_enum_t type, void *data)
 			    "Writing length %d to command pipe\n", len);
 	}
 
-	if (write(cmdpipe[WRITE_PIPE], &len, sizeof(int)) < 0)
+	if (write(to_slave, &len, sizeof(int)) < 0)
 		err(1, "command pipe write for length failed");
 
 	if (len > 0) {
@@ -1909,7 +1994,7 @@ write_cmd_pipe_args(data_enum_t type, void *data)
 			fprintf(stderr, "Writing data >%s< to command pipe\n",
 			    (const char *)cmd);
 		}
-		if (write(cmdpipe[WRITE_PIPE], cmd, len) < 0)
+		if (write(to_slave, cmd, len) < 0)
 			err(1, "command pipe write of data failed");
 	}
 }
@@ -1931,14 +2016,14 @@ read_cmd_pipe(ct_data_t *response)
 	 * output from the slave because the slave may be blocked waiting
 	 * for a flush on its stdout.
 	 */
-	rfd[0].fd = slvpipe[READ_PIPE];
+	rfd[0].fd = from_slave;
 	rfd[0].events = POLLIN;
 	rfd[1].fd = master;
 	rfd[1].events = POLLIN;
 
 	do {
 		if (poll(rfd, 2, 4000) == 0)
-			errx(2, "%s, %zu: Command pipe read timeout",
+			errx(2, "%s:%zu: Command pipe read timeout",
 			    cur_file, line);
 
 		if ((rfd[1].revents & POLLIN) == POLLIN) {
@@ -1949,14 +2034,14 @@ read_cmd_pipe(ct_data_t *response)
 			save_slave_output(false);
 		}
 	}
-	while((rfd[1].revents & POLLIN) == POLLIN);
+	while ((rfd[1].revents & POLLIN) == POLLIN);
 
-	if (read(slvpipe[READ_PIPE], &type, sizeof(int)) < 0)
+	if (read(from_slave, &type, sizeof(int)) < 0)
 		err(1, "command pipe read for type failed");
 	response->data_type = type;
 
 	if ((type != data_ok) && (type != data_err) && (type != data_count)) {
-		if (read(slvpipe[READ_PIPE], &len, sizeof(int)) < 0)
+		if (read(from_slave, &len, sizeof(int)) < 0)
 			err(1, "command pipe read for length failed");
 		response->data_len = len;
 
@@ -1968,7 +2053,7 @@ read_cmd_pipe(ct_data_t *response)
 		if ((response->data_value = malloc(len + 1)) == NULL)
 			err(1, "Failed to alloc memory for cmd pipe read");
 
-		if (read(slvpipe[READ_PIPE], response->data_value, len) < 0)
+		if (read(from_slave, response->data_value, len) < 0)
 			err(1, "command pipe read of data failed");
 
 		if (response->data_type != data_byte) {
@@ -1983,7 +2068,7 @@ read_cmd_pipe(ct_data_t *response)
 	} else {
 		response->data_value = NULL;
 		if (type == data_count) {
-			if (read(slvpipe[READ_PIPE], &len, sizeof(int)) < 0)
+			if (read(from_slave, &len, sizeof(int)) < 0)
 				err(1, "command pipe read for number of "
 				       "returns failed");
 			response->data_len = len;
@@ -2038,9 +2123,9 @@ save_slave_output(bool discard)
 			}
 
 			if (verbose) {
-				fprintf(stderr, "count = %zu, "
-				    "allocated = %zu\n", saved_output.count,
-				    saved_output.allocated);
+				fprintf(stderr,
+				    "count = %zu, allocated = %zu\n",
+				    saved_output.count, saved_output.allocated);
 				for (i = 0; i < (size_t)result; i++) {
 					fprintf(stderr, "Saving slave output "
 					    "at %zu: 0x%x (%c)\n",
@@ -2054,9 +2139,9 @@ save_slave_output(bool discard)
 			saved_output.count += result;
 
 			if (verbose) {
-				fprintf(stderr, "count = %zu, "
-				    "allocated = %zu\n", saved_output.count,
-				    saved_output.allocated);
+				fprintf(stderr,
+				    "count = %zu, allocated = %zu\n",
+				    saved_output.count, saved_output.allocated);
 			}
 		} else {
 			if (verbose) {
@@ -2074,5 +2159,5 @@ save_slave_output(bool discard)
 static void
 yyerror(const char *msg)
 {
-	warnx("%s in line %zu of file %s", msg, line, cur_file);
+	errx(1, "%s:%zu: %s", cur_file, line, msg);
 }

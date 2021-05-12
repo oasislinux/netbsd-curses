@@ -1,4 +1,4 @@
-/*	$NetBSD: nbperf.c,v 1.6 2021/01/07 16:03:08 joerg Exp $	*/
+/*	$NetBSD: nbperf.c,v 1.7 2021/01/12 14:21:18 joerg Exp $	*/
 /*-
  * Copyright (c) 2009 The NetBSD Foundation, Inc.
  * All rights reserved.

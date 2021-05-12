@@ -1,7 +1,8 @@
-/*	$NetBSD: director.c,v 1.11 2020/10/24 04:46:17 blymn Exp $	*/
+/*	$NetBSD: director.c,v 1.28 2021/02/13 09:18:12 rillig Exp $	*/
 
 /*-
  * Copyright 2009 Brett Lymn <blymn@NetBSD.org>
+ * Copyright 2021 Roland Illig <rillig@NetBSD.org>
  *
  * All rights reserved.
  *
@@ -13,7 +14,7 @@
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. The name of the author may not be used to endorse or promote products
- *    derived from this software withough specific prior written permission
+ *    derived from this software without specific prior written permission
  *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
@@ -25,13 +26,12 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- *
  */
 
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
+#include <sys/wait.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <ctype.h>
@@ -51,28 +51,29 @@ void yyparse(void);
 #define DEF_SLAVE "./slave"
 
 const char *def_check_path = "./"; /* default check path */
-const char *def_include_path = "./"; /* default include path */
 
-extern size_t nvars;	/* In testlang_conf.y */
+extern size_t nvars;		/* In testlang_conf.y */
 saved_data_t  saved_output;	/* In testlang_conf.y */
-int cmdpipe[2];		/* command pipe between director and slave */
-int slvpipe[2];		/* reply pipe back from slave */
-int master;		/* pty to the slave */
-int verbose;		/* control verbosity of tests */
-int check_file_flag;		/* control checkfile generation */
-const char *check_path;	/* path to prepend to check files for output
-			   validation */
-const char *include_path;	/* path to prepend to include files */
-char *cur_file;		/* name of file currently being read */
+int to_slave;
+int from_slave;
+int master;			/* pty to the slave */
+int verbose;			/* control verbosity of tests */
+int check_file_flag;		/* control check-file generation */
+const char *check_path;		/* path to prepend to check files for output
+				   validation */
+char *cur_file;			/* name of file currently being read */
 
-void init_parse_variables(int); /* in testlang_parse.y */
+void init_parse_variables(int);	/* in testlang_parse.y */
 
 /*
  * Handle the slave exiting unexpectedly, try to recover the exit message
  * and print it out.
+ *
+ * FIXME: Must not use stdio in a signal handler.  This leads to incomplete
+ * output in verbose mode, truncating the useful part of the error message.
  */
 static void
-slave_died(int param)
+slave_died(int signo)
 {
 	char last_words[256];
 	size_t count;
@@ -81,8 +82,11 @@ slave_died(int param)
 	if (saved_output.count > 0) {
 		fprintf(stderr, "output from slave: ");
 		for (count = 0; count < saved_output.count; count ++) {
-			if (isprint((unsigned char)saved_output.data[count]))
-			    fprintf(stderr, "%c", saved_output.data[count]);
+			unsigned char b = saved_output.data[count];
+			if (isprint(b))
+				fprintf(stderr, "%c", b);
+			else
+				fprintf(stderr, "\\x%02x", b);
 		}
 		fprintf(stderr, "\n");
 	}
@@ -105,14 +109,13 @@ usage(void)
 	    "commandfile\n", getprogname());
 	fprintf(stderr, " where:\n");
 	fprintf(stderr, "    -v enables verbose test output\n");
-	fprintf(stderr, "    -g enables check file generation if does not exist\n");
-	fprintf(stderr, "    -f forces check file generation if -g flag is set\n");
+	fprintf(stderr, "    -g generates check-files if they do not exist\n");
+	fprintf(stderr, "    -f overwrites check-files with the actual data\n");
 	fprintf(stderr, "    -T is a directory containing the terminfo.cdb "
-	    "file, or a file holding the terminfo description n");
+	    "file, or a file holding the terminfo description\n");
 	fprintf(stderr, "    -s is the path to the slave executable\n");
 	fprintf(stderr, "    -t is value to set TERM to for the test\n");
-	fprintf(stderr, "    -I is the directory to include files\n");
-	fprintf(stderr, "    -C is the directory for config files\n");
+	fprintf(stderr, "    -C is the directory for check-files\n");
 	fprintf(stderr, "    commandfile is a file of test directives\n");
 	exit(1);
 }
@@ -127,26 +130,21 @@ main(int argc, char *argv[])
 	int ch;
 	pid_t slave_pid;
 	extern FILE *yyin;
-	char *arg1, *arg2, *arg3, *arg4;
+	char *arg1, *arg2;
 	struct termios term_attr;
 	struct stat st;
+	int pipe_to_slave[2], pipe_from_slave[2];
 
 	termpath = term = slave = NULL;
 	verbose = 0;
 	check_file_flag = 0;
 
-	while ((ch = getopt(argc, argv, "vgfC:I:p:s:t:T:")) != -1) {
-		switch(ch) {
-		case 'I':
-			include_path = optarg;
-			break;
+	while ((ch = getopt(argc, argv, "vgfC:s:t:T:")) != -1) {
+		switch (ch) {
 		case 'C':
 			check_path = optarg;
 			break;
 		case 'T':
-			termpath = optarg;
-			break;
-		case 'p':
 			termpath = optarg;
 			break;
 		case 's':
@@ -173,7 +171,7 @@ main(int argc, char *argv[])
 
 	argc -= optind;
 	argv += optind;
-	if (argc < 1)
+	if (argc != 1)
 		usage();
 
 	if (termpath == NULL)
@@ -188,16 +186,8 @@ main(int argc, char *argv[])
 	if (check_path == NULL)
 		check_path = getenv("CHECK_PATH");
 	if ((check_path == NULL) || (check_path[0] == '\0')) {
-		warn("$CHECK_PATH not set, defaulting to %s", def_check_path);
+		warnx("$CHECK_PATH not set, defaulting to %s", def_check_path);
 		check_path = def_check_path;
-	}
-
-	if (include_path == NULL)
-		include_path = getenv("INCLUDE_PATH");
-	if ((include_path == NULL) || (include_path[0] == '\0')) {
-		warn("$INCLUDE_PATH not set, defaulting to %s",
-			def_include_path);
-		include_path = def_include_path;
 	}
 
 	signal(SIGCHLD, slave_died);
@@ -232,11 +222,13 @@ main(int argc, char *argv[])
 		munmap(tinfo, (size_t)st.st_size);
 	}
 
-	if (pipe(cmdpipe) < 0)
+	if (pipe(pipe_to_slave) < 0)
 		err(1, "Command pipe creation failed");
+	to_slave = pipe_to_slave[1];
 
-	if (pipe(slvpipe) < 0)
+	if (pipe(pipe_from_slave) < 0)
 		err(1, "Slave pipe creation failed");
+	from_slave = pipe_from_slave[0];
 
 	/*
 	 * Create default termios settings for later use
@@ -255,23 +247,22 @@ main(int argc, char *argv[])
 
 	if (slave_pid == 0) {
 		/* slave side, just exec the slave process */
-		if (asprintf(&arg1, "%d", cmdpipe[0]) < 0)
+		if (asprintf(&arg1, "%d", pipe_to_slave[0]) < 0)
 			err(1, "arg1 conversion failed");
+		close(pipe_to_slave[1]);
 
-		if (asprintf(&arg2, "%d", cmdpipe[1]) < 0)
+		close(pipe_from_slave[0]);
+		if (asprintf(&arg2, "%d", pipe_from_slave[1]) < 0)
 			err(1, "arg2 conversion failed");
 
-		if (asprintf(&arg3, "%d", slvpipe[0]) < 0)
-			err(1, "arg3 conversion failed");
-
-		if (asprintf(&arg4, "%d", slvpipe[1]) < 0)
-			err(1, "arg4 conversion failed");
-
-		if (execl(slave, slave, arg1, arg2, arg3, arg4, NULL) < 0)
+		if (execl(slave, slave, arg1, arg2, (char *)0) < 0)
 			err(1, "Exec of slave %s failed", slave);
 
 		/* NOT REACHED */
 	}
+
+	(void)close(pipe_to_slave[0]);
+	(void)close(pipe_from_slave[1]);
 
 	fcntl(master, F_SETFL, O_NONBLOCK);
 
@@ -285,6 +276,13 @@ main(int argc, char *argv[])
 
 	yyparse();
 	fclose(yyin);
+
+	signal(SIGCHLD, SIG_DFL);
+	(void)close(to_slave);
+	(void)close(from_slave);
+
+	int status;
+	(void)waitpid(slave_pid, &status, 0);
 
 	exit(0);
 }

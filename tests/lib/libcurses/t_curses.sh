@@ -1,4 +1,5 @@
-h_run(){
+h_run()
+{
 	file=$1
 	if [ -z "$2" ]; then
 		export LC_ALL=C
@@ -24,7 +25,6 @@ r_run()
 	$(atf_get_srcdir)/director $2 \
 		-T $(atf_get_srcdir) \
 		-t atf \
-		-I $(atf_get_srcdir)/tests \
 		-C $(atf_get_srcdir)/check_files \
 		-s $(atf_get_srcdir)/slave $file || atf_fail "test ${file} failed"
 }
@@ -96,6 +96,16 @@ varcheck_body()
 ##########################################
 # curses add characters to window routines
 ##########################################
+
+atf_test_case addbytes
+addbytes_head()
+{
+	atf_set "descr" "Tests adding bytes to stdscr"
+}
+addbytes_body()
+{
+	h_run addbytes
+}
 
 atf_test_case addch
 addch_head()
@@ -2171,6 +2181,7 @@ atf_init_test_cases()
 	atf_add_test_case varcheck
 
 	# curses add characters to window routines
+	atf_add_test_case addbytes
 	atf_add_test_case addch
 	atf_add_test_case waddch
 	atf_add_test_case mvaddch
@@ -2415,4 +2426,3 @@ atf_init_test_cases()
 	atf_add_test_case underscore
 	atf_add_test_case wunderscore
 }
-

@@ -1,7 +1,8 @@
-/*	$NetBSD: command_table.h,v 1.4 2020/10/24 04:46:17 blymn Exp $	*/
+/*	$NetBSD: command_table.h,v 1.7 2021/02/13 08:14:46 rillig Exp $	*/
 
 /*-
  * Copyright 2009 Brett Lymn <blymn@NetBSD.org>
+ * Copyright 2021 Roland Illig <rillig@NetBSD.org>
  *
  * All rights reserved.
  *
@@ -13,7 +14,7 @@
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. The name of the author may not be used to endorse or promote products
- *    derived from this software withough specific prior written permission
+ *    derived from this software without specific prior written permission
  *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
@@ -25,16 +26,15 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- *
  */
 
-#ifndef _COMMAND_TABLE_H_
-#define	_COMMAND_TABLE_H_
+#ifndef CTF_COMMAND_TABLE_H
+#define	CTF_COMMAND_TABLE_H
 
 #include "curses_commands.h"
 
-static const char *restricted_commands[] = { "filter", "ripoffline", "use_env",
+static const char *restricted_commands[] = {
+	"filter", "ripoffline", "use_env",
 	"slk_init", "initscr", "newterm"
 };
 
@@ -430,4 +430,4 @@ struct command_def commands[] = {
 
 size_t ncmds = sizeof(commands) / sizeof(struct command_def);
 
-#endif /* _COMMAND_TABLE_H */
+#endif

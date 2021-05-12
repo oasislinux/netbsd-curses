@@ -1,3 +1,4 @@
+$NetBSD: testframe.txt,v 1.8 2021/02/09 20:31:02 rillig Exp $
 
 CURSES TESTFRAME
 ----------------
@@ -7,9 +8,9 @@ CURSES TESTFRAME
 The curses library is a complex piece of software and, often, changes
 made to the library may introduce subtle bugs that are hidden by other
 actions so a visual check of the curses output may look correct in
-some circumstances and the bug only show itself after a certain
+some circumstances and the bug only shows itself after a certain
 sequence of actions.  To assist with validating that changes made to
-the curses library have no undesired effects an automated test is
+the curses library have no undesired effects, an automated test is
 needed to detect and highlight any changes in the curses application
 output stream.  The programmer can then analyse the output changes and
 either correct a bug or update the automated test to accept the new
@@ -62,29 +63,47 @@ assign:
       overwritten on each subsequent use.
 
 call, call2, call3, call4:
-      All these are used to call curses routines, the only difference
-      between then is the number of expected return values.  Call
+
+      All these are used to call curses routines.  The only difference
+      between them is the number of expected return values.  Call
       expects one return value, call2 expects 2, call3 expects 3 and
-      call4 expects four.  Any parameters that are passed by reference
-      and updated by the call are treated like returns.  So, for
-      example, calling the function getyx() which has three
-      parameters, the window, a pointer to storage for y and a pointer
-      to storage for x would be called like this:
+      call4 expects 4.  Any parameters that are passed by reference and
+      updated by the call are treated like returns and are listed after
+      the regular return value.  The general form of a call is:
 
-      	 	 call3 OK 4 5 getyx $win1
+		call[234] <return...> <function> <argument...>
 
-      Which calls getyx, the first (and possibly only) return is the
-      return status of the function call, in this case we expect "OK"
-      indicating that the call succeeded.  The next two returns are
-      the values of y and x respectively, the parameter $win1 is a
-      variable that was assigned by a previous call.  Any return can
-      be assigned to a variable by including the variable name in a
-      call return list.  Variables are referenced in a call parameter
-      list by prefixing the name with a $ character.  All returns are
-      validated against the expected values and an error raised if
-      there is a mismatch.  The only exception to this is when the
-      return is assigned to a variable.  Valid values for the returns
-      list are:
+      As an example, the macro 'getyx' has 3 parameters, as seen by a C
+      programmer, and it has return type 'void'.  If its return type
+      were not void, that would be its first return value.  The first
+      parameter is a window and is passed by value.  The other two, 'y'
+      and 'x' are references to return values, thus they do not count as
+      parameters.  In summary, there are 2 return values, therefore
+      'call2' is used:
+
+		call2	4 5	getyx		$win1
+
+      The two return values from the actual function call are validated
+      to be '4' and '5'.  The parameter '$win' refers to a variable that
+      has been defined by a previous call or variable assignment.
+
+      Instead of directly validating the return values, they can also be
+      assigned to variables:
+
+		call2	y x	getyx		$win1
+		check	y 4
+		check	x 5
+
+      Another example is 'mvwaddwstr', which has a single return value
+      (OK or ERR) and 4 parameters.  It is called like this:
+
+		call	OK	mvwaddwstr	$win1 4 5 "text"
+
+      Variables are referenced in a call parameter list by prefixing the
+      name with a '$' sign.  All returns are validated against the
+      expected values and an error raised if there is a mismatch.  The
+      only exception to this is when the return is assigned to a
+      variable.  Valid values for the returns list are:
 
       	  	  variable - assign the return to the given variable
 		             name.
@@ -242,21 +261,18 @@ of the operation can either be used as an argument for a call or can
 be used as an expected result for a call.
 
 In addition to all the curses calls being supported by the slave,
-there is one more special call called "drain".  This call repeatedly
-called wgetch(win) until there are no more characters in win.  The call
+there is one more special call called "DRAIN".  This call repeatedly
+calls wgetch(win) until there are no more characters in win.  The call
 assumes that the curses input is either in no delay or timed input
 mode otherwise the test will time out and fail.  This call can be used
-to clear any pending input when testing testing a timed read to
-prevent the input being used in a later test.
+to clear any pending input when testing a timed read, to prevent the
+input from being used in a later test.
 
 4. Slave
 
 The user has no direct interaction with the slave process.  The slave
-is forked off by the director communicates to the director over a set
-of pipes and a pseudo-tty connected to its standard i/o file
+is forked off by the director and communicates to the director over a
+set of pipes and a pseudo-tty connected to its standard i/o file
 descriptors.  The slave executes the passed curses calls and passes
 back return values to the director.  The slave automatically calls
-initscr() on start up.
-
-
-
+initscr() on startup.

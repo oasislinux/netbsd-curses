@@ -1,4 +1,4 @@
-/*	$NetBSD: refresh.c,v 1.112 2020/02/24 12:20:29 rin Exp $	*/
+/*	$NetBSD: refresh.c,v 1.113 2021/05/08 04:29:07 mrg Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -32,6 +32,7 @@
 #include <poll.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "curses.h"
 #include "curses_private.h"
@@ -1313,6 +1314,7 @@ makech(int wy)
 						csp->ch = (wchar_t)btowc((int)' ');
 						SET_WCOL( *csp, 1 );
 #endif /* HAVE_WCHAR */
+						assert(csp != &blank);
 						csp++;
 					}
 					return OK;
@@ -1359,7 +1361,10 @@ makech(int wy)
 			{
 				if (putch(nsp, csp, wy, wx) == ERR)
 					return ERR;
-				csp++;
+				if (!_cursesi_screen->curwin) {
+					assert(csp != &blank);
+					csp++;
+				}
 			} else {
 				putattr(nsp);
 				putattr_out(nsp);
