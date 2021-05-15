@@ -147,24 +147,34 @@ ti_puts(const TERMINAL *term, const char *str, int affcnt,
 	    str, affcnt, outc, args);
 }
 
+typedef struct {
+	int (*func)(int);
+} PUTCFUNC;
+
+static int
+_ti_putcfunc(int c, void *p)
+{
+	return ((PUTCFUNC *)p)->func(c);
+}
+
 int
 ti_putp(const TERMINAL *term, const char *str)
 {
+	PUTCFUNC fn = {putchar};
 
 	assert(term != NULL);
 	assert(str != NULL);
-	return ti_puts(term, str, 1,
-	    (int (*)(int, void *))(void *)putchar, NULL);
+	return ti_puts(term, str, 1, _ti_putcfunc, &fn);
 }
 
 int
 tputs(const char *str, int affcnt, int (*outc)(int))
 {
+	PUTCFUNC fn = {outc};
 
 	assert(str != NULL);
 	assert(outc != NULL);
-	return _ti_puts(1, ospeed, PC, str, affcnt,
-	    (int (*)(int, void *))(void *)outc, NULL);
+	return _ti_puts(1, ospeed, PC, str, affcnt, _ti_putcfunc, &fn);
 }
 
 int
