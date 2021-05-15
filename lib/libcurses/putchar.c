@@ -55,7 +55,7 @@ __cputchar_args(int ch, void *args)
 
 #ifdef DEBUG
 	__CTRACE(__CTRACE_OUTPUT, "__cputchar_args: %s on fd %d\n",
-	    unctrl(ch), outfd->_file);
+	    unctrl(ch), fileno(outfd));
 #endif
 	status = putc(ch, outfd);
 	fflush(outfd);
@@ -85,7 +85,7 @@ __cputwchar_args(wchar_t wch, void *args)
 
 #ifdef DEBUG
 	__CTRACE(__CTRACE_OUTPUT, "__cputwchar_args: 0x%x on fd %d\n",
-	    wch, outfd->_file);
+	    wch, fileno(outfd));
 #endif
 	status = putwc(wch, outfd);
 	fflush(outfd);
