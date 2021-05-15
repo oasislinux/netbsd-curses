@@ -99,7 +99,7 @@ cdbr_open(const char *path, int flags)
 
 
 	size = (size_t)sb.st_size;
-	base = mmap(NULL, size, PROT_READ, MAP_FILE|MAP_SHARED, fd, 0);
+	base = mmap(NULL, size, PROT_READ, MAP_SHARED, fd, 0);
 	close(fd);
 
 	if (base == MAP_FAILED)
