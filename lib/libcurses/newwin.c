@@ -1,4 +1,4 @@
-/*	$NetBSD: newwin.c,v 1.58 2020/07/14 04:39:39 uwe Exp $	*/
+/*	$NetBSD: newwin.c,v 1.59 2021/05/15 11:06:07 uwe Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -135,9 +135,7 @@ __newwin(SCREEN *screen, int nlines, int ncols, int by, int bx, int ispad,
 
 	win->bch = ' ';
 	if (__using_color)
-		win->battr = __default_color;
-	else
-		win->battr = 0;
+		win->battr |= __default_color;
 	win->nextp = win;
 	win->ch_off = 0;
 	win->orig = NULL;
@@ -378,6 +376,7 @@ __makenew(SCREEN *screen, int nlines, int ncols, int by, int bx, int sub,
 	win->flags = (__IDLINE | __IDCHAR);
 	win->delay = -1;
 	win->wattr = 0;
+	win->battr = 0;
 #ifdef HAVE_WCHAR
 	win->bnsp = NULL;
 	SET_BGWCOL(*win, 1);
