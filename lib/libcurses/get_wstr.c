@@ -165,7 +165,7 @@ __wgetn_wstr(WINDOW *win, wchar_t *wstr, int n)
 #ifdef DEBUG
 		__CTRACE(__CTRACE_INPUT,
 		    "__wgetn_wstr: win %p, char 0x%x, remain %d\n",
-		    win, wc, remain);
+		    (void *)win, wc, remain);
 #endif
 		*wstr = wc;
 		touchline(win, win->cury, 1);

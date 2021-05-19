@@ -101,7 +101,7 @@ wins_wch(WINDOW *win, const cchar_t *wch)
 		__CTRACE(__CTRACE_INPUT, "wins_wch: (0,%d)=(%x,%x,%p)\n", x,
 		    win->alines[0]->line[x].ch,
 		    win->alines[0]->line[x].attr,
-		    win->alines[0]->line[x].nsp);
+		    (void *)win->alines[0]->line[x].nsp);
 #endif /* DEBUG */
 	x = win->curx;
 	y = win->cury;
@@ -202,7 +202,7 @@ wins_wch(WINDOW *win, const cchar_t *wch)
 	}
 #ifdef DEBUG
 	__CTRACE(__CTRACE_INPUT, "wins_wch: insert (%x,%x,%p)\n",
-	    start->ch, start->attr, start->nsp);
+	    start->ch, start->attr, (void *)start->nsp);
 #endif /* DEBUG */
 	temp1 = start + 1;
 	ex = x + 1;
@@ -220,7 +220,7 @@ wins_wch(WINDOW *win, const cchar_t *wch)
 			    "wins_wch: (0,%d)=(%x,%x,%p)\n", x,
 			    win->alines[0]->line[x].ch,
 			    win->alines[0]->line[x].attr,
-			    win->alines[0]->line[x].nsp);
+			    (void *)win->alines[0]->line[x].nsp);
 	}
 #endif /* DEBUG */
 	newx = win->maxx - 1 + win->ch_off;

@@ -708,7 +708,7 @@ _formi_join_line(FIELD *field, _FORMI_FIELD_LINES **rowp, int direction)
 	_FORMI_FIELD_LINES *row = *rowp;
 
 	_formi_dbg_printf("%s: working on row %p, row_count = %d\n",
-	    __func__, row, field->row_count);
+	    __func__, (void *)row, field->row_count);
 
 	if ((direction == JOIN_NEXT) || (direction == JOIN_NEXT_NW)) {
 		  /*
@@ -1923,7 +1923,7 @@ _formi_add_char(FIELD *field, unsigned int pos, char c)
 	_formi_dbg_printf("%s: length=%d(%d), allocated=%d\n", __func__,
 		row->expanded, row->length, row->allocated);
 	_formi_dbg_printf("%s: ypos=%d, start_line=%p\n", __func__,
-		field->cursor_ypos, field->start_line);
+		field->cursor_ypos, (void *)field->start_line);
 	_formi_dbg_printf("%s: %s\n", __func__, row->string);
 	_formi_dbg_printf("%s: buf0_status=%d\n", __func__, field->buf0_status);
 	_formi_dbg_printf("%s: status = %s\n", __func__,
@@ -2064,7 +2064,7 @@ _formi_manipulate_field(FORM *form, int c)
 	    __func__, cur->cursor_xpos, cur->row_xpos, cur->start_char,
 	    cur->cur_line->length, cur->cur_line->allocated);
 	_formi_dbg_printf("%s: start_line=%p, ypos=%d\n", __func__,
-	    cur->start_line, cur->cursor_ypos);
+	    (void *)cur->start_line, cur->cursor_ypos);
 	if (cur->cur_line->string == NULL)
 		_formi_dbg_printf("%s: string=(null)\n", __func__);
 	else
@@ -2917,7 +2917,7 @@ _formi_manipulate_field(FORM *form, int c)
 	     "allocated=%d\n", __func__, cur->cursor_xpos, cur->row_xpos,
 	     cur->start_char, cur->cur_line->length, cur->cur_line->allocated);
 	_formi_dbg_printf("%s: start_line=%p, ypos=%d\n", __func__,
-	    cur->start_line, cur->cursor_ypos);
+	    (void *)cur->start_line, cur->cursor_ypos);
 	_formi_dbg_printf("%s: string=\"%s\"\n", __func__,
 	    cur->cur_line->string);
 	assert ((cur->cursor_xpos < INT_MAX) && (cur->row_xpos < INT_MAX)

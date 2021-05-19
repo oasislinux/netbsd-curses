@@ -186,7 +186,7 @@ wins_nwstr(WINDOW *win, const wchar_t *wstr, int n)
 			    (int) win->cury, x,
 			    win->alines[win->cury]->line[x].ch,
 			    win->alines[win->cury]->line[x].attr,
-			    win->alines[win->cury]->line[x].nsp);
+			    (void *)win->alines[win->cury]->line[x].nsp);
 	}
 #endif /* DEBUG */
 
@@ -213,7 +213,8 @@ wins_nwstr(WINDOW *win, const wchar_t *wstr, int n)
 				SET_WCOL(*temp1, 1);
 #ifdef DEBUG
 				__CTRACE(__CTRACE_INPUT,
-				    "wins_nwstr: empty cell(%p)\n", temp1);
+				    "wins_nwstr: empty cell(%p)\n",
+				    (void *)temp1);
 #endif /* DEBUG */
 				temp1--;
 			}
@@ -231,7 +232,7 @@ wins_nwstr(WINDOW *win, const wchar_t *wstr, int n)
 				    (int) win->cury, x,
 				    win->alines[win->cury]->line[x].ch,
 				    win->alines[win->cury]->line[x].attr,
-				    win->alines[win->cury]->line[x].nsp);
+				    (void *)win->alines[win->cury]->line[x].nsp);
 		}
 #endif /* DEBUG */
 	}
@@ -313,7 +314,7 @@ wins_nwstr(WINDOW *win, const wchar_t *wstr, int n)
 			    (int) win->cury, x,
 			    win->alines[win->cury]->line[x].ch,
 			    win->alines[win->cury]->line[x].attr,
-			    win->alines[win->cury]->line[x].nsp);
+			    (void *)win->alines[win->cury]->line[x].nsp);
 	}
 #endif /* DEBUG */
 	newx = win->maxx - 1 + win->ch_off;

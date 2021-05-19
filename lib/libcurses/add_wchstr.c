@@ -139,7 +139,8 @@ wadd_wchnstr(WINDOW *win, const cchar_t *wchstr, int n)
 
 #ifdef DEBUG
 	__CTRACE(__CTRACE_INPUT,
-	    "wadd_wchnstr: win = %p, wchstr = %p, n = %d\n", win, wchstr, n);
+	    "wadd_wchnstr: win = %p, wchstr = %p, n = %d\n",
+	    (void *)win, (void *)wchstr, n);
 #endif
 
 	if (!wchstr)
@@ -288,7 +289,7 @@ wadd_wchnstr(WINDOW *win, const cchar_t *wchstr, int n)
 		__CTRACE(__CTRACE_INPUT, "wadd_wchnstr: (%d,%d)=(%x,%x,%p)\n",
 		    win->cury, i, win->alines[win->cury]->line[i].ch,
 		    win->alines[win->cury]->line[i].attr,
-		    win->alines[win->cury]->line[i].nsp);
+		    (void *)win->alines[win->cury]->line[i].nsp);
 	}
 #endif /* DEBUG */
 	lnp->flags |= __ISDIRTY;

@@ -61,7 +61,7 @@ werase(WINDOW *win)
 	attr_t	battr;
 
 #ifdef DEBUG
-	__CTRACE(__CTRACE_ERASE, "werase: (%p)\n", win);
+	__CTRACE(__CTRACE_ERASE, "werase: (%p)\n", (void *)win);
 #endif
 #ifdef HAVE_WCHAR
 	bch = (wchar_t)btowc((int)win->bch);

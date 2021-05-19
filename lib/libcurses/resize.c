@@ -51,7 +51,7 @@ wresize(WINDOW *win, int req_nlines, int req_ncols)
 
 #ifdef	DEBUG
 	__CTRACE(__CTRACE_WINDOW, "wresize: (%p, %d, %d)\n",
-	    win, nlines, ncols);
+	    (void *)win, nlines, ncols);
 #endif
 	if (win->orig == NULL) {
 		/* bound "our" windows by the screen size */
@@ -253,7 +253,8 @@ __resizewin(WINDOW *win, int nlines, int ncols)
 	WINDOW			*swin;
 
 #ifdef	DEBUG
-	__CTRACE(__CTRACE_WINDOW, "resize: (%p, %d, %d)\n", win, nlines, ncols);
+	__CTRACE(__CTRACE_WINDOW, "resize: (%p, %d, %d)\n",
+	    (void *)win, nlines, ncols);
 	__CTRACE(__CTRACE_WINDOW, "resize: win->wattr = %08x\n", win->wattr);
 	__CTRACE(__CTRACE_WINDOW, "resize: win->flags = %#.4x\n", win->flags);
 	__CTRACE(__CTRACE_WINDOW, "resize: win->maxy = %d\n", win->maxy);

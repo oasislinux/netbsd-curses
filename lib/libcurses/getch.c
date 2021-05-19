@@ -800,7 +800,7 @@ wgetch(WINDOW *win)
 	FILE *infd = _cursesi_screen->infd;
 
 #ifdef DEBUG
-	__CTRACE(__CTRACE_INPUT, "wgetch: win(%p)\n", win);
+	__CTRACE(__CTRACE_INPUT, "wgetch: win(%p)\n", (void *)win);
 #endif
 	if (win == NULL)
 		return ERR;

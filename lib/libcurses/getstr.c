@@ -159,7 +159,7 @@ __wgetnstr(WINDOW *win, char *str, int n)
 #ifdef DEBUG
 		__CTRACE(__CTRACE_INPUT,
 		    "__wgetnstr: win %p, char 0x%x, remain %d\n",
-		    win, c, remain);
+		    (void *)win, c, remain);
 #endif
 		*str = c;
 		__touchline(win, win->cury, 0, (int) win->maxx - 1);

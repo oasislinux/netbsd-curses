@@ -42,7 +42,8 @@ touchoverlap(WINDOW *win1, WINDOW *win2)
 	int     y, endy, endx, starty, startx;
 
 #ifdef DEBUG
-	__CTRACE(__CTRACE_WINDOW, "touchoverlap: (%p, %p);\n", win1, win2);
+	__CTRACE(__CTRACE_WINDOW, "touchoverlap: (%p, %p);\n",
+	    (void *)win1, (void *)win2);
 #endif
 	starty = max(win1->begy, win2->begy);
 	startx = max(win1->begx, win2->begx);

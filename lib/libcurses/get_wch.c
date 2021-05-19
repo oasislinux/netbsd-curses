@@ -83,7 +83,7 @@ inkey(wchar_t *wc, int to, int delay)
 	char		*inbuf = &_cursesi_screen->cbuf[ 0 ];
 
 #ifdef DEBUG
-	__CTRACE(__CTRACE_INPUT, "inkey (%p, %d, %d)\n", wc, to, delay);
+	__CTRACE(__CTRACE_INPUT, "inkey (%p, %d, %d)\n", (void *)wc, to, delay);
 #endif
 	for (;;) { /* loop until we get a complete key sequence */
 		if (wstate == INKEY_NORM) {

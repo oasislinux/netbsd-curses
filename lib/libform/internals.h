@@ -137,7 +137,7 @@ int
 _formi_sync_buffer(FIELD *field);
 
 #ifdef DEBUG
-void _formi_dbg_printf(const char *, ...) __printflike(1, 2);
+void _formi_dbg_printf(const char *, ...) __attribute__((__format__(printf, 1, 2)));
 #else
 #define _formi_dbg_printf(a,...)
 #endif /* DEBUG */

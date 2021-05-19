@@ -63,7 +63,7 @@ wbkgdset(WINDOW *win, chtype ch)
 {
 #ifdef DEBUG
 	__CTRACE(__CTRACE_ATTR, "wbkgdset: (%p), '%s', %08x\n",
-	    win, unctrl(ch & __CHARTEXT), ch & __ATTRIBUTES);
+	    (void *)win, unctrl(ch & __CHARTEXT), ch & __ATTRIBUTES);
 #endif
 
 	/* Background character. */
@@ -89,7 +89,7 @@ wbkgd(WINDOW *win, chtype ch)
 
 #ifdef DEBUG
 	__CTRACE(__CTRACE_ATTR, "wbkgd: (%p), '%s', %08x\n",
-	    win, unctrl(ch & __CHARTEXT), ch & __ATTRIBUTES);
+	    (void *)win, unctrl(ch & __CHARTEXT), ch & __ATTRIBUTES);
 #endif
 	obch = win->bch;
 	wbkgdset(win, ch);
@@ -163,7 +163,7 @@ wbkgrndset(WINDOW *win, const cchar_t *wch)
 
 #ifdef DEBUG
 	__CTRACE(__CTRACE_ATTR, "wbkgrndset: (%p), '%s', %x\n",
-		win, (const char *) wunctrl(wch), wch->attributes);
+		(void *)win, (const char *) wunctrl(wch), wch->attributes);
 #endif
 
 	/* ignore multi-column characters */
@@ -225,7 +225,7 @@ wbkgrnd(WINDOW *win, const cchar_t *wch)
 {
 #ifdef DEBUG
 	__CTRACE(__CTRACE_ATTR, "wbkgrnd: (%p), '%s', %x\n",
-		win, (const char *) wunctrl(wch), wch->attributes);
+		(void *)win, (const char *) wunctrl(wch), wch->attributes);
 #endif
 
 	/* ignore multi-column characters */

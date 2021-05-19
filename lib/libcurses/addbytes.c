@@ -228,7 +228,7 @@ _cursesi_addbyte(WINDOW *win, __LINE **lp, int *y, int *x, int c,
 	}
 
 #ifdef DEBUG
-	__CTRACE(__CTRACE_INPUT, "ADDBYTES(%p, %d, %d)\n", win, *y, *x);
+	__CTRACE(__CTRACE_INPUT, "ADDBYTES(%p, %d, %d)\n", (void *)win, *y, *x);
 #endif
 
 	if (char_interp && ((*lp)->flags & __ISPASTEOL)) {
@@ -523,7 +523,7 @@ _cursesi_addwchar(WINDOW *win, __LINE **lnp, int *y, int *x,
 	}
 #ifdef DEBUG
 	__CTRACE(__CTRACE_INPUT, "_cursesi_addwchar: non-spacing list header: %p\n",
-	    lp->nsp);
+	    (void *)lp->nsp);
 	__CTRACE(__CTRACE_INPUT, "_cursesi_addwchar: add rest columns (%d:%d)\n",
 		sx + 1, sx + cw - 1);
 	__CTRACE(__CTRACE_INPUT, "_cursesi_addwchar: *x = %d, win->maxx = %d\n", *x, win->maxx);

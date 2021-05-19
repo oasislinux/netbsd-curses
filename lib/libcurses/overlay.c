@@ -43,7 +43,8 @@ overlay(const WINDOW *win1, WINDOW *win2)
 {
 
 #ifdef DEBUG
-	__CTRACE(__CTRACE_WINDOW, "overlay: (%p, %p);\n", win1, win2);
+	__CTRACE(__CTRACE_WINDOW, "overlay: (%p, %p);\n",
+	    (void *)win1, (void *)win2);
 #endif
 	return copywin(win1, win2,
 			win2->begy - win1->begy, win2->begx - win1->begx,

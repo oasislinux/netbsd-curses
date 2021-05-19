@@ -139,7 +139,7 @@ int
 wattr_get(WINDOW *win, attr_t *attr, short *pair, void *opts)
 {
 #ifdef DEBUG
-	__CTRACE(__CTRACE_ATTR, "wattr_get: win %p\n", win);
+	__CTRACE(__CTRACE_ATTR, "wattr_get: win %p\n", (void *)win);
 #endif
 	if (attr != NULL) {
 		*attr = win->wattr;
@@ -192,7 +192,7 @@ wattr_set(WINDOW *win, attr_t attr, short pair, void *opts)
 {
 #ifdef DEBUG
 	__CTRACE(__CTRACE_ATTR, "wattr_set: win %p, attr %08x, pair %d\n",
-	    win, attr, pair);
+	    (void *)win, attr, pair);
 #endif
 	if (opts != NULL)
 		return ERR;
@@ -217,7 +217,8 @@ int
 wcolor_set(WINDOW *win, short pair, void *opts)
 {
 #ifdef DEBUG
-	__CTRACE(__CTRACE_COLOR, "wolor_set: win %p, pair %d\n", win, pair);
+	__CTRACE(__CTRACE_COLOR, "wolor_set: win %p, pair %d\n",
+	    (void *)win, pair);
 #endif
 	__wcolor_set(win, (attr_t) COLOR_PAIR(pair));
 	return OK;
@@ -233,7 +234,7 @@ chtype
 getattrs(WINDOW *win)
 {
 #ifdef DEBUG
-	__CTRACE(__CTRACE_ATTR, "getattrs: win %p\n", win);
+	__CTRACE(__CTRACE_ATTR, "getattrs: win %p\n", (void *)win);
 #endif
 	return((chtype) win->wattr);
 }
@@ -246,7 +247,8 @@ int
 wattron(WINDOW *win, int attr)
 {
 #ifdef DEBUG
-	__CTRACE(__CTRACE_ATTR, "wattron: win %p, attr %08x\n", win, attr);
+	__CTRACE(__CTRACE_ATTR, "wattron: win %p, attr %08x\n",
+	    (void *)win, attr);
 #endif
 	return __wattr_on(win, (attr_t) attr);
 }
@@ -259,7 +261,8 @@ int
 wattroff(WINDOW *win, int attr)
 {
 #ifdef DEBUG
-	__CTRACE(__CTRACE_ATTR, "wattroff: win %p, attr %08x\n", win, attr);
+	__CTRACE(__CTRACE_ATTR, "wattroff: win %p, attr %08x\n",
+	    (void *)win, attr);
 #endif
 	return __wattr_off(win, (attr_t) attr);
 }
@@ -273,7 +276,8 @@ int
 wattrset(WINDOW *win, int attr)
 {
 #ifdef DEBUG
-	__CTRACE(__CTRACE_ATTR, "wattrset: win %p, attr %08x\n", win, attr);
+	__CTRACE(__CTRACE_ATTR, "wattrset: win %p, attr %08x\n",
+	    (void *)win, attr);
 #endif
 	__wattr_off(win, __ATTRIBUTES);
 	__wattr_on(win, (attr_t) attr);
@@ -379,7 +383,8 @@ __wattr_on(WINDOW *win, attr_t attr)
 	const TERMINAL *t = win->screen->term;
 
 #ifdef DEBUG
-	__CTRACE(__CTRACE_ATTR, "wattr_on: win %p, attr %08x\n", win, attr);
+	__CTRACE(__CTRACE_ATTR, "wattr_on: win %p, attr %08x\n",
+	    (void *)win, attr);
 #endif
 	/* If can enter modes, set the relevent attribute bits. */
 	if (t_exit_attribute_mode(t) != NULL) {
@@ -428,7 +433,8 @@ __wattr_off(WINDOW *win, attr_t attr)
 	const TERMINAL *t = win->screen->term;
 
 #ifdef DEBUG
-	__CTRACE(__CTRACE_ATTR, "wattr_off: win %p, attr %08x\n", win, attr);
+	__CTRACE(__CTRACE_ATTR, "wattr_off: win %p, attr %08x\n",
+	    (void *)win, attr);
 #endif
 	/* If can do exit modes, unset the relevent attribute bits. */
 	if (t_exit_attribute_mode(t) != NULL) {

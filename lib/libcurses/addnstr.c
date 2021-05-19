@@ -128,7 +128,7 @@ waddnstr(WINDOW *win, const char *s, int n)
 
 #ifdef DEBUG
 		__CTRACE(__CTRACE_INPUT, "ADDNSTR: win %p, length %d\n",
-			 win, n);
+			 (void *)win, n);
 #endif
 	/*
 	 * behavior changed from traditional BSD curses, for better XCURSES

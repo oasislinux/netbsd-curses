@@ -60,7 +60,7 @@ is_linetouched(WINDOW *win, int line)
 
 #ifdef DEBUG
 	__CTRACE(__CTRACE_LINE, "is_linetouched: (%p, line %d, dirty %d)\n",
-	    win, line, (win->alines[line]->flags & __ISDIRTY));
+	    (void *)win, line, (win->alines[line]->flags & __ISDIRTY));
 #endif
 	return (win->alines[line]->flags & __ISDIRTY) != 0;
 }
@@ -74,7 +74,8 @@ int
 touchline(WINDOW *win, int start, int count)
 {
 #ifdef DEBUG
-	__CTRACE(__CTRACE_LINE, "touchline: (%p, %d, %d)\n", win, start, count);
+	__CTRACE(__CTRACE_LINE, "touchline: (%p, %d, %d)\n",
+	    (void *)win, start, count);
 #endif
 	return wtouchln(win, start, count, 1);
 }
@@ -87,7 +88,8 @@ touchline(WINDOW *win, int start, int count)
 int wredrawln(WINDOW *win, int start, int count)
 {
 #ifdef DEBUG
-	__CTRACE(__CTRACE_LINE, "wredrawln: (%p, %d, %d)\n", win, start, count);
+	__CTRACE(__CTRACE_LINE, "wredrawln: (%p, %d, %d)\n",
+	    (void *)win, start, count);
 #endif
 	return wtouchln(win, start, count, 1);
 }
@@ -102,7 +104,7 @@ is_wintouched(WINDOW *win)
 	int y, maxy;
 
 #ifdef DEBUG
-	__CTRACE(__CTRACE_LINE, "is_wintouched: (%p, maxy %d)\n", win,
+	__CTRACE(__CTRACE_LINE, "is_wintouched: (%p, maxy %d)\n", (void *)win,
 	    win->maxy);
 #endif
 	maxy = win->maxy;
@@ -122,7 +124,7 @@ int
 touchwin(WINDOW *win)
 {
 #ifdef DEBUG
-	__CTRACE(__CTRACE_LINE, "touchwin: (%p)\n", win);
+	__CTRACE(__CTRACE_LINE, "touchwin: (%p)\n", (void *)win);
 #endif
 	return wtouchln(win, 0, win->maxy, 1);
 }
@@ -135,7 +137,7 @@ int
 redrawwin(WINDOW *win)
 {
 #ifdef DEBUG
-	__CTRACE(__CTRACE_LINE, "redrawwin: (%p)\n", win);
+	__CTRACE(__CTRACE_LINE, "redrawwin: (%p)\n", (void *)win);
 #endif
 	return wtouchln(win, 0, win->maxy, 1);
 }
@@ -148,7 +150,7 @@ int
 untouchwin(WINDOW *win)
 {
 #ifdef DEBUG
-	__CTRACE(__CTRACE_LINE, "untouchwin: (%p)\n", win);
+	__CTRACE(__CTRACE_LINE, "untouchwin: (%p)\n", (void *)win);
 #endif
 	return wtouchln(win, 0, win->maxy, 0);
 }
@@ -166,7 +168,7 @@ wtouchln(WINDOW *win, int line, int n, int changed)
 
 #ifdef DEBUG
 	__CTRACE(__CTRACE_LINE, "wtouchln: (%p) %d, %d, %d\n",
-	    win, line, n, changed);
+	    (void *)win, line, n, changed);
 #endif
 	if (line < 0 || win->maxy <= line)
 		return ERR;
@@ -200,7 +202,7 @@ __touchwin(WINDOW *win)
 	int	 y, maxy;
 
 #ifdef DEBUG
-	__CTRACE(__CTRACE_LINE, "__touchwin: (%p)\n", win);
+	__CTRACE(__CTRACE_LINE, "__touchwin: (%p)\n", (void *)win);
 #endif
 	maxy = win->maxy;
 	for (y = 0; y < maxy; y++)
@@ -228,7 +230,7 @@ _cursesi_touchline_force(WINDOW *win, int y, int sx, int ex, int force)
 
 #ifdef DEBUG
 	__CTRACE(__CTRACE_LINE, "__touchline: (%p, %d, %d, %d, %d)\n",
-	    win, y, sx, ex, force);
+	    (void *)win, y, sx, ex, force);
 	__CTRACE(__CTRACE_LINE, "__touchline: first = %d, last = %d\n",
 	    *win->alines[y]->firstchp, *win->alines[y]->lastchp);
 #endif

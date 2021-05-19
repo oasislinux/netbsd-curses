@@ -121,7 +121,8 @@ __ripoffscreen(SCREEN *screen)
 		if (w != NULL)
 			__CTRACE(__CTRACE_WINDOW,
 			    "newterm: %p ripped %d line(s) from the %s\n",
-			    w, nlines, srip->nlines < 0 ? "bottom" : "top");
+			    (void *)w, nlines,
+			    srip->nlines < 0 ? "bottom" : "top");
 #endif
 	}
 	nrips = 0; /* Reset the stack. */

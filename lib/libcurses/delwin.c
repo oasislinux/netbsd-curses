@@ -46,7 +46,7 @@ delwin(WINDOW *win)
 	SCREEN *screen;
 
 #ifdef DEBUG
-	__CTRACE(__CTRACE_WINDOW, "delwin(%p)\n", win);
+	__CTRACE(__CTRACE_WINDOW, "delwin(%p)\n", (void *)win);
 #endif
 
 	if (win == NULL)

@@ -134,7 +134,7 @@ waddchnstr(WINDOW *win, const chtype *chstr, int n)
 
 #ifdef DEBUG
 	__CTRACE(__CTRACE_INPUT, "waddchnstr: win = %p, chstr = %p, n = %d\n",
-	    win, chstr, n);
+	    (void *)win, (void *)chstr, n);
 #endif
 
 	if (n >= 0)

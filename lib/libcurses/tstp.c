@@ -172,7 +172,7 @@ __set_winchhandler(void)
 #ifdef DEBUG
 		__CTRACE(__CTRACE_MISC,
 		    "__set_winchhandler: owsa.sa_handler=%p\n",
-		    owsa.sa_handler);
+		    (void *)(uintptr_t)owsa.sa_handler);
 #endif
 	}
 }
@@ -202,7 +202,7 @@ __restore_winchhandler(void)
 			winch_set = -1;
 #ifdef DEBUG
 			__CTRACE(__CTRACE_MISC, "cwsa.sa_handler = %p\n",
-			    cwsa.sa_handler);
+			    (void *)(uintptr_t)cwsa.sa_handler);
 #endif
 		}
 	}

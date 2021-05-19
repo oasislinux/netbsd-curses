@@ -642,7 +642,7 @@ __change_pair(short pair)
 	for (wlp = _cursesi_screen->winlistp; wlp != NULL; wlp = wlp->nextp) {
 #ifdef DEBUG
 		__CTRACE(__CTRACE_COLOR, "__change_pair: win = %p\n",
-		    wlp->winp);
+		    (void *)wlp->winp);
 #endif
 		win = wlp->winp;
 		if (win == __virtscr)

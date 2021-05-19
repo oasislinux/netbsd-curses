@@ -39,7 +39,7 @@ keypad(WINDOW *win, bool bf)
 {
 #ifdef DEBUG
 	__CTRACE(__CTRACE_MISC,
-	    "keypad: win %p, %s\n", win, bf ? "TRUE" : "FALSE");
+	    "keypad: win %p, %s\n", (void *)win, bf ? "TRUE" : "FALSE");
 #endif
 	if (bf) {
 		win->flags |= __KEYPAD;

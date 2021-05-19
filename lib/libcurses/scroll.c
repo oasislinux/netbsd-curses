@@ -79,7 +79,8 @@ wscrl(WINDOW *win, int nlines)
 	int     oy, ox;
 
 #ifdef DEBUG
-	__CTRACE(__CTRACE_WINDOW, "wscrl: (%p) lines=%d\n", win, nlines);
+	__CTRACE(__CTRACE_WINDOW, "wscrl: (%p) lines=%d\n",
+	    (void *)win, nlines);
 #endif
 
 	if (!(win->flags & __SCROLLOK))

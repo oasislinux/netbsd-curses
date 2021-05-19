@@ -79,7 +79,7 @@ putwin(WINDOW *win, FILE *fp)
 	__LDATA *sp;
 
 #ifdef DEBUG
-	__CTRACE(__CTRACE_FILEIO, "putwin: win %p\n", win);
+	__CTRACE(__CTRACE_FILEIO, "putwin: win %p\n", (void *)win);
 #endif
 
 	if (win == NULL)
@@ -231,7 +231,7 @@ getwin(FILE *fp)
 		__touchline(win, y, 0, (int) win->maxx - 1);
 	}
 #ifdef DEBUG
-	__CTRACE(__CTRACE_FILEIO, "getwin: win = %p\n", win);
+	__CTRACE(__CTRACE_FILEIO, "getwin: win = %p\n", (void *)win);
 #endif
 	return win;
 

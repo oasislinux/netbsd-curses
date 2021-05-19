@@ -187,7 +187,7 @@ __subwin(WINDOW *orig, int nlines, int ncols, int by, int bx, int ispad)
 
 #ifdef	DEBUG
 	__CTRACE(__CTRACE_WINDOW, "subwin: (%p, %d, %d, %d, %d, %d)\n",
-	    orig, nlines, ncols, by, bx, ispad);
+	    (void *)orig, nlines, ncols, by, bx, ispad);
 #endif
 	if (orig == NULL)
 		return NULL;
@@ -291,7 +291,7 @@ __makenew(SCREEN *screen, int nlines, int ncols, int by, int bx, int sub,
 	if ((win = malloc(sizeof(WINDOW))) == NULL)
 		return NULL;
 #ifdef DEBUG
-	__CTRACE(__CTRACE_WINDOW, "makenew: win = %p\n", win);
+	__CTRACE(__CTRACE_WINDOW, "makenew: win = %p\n", (void *)win);
 #endif
 	win->fp = NULL;
 	win->buf = NULL;

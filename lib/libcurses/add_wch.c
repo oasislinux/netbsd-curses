@@ -98,7 +98,7 @@ wadd_wch(WINDOW *win, const cchar_t *wch)
 		assert(win->alines[i]->sentinel == SENTINEL_VALUE);
 	}
 	__CTRACE(__CTRACE_INPUT, "wadd_wch: win(%p), x: %d, y: %d\n",
-	    win, x, y);
+	    (void *)win, x, y);
 #endif
 	lnp = win->alines[y];
 	return _cursesi_addwchar(win, &lnp, &(win->cury), &(win->curx), wch, 1);

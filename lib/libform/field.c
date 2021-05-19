@@ -426,7 +426,7 @@ set_field_buffer(FIELD *field, int buffer, const char *value)
 	    && ((field->rows + field->nrows) == 1))
 		len = field->cols;
 
-	_formi_dbg_printf( "%s: len = %d, value = %s, buffer=%d\n", __func__,
+	_formi_dbg_printf( "%s: len = %zu, value = %s, buffer=%d\n", __func__,
 	    len, value, buffer);
 	if (field->buffers[buffer].string != NULL)
 		_formi_dbg_printf("%s: string=%s, len = %d\n", __func__,
@@ -447,7 +447,7 @@ set_field_buffer(FIELD *field, int buffer, const char *value)
 	field->buffers[buffer].allocated = len + 1;
 	status = field_buffer_init(field, buffer);
 
-	_formi_dbg_printf("%s: len = %d, value = %s\n", __func__, len, value);
+	_formi_dbg_printf("%s: len = %zu, value = %s\n", __func__, len, value);
 	_formi_dbg_printf("%s: string = %s, len = %d\n", __func__,
 	    field->buffers[buffer].string, field->buffers[buffer].length);
 	_formi_dbg_printf("%s: lines.len = %d\n", __func__,

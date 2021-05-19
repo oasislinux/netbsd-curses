@@ -246,7 +246,7 @@ delscreen(SCREEN *screen)
 {
 
 #ifdef DEBUG
-	__CTRACE(__CTRACE_SCREEN, "delscreen(%p)\n", screen);
+	__CTRACE(__CTRACE_SCREEN, "delscreen(%p)\n", (void *)screen);
 #endif
 
 	__delscreen(screen);
