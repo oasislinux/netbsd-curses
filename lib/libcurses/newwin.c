@@ -245,6 +245,7 @@ __set_subwin(WINDOW *orig, WINDOW *win)
 		lp->hash = __hash((char *)(void *)lp->line,
 				  (size_t)(win->maxx * __LDATASIZE));
 #else
+		lp->hash = 0;
 		for (cp = lp->line, j = 0; j < win->maxx; j++, cp++) {
 			lp->hash = __hash_more( &cp->ch,
 			    sizeof( wchar_t ), lp->hash );
