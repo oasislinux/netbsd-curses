@@ -259,7 +259,7 @@ tset: $(TSET_OBJ)
 	$(CC) $(LDFLAGS) -o $@ $(TSET_OBJ)
 
 .PHONY: install
-install:
+install: $(LIBS) $(BINS)
 	mkdir -p $(DESTDIR)$(LIBDIR) $(DESTDIR)$(BINDIR) $(DESTDIR)$(INCDIR) $(DESTDIR)$(MAN1DIR) $(DESTDIR)$(MAN3DIR)
 	cp $(LIBS) $(DESTDIR)$(LIBDIR)/
 	cp $(BINS) $(DESTDIR)$(BINDIR)/
