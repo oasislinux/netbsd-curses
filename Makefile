@@ -3,6 +3,7 @@
 PREFIX=/usr/local
 BINDIR=$(PREFIX)/bin
 LIBDIR=$(PREFIX)/lib
+INCDIR=$(PREFIX)/include
 MANDIR=$(PREFIX)/share/man
 MAN1DIR=$(MANDIR)/man1
 MAN3DIR=$(MANDIR)/man3
@@ -259,9 +260,16 @@ tset: $(TSET_OBJ)
 
 .PHONY: install
 install:
-	mkdir -p $(DESTDIR)$(LIBDIR) $(DESTDIR)$(BINDIR) $(DESTDIR)$(MAN1DIR) $(DESTDIR)$(MAN3DIR)
+	mkdir -p $(DESTDIR)$(LIBDIR) $(DESTDIR)$(BINDIR) $(DESTDIR)$(INCDIR) $(DESTDIR)$(MAN1DIR) $(DESTDIR)$(MAN3DIR)
 	cp $(LIBS) $(DESTDIR)$(LIBDIR)/
 	cp $(BINS) $(DESTDIR)$(BINDIR)/
+	cp\
+		$(LIBCURSES_HDR:%=lib/libcurses/%)\
+		$(LIBFORM_HDR:%=lib/libform/%)\
+		$(LIBMENU_HDR:%=lib/libmenu/%)\
+		$(LIBPANEL_HDR:%=lib/libpanel/%)\
+		$(LIBTERMINFO_HDR:%=lib/libterminfo/%)\
+		$(DESTDIR)$(INCDIR)/
 	cp\
 		$(INFOCMP_MAN1:%=usr.bin/infocmp/%)\
 		$(TABS_MAN1:%=usr.bin/tabs/%)\
