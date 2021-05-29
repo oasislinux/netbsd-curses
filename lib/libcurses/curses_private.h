@@ -281,7 +281,7 @@ struct __screen {
 	int meta_state;
 	char padchar;
 	int endwin;
-	int notty;
+	int ttyfd;
 	int resized;
 	wchar_t *unget_list;
 	int unget_len, unget_pos;

@@ -157,7 +157,6 @@ newterm(char *type, FILE *outfd, FILE *infd)
 	new_screen->curscr = NULL;
 	new_screen->__virtscr = NULL;
 	new_screen->curwin = 0;
-	new_screen->notty = FALSE;
 	new_screen->resized = 0;
 	new_screen->unget_len = 32;
 

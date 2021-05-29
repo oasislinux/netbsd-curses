@@ -132,7 +132,7 @@ __winch_signal_handler(/*ARGSUSED*/int signo)
 {
 	struct winsize win;
 
-	if (ioctl(fileno(_cursesi_screen->outfd), TIOCGWINSZ, &win) != -1 &&
+	if (ioctl(_cursesi_screen->ttyfd, TIOCGWINSZ, &win) != -1 &&
 	    win.ws_row != 0 && win.ws_col != 0)
 	{
 		LINES = win.ws_row;
@@ -277,7 +277,7 @@ __restartwin(void)
 	 * Update curscr (which also updates __virtscr) and stdscr
 	 * to match the new size.
 	 */
-	if (ioctl(fileno(_cursesi_screen->outfd), TIOCGWINSZ, &win) != -1 &&
+	if (ioctl(_cursesi_screen->ttyfd, TIOCGWINSZ, &win) != -1 &&
 	    win.ws_row != 0 && win.ws_col != 0)
 	{
 		if (win.ws_row != LINES) {
@@ -301,11 +301,11 @@ __restartwin(void)
 		wresize(stdscr, nlines, ncols);
 
 	/* save the new "default" terminal state */
-	(void)tcgetattr(fileno(_cursesi_screen->infd),
+	(void)tcgetattr(_cursesi_screen->ttyfd,
 			&_cursesi_screen->orig_termios);
 
 	/* Reset the terminal state to the mode just before we stopped. */
-	(void)tcsetattr(fileno(_cursesi_screen->infd), TCSASOFT | TCSADRAIN,
+	(void)tcsetattr(_cursesi_screen->ttyfd, TCSASOFT | TCSADRAIN,
 			&_cursesi_screen->save_termios);
 
 	/* Restore colours */
@@ -331,7 +331,7 @@ def_prog_mode(void)
 	if (_cursesi_screen->endwin)
 		return ERR;
 
-	return tcgetattr(fileno(_cursesi_screen->infd),
+	return tcgetattr(_cursesi_screen->ttyfd,
 			 &_cursesi_screen->save_termios) ? ERR : OK;
 }
 
@@ -347,7 +347,7 @@ int
 def_shell_mode(void)
 {
 
-	return tcgetattr(fileno(_cursesi_screen->infd),
+	return tcgetattr(_cursesi_screen->ttyfd,
 			 &_cursesi_screen->orig_termios) ? ERR : OK;
 }
 

@@ -70,7 +70,7 @@ int
 baudrate(void)
 {
 
-	if (_cursesi_screen->notty == TRUE)
+	if (_cursesi_screen->ttyfd == -1)
 		return 0;
 
 	return cfgetospeed(&_cursesi_screen->baset);
@@ -102,11 +102,13 @@ _cursesi_gettmode(SCREEN *screen)
 {
 	screen->useraw = 0;
 
-	if (tcgetattr(fileno(screen->infd), &screen->orig_termios)) {
+	screen->ttyfd = fileno(screen->infd);
+	if (tcgetattr(screen->ttyfd, &screen->orig_termios)) {
 		/* if the input fd is not a tty try the output */
-		if (tcgetattr(fileno(screen->infd), &screen->orig_termios)) {
+		screen->ttyfd = fileno(screen->outfd);
+		if (tcgetattr(screen->ttyfd, &screen->orig_termios)) {
 			/* not a tty ... we will disable tty related stuff */
-			screen->notty = TRUE;
+			screen->ttyfd = -1;
 			__GT = 0;
 			__NONL = 0;
 			return OK;
@@ -152,7 +154,7 @@ _cursesi_gettmode(SCREEN *screen)
 #endif
 
 	screen->curt = &screen->baset;
-	return tcsetattr(fileno(screen->infd), TCSASOFT | TCSADRAIN,
+	return tcsetattr(screen->ttyfd, TCSASOFT | TCSADRAIN,
 	    screen->curt) ? ERR : OK;
 }
 
@@ -172,9 +174,9 @@ raw(void)
 
 	_cursesi_screen->useraw = __pfast = __rawmode = 1;
 	_cursesi_screen->curt = &_cursesi_screen->rawt;
-	if (_cursesi_screen->notty == TRUE)
+	if (_cursesi_screen->ttyfd == -1)
 		return OK;
-	return tcsetattr(fileno(_cursesi_screen->infd), TCSASOFT | TCSADRAIN,
+	return tcsetattr(_cursesi_screen->ttyfd, TCSASOFT | TCSADRAIN,
 	    _cursesi_screen->curt) ? ERR : OK;
 }
 
@@ -193,10 +195,10 @@ noraw(void)
 		__restartwin();
 
 	_cursesi_screen->useraw = __pfast = __rawmode = 0;
-	if (_cursesi_screen->notty == TRUE)
+	if (_cursesi_screen->ttyfd == -1)
 		return OK;
 	_cursesi_screen->curt = &_cursesi_screen->baset;
-	return tcsetattr(fileno(_cursesi_screen->infd), TCSASOFT | TCSADRAIN,
+	return tcsetattr(_cursesi_screen->ttyfd, TCSASOFT | TCSADRAIN,
 	    _cursesi_screen->curt) ? ERR : OK;
 }
 
@@ -215,11 +217,11 @@ cbreak(void)
 		__restartwin();
 
 	__rawmode = 1;
-	if (_cursesi_screen->notty == TRUE)
+	if (_cursesi_screen->ttyfd == -1)
 		return OK;
 	_cursesi_screen->curt = _cursesi_screen->useraw ?
 		&_cursesi_screen->rawt : &_cursesi_screen->cbreakt;
-	return tcsetattr(fileno(_cursesi_screen->infd), TCSASOFT | TCSADRAIN,
+	return tcsetattr(_cursesi_screen->ttyfd, TCSASOFT | TCSADRAIN,
 	    _cursesi_screen->curt) ? ERR : OK;
 }
 
@@ -238,7 +240,7 @@ nocbreak(void)
 		__restartwin();
 
 	__rawmode = 0;
-	if (_cursesi_screen->notty == TRUE)
+	if (_cursesi_screen->ttyfd == -1)
 		return OK;
 	  /* if we were in halfdelay mode then nuke the timeout */
 	if ((stdscr->flags & __HALFDELAY) &&
@@ -248,7 +250,7 @@ nocbreak(void)
 	stdscr->flags &= ~__HALFDELAY;
 	_cursesi_screen->curt = _cursesi_screen->useraw ?
 		&_cursesi_screen->rawt : &_cursesi_screen->baset;
-	return tcsetattr(fileno(_cursesi_screen->infd), TCSASOFT | TCSADRAIN,
+	return tcsetattr(_cursesi_screen->ttyfd, TCSASOFT | TCSADRAIN,
 	    _cursesi_screen->curt) ? ERR : OK;
 }
 
@@ -285,7 +287,7 @@ __delay(void)
 	if (_cursesi_screen->endwin)
 		__restartwin();
 
-	if (_cursesi_screen->notty == TRUE)
+	if (_cursesi_screen->ttyfd == -1)
 		return OK;
 	_cursesi_screen->rawt.c_cc[VMIN] = 1;
 	_cursesi_screen->rawt.c_cc[VTIME] = 0;
@@ -294,7 +296,7 @@ __delay(void)
 	_cursesi_screen->baset.c_cc[VMIN] = 1;
 	_cursesi_screen->baset.c_cc[VTIME] = 0;
 
-	if (tcsetattr(fileno(_cursesi_screen->infd), TCSASOFT | TCSANOW, 
+	if (tcsetattr(_cursesi_screen->ttyfd, TCSASOFT | TCSANOW,
 	    _cursesi_screen->curt)) {
 		__restore_termios();
 		return ERR;
@@ -313,7 +315,7 @@ __nodelay(void)
 	if (_cursesi_screen->endwin)
 		__restartwin();
 
-	if (_cursesi_screen->notty == TRUE)
+	if (_cursesi_screen->ttyfd == -1)
 		return OK;
 	_cursesi_screen->rawt.c_cc[VMIN] = 0;
 	_cursesi_screen->rawt.c_cc[VTIME] = 0;
@@ -322,7 +324,7 @@ __nodelay(void)
 	_cursesi_screen->baset.c_cc[VMIN] = 0;
 	_cursesi_screen->baset.c_cc[VTIME] = 0;
 
-	if (tcsetattr(fileno(_cursesi_screen->infd), TCSASOFT | TCSANOW,
+	if (tcsetattr(_cursesi_screen->ttyfd, TCSASOFT | TCSANOW,
 	    _cursesi_screen->curt)) {
 		__restore_termios();
 		return ERR;
@@ -338,7 +340,7 @@ __save_termios(void)
 	if (_cursesi_screen->endwin)
 		__restartwin();
 
-	if (_cursesi_screen->notty == TRUE)
+	if (_cursesi_screen->ttyfd == -1)
 		return;
 	_cursesi_screen->ovmin = _cursesi_screen->cbreakt.c_cc[VMIN];
 	_cursesi_screen->ovtime = _cursesi_screen->cbreakt.c_cc[VTIME];
@@ -351,7 +353,7 @@ __restore_termios(void)
 	if (_cursesi_screen->endwin)
 		__restartwin();
 
-	if (_cursesi_screen->notty == TRUE)
+	if (_cursesi_screen->ttyfd == -1)
 		return;
 	_cursesi_screen->rawt.c_cc[VMIN] = _cursesi_screen->ovmin;
 	_cursesi_screen->rawt.c_cc[VTIME] = _cursesi_screen->ovtime;
@@ -371,7 +373,7 @@ __timeout(int delay)
 	if (_cursesi_screen->endwin)
 		__restartwin();
 
-	if (_cursesi_screen->notty == TRUE)
+	if (_cursesi_screen->ttyfd == -1)
 		return OK;
 	_cursesi_screen->ovmin = _cursesi_screen->cbreakt.c_cc[VMIN];
 	_cursesi_screen->ovtime = _cursesi_screen->cbreakt.c_cc[VTIME];
@@ -382,7 +384,7 @@ __timeout(int delay)
 	_cursesi_screen->baset.c_cc[VMIN] = 0;
 	_cursesi_screen->baset.c_cc[VTIME] = delay;
 
-	if (tcsetattr(fileno(_cursesi_screen->infd), TCSASOFT | TCSANOW,
+	if (tcsetattr(_cursesi_screen->ttyfd, TCSASOFT | TCSANOW,
 	    _cursesi_screen->curt)) {
 		__restore_termios();
 		return ERR;
@@ -401,7 +403,7 @@ __notimeout(void)
 	if (_cursesi_screen->endwin)
 		__restartwin();
 
-	if (_cursesi_screen->notty == TRUE)
+	if (_cursesi_screen->ttyfd == -1)
 		return OK;
 	_cursesi_screen->rawt.c_cc[VMIN] = 1;
 	_cursesi_screen->rawt.c_cc[VTIME] = 0;
@@ -410,7 +412,7 @@ __notimeout(void)
 	_cursesi_screen->baset.c_cc[VMIN] = 1;
 	_cursesi_screen->baset.c_cc[VTIME] = 0;
 
-	return tcsetattr(fileno(_cursesi_screen->infd), TCSASOFT | TCSANOW,
+	return tcsetattr(_cursesi_screen->ttyfd, TCSASOFT | TCSANOW,
 	    _cursesi_screen->curt) ? ERR : OK;
 }
 
@@ -452,7 +454,7 @@ nl(void)
 	if (_cursesi_screen->endwin)
 		__restartwin();
 
-	if (_cursesi_screen->notty == TRUE)
+	if (_cursesi_screen->ttyfd == -1)
 		return OK;
 	_cursesi_screen->rawt.c_iflag |= ICRNL;
 	_cursesi_screen->rawt.c_oflag |= ONLCR;
@@ -463,7 +465,7 @@ nl(void)
 
 	_cursesi_screen->nl = 1;
 	_cursesi_screen->pfast = _cursesi_screen->rawmode;
-	return tcsetattr(fileno(_cursesi_screen->infd), TCSASOFT | TCSADRAIN,
+	return tcsetattr(_cursesi_screen->ttyfd, TCSASOFT | TCSADRAIN,
 	    _cursesi_screen->curt) ? ERR : OK;
 }
 
@@ -477,7 +479,7 @@ nonl(void)
 	if (_cursesi_screen->endwin)
 		__restartwin();
 
-	if (_cursesi_screen->notty == TRUE)
+	if (_cursesi_screen->ttyfd == -1)
 		return OK;
 	_cursesi_screen->rawt.c_iflag &= ~ICRNL;
 	_cursesi_screen->rawt.c_oflag &= ~ONLCR;
@@ -488,7 +490,7 @@ nonl(void)
 
 	_cursesi_screen->nl = 0;
 	__pfast = 1;
-	return tcsetattr(fileno(_cursesi_screen->infd), TCSASOFT | TCSADRAIN,
+	return tcsetattr(_cursesi_screen->ttyfd, TCSASOFT | TCSADRAIN,
 	    _cursesi_screen->curt) ? ERR : OK;
 }
 
@@ -516,7 +518,7 @@ intrflush(WINDOW *win, bool bf)
 	if (_cursesi_screen->endwin)
 		__restartwin();
 
-	if (_cursesi_screen->notty == TRUE)
+	if (_cursesi_screen->ttyfd == -1)
 		return OK;
 	if (bf) {
 		_cursesi_screen->rawt.c_lflag &= ~NOFLSH;
@@ -529,7 +531,7 @@ intrflush(WINDOW *win, bool bf)
 	}
 
 	__pfast = 1;
-	return tcsetattr(fileno(_cursesi_screen->infd), TCSASOFT | TCSADRAIN,
+	return tcsetattr(_cursesi_screen->ttyfd, TCSASOFT | TCSADRAIN,
 	    _cursesi_screen->curt) ? ERR : OK;
 }
 
@@ -609,9 +611,9 @@ int
 savetty(void)
 {
 
-	if (_cursesi_screen->notty == TRUE)
+	if (_cursesi_screen->ttyfd == -1)
 		return OK;
-	return tcgetattr(fileno(_cursesi_screen->infd),
+	return tcgetattr(_cursesi_screen->ttyfd,
 			 &_cursesi_screen->savedtty) ? ERR : OK;
 }
 
@@ -619,9 +621,9 @@ int
 resetty(void)
 {
 
-	if (_cursesi_screen->notty == TRUE)
+	if (_cursesi_screen->ttyfd == -1)
 		return OK;
-	return tcsetattr(fileno(_cursesi_screen->infd), TCSASOFT | TCSADRAIN,
+	return tcsetattr(_cursesi_screen->ttyfd, TCSASOFT | TCSADRAIN,
 			 &_cursesi_screen->savedtty) ? ERR : OK;
 }
 
@@ -633,7 +635,7 @@ char
 erasechar(void)
 {
 
-	if (_cursesi_screen->notty == TRUE)
+	if (_cursesi_screen->ttyfd == -1)
 		return 0;
 	return _cursesi_screen->baset.c_cc[VERASE];
 }
@@ -646,7 +648,7 @@ char
 killchar(void)
 {
 
-	if (_cursesi_screen->notty == TRUE)
+	if (_cursesi_screen->ttyfd == -1)
 		return 0;
 	return _cursesi_screen->baset.c_cc[VKILL];
 }
@@ -662,7 +664,7 @@ erasewchar(wchar_t *ch)
 #ifndef HAVE_WCHAR
 	return ERR;
 #else
-	if (_cursesi_screen->notty == TRUE)
+	if (_cursesi_screen->ttyfd == -1)
 		return ERR;
 	*ch = _cursesi_screen->baset.c_cc[VERASE];
 	return OK;
@@ -680,7 +682,7 @@ killwchar( wchar_t *ch )
 #ifndef HAVE_WCHAR
 	return ERR;
 #else
-	if (_cursesi_screen->notty == TRUE)
+	if (_cursesi_screen->ttyfd == -1)
 		return 0;
 	*ch = _cursesi_screen->baset.c_cc[VKILL];
 	return OK;
