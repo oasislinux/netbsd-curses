@@ -339,8 +339,8 @@ int
 reset_prog_mode(void)
 {
 
-	return tcsetattr(fileno(_cursesi_screen->infd), TCSASOFT | TCSADRAIN,
-			 &_cursesi_screen->save_termios) ? ERR : OK;
+	__restartwin();
+	return OK;
 }
 
 int
