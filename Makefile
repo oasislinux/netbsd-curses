@@ -28,7 +28,7 @@ HOSTCC=$(CC)
 HOSTCFLAGS=$(CFLAGS)
 HOSTLDFLAGS=$(LDFLAGS)
 
-TERM_BUILTIN=ansi dumb vt100 vt220 wsvt25 xterm xterm-256color
+TERM_BUILTIN=ansi dumb vt100 vt220 xterm xterm-256color
 ENABLE_WCHAR=1
 
 -include config.mk
