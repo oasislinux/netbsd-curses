@@ -360,7 +360,7 @@ _ti_findterm(TERMINAL *term, const char *name, int flags)
 	return 0;
 #else
 	int r;
-	char *c, *e;
+	char *e;
 
 	assert(term != NULL);
 	assert(name != NULL);
@@ -372,8 +372,8 @@ _ti_findterm(TERMINAL *term, const char *name, int flags)
 	if (e != NULL && *e == '/')
 		return _ti_dbgetterm(term, e, name, flags);
 
-	c = NULL;
 #ifdef TERMINFO_COMPILE
+	char *c = NULL;
 	if (e == NULL && (c = getenv("TERMCAP")) != NULL) {
 		if (*c != '\0' && *c != '/') {
 			c = strdup(c);
