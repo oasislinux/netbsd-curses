@@ -4,7 +4,8 @@ PREFIX=/usr/local
 BINDIR=$(PREFIX)/bin
 LIBDIR=$(PREFIX)/lib
 INCDIR=$(PREFIX)/include
-MANDIR=$(PREFIX)/share/man
+DATADIR=$(PREFIX)/share
+MANDIR=$(DATADIR)/man
 MAN1DIR=$(MANDIR)/man1
 MAN3DIR=$(MANDIR)/man3
 
@@ -12,6 +13,7 @@ ARFLAGS=-cr
 CFLAGS+=\
 	-Wall\
 	-Wpedantic\
+	-D _PATH_TERMINFO=\"$(DATADIR)/misc/terminfo\"\
 	-D TERMINFO_COMPILE\
 	-D TERMINFO_COMPAT\
 	-D TERMINFO_DB\

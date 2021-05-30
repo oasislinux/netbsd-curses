@@ -45,7 +45,9 @@
  * Although we can read v1 structure (which includes v2 alias records)
  * we really want a v3 structure to get numerics of type int rather than short.
  */
+#ifndef _PATH_TERMINFO
 #define _PATH_TERMINFO	"/usr/share/misc/terminfo"
+#endif
 
 #ifdef TERMINFO_DB
 static char __ti_database[PATH_MAX];
