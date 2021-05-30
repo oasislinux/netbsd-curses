@@ -581,19 +581,31 @@ print_dump(int argc, char **argv)
 }
 
 static void
-write_database(const char *dbname)
+write_database(const char *dbname, int argc, char **argv)
 {
 	struct cdbw *db;
 	char *tmp_dbname;
 	TERM *term;
-	int fd;
+	int fd, i;
 
 	db = cdbw_open();
 	if (db == NULL)
 		err(EXIT_FAILURE, "cdbw_open failed");
 	/* Save the terms */
-	STAILQ_FOREACH(term, &terms, next)
-		save_term(db, term);
+	if (argc > 0) {
+		for (i = 0; i < argc; i++) {
+			term = find_newest_term(argv[i]);
+			if (term == NULL) {
+				warnx("%s: no description for terminal",
+				    argv[i]);
+				continue;
+			}
+			save_term(db, term);
+		}
+	} else {
+		STAILQ_FOREACH(term, &terms, next)
+			save_term(db, term);
+	}
 
 	tmp_dbname = malloc(strlen(dbname) + 8);
 	if (!tmp_dbname)
@@ -722,7 +734,7 @@ main(int argc, char **argv)
 	} else {
 		dbname = ofile;
 	}
-	write_database(dbname);
+	write_database(dbname, argc - optind, argv + optind);
 
 	if (sflag != 0)
 		fprintf(stderr, "%zu entries and %zu aliases written to %s\n",
