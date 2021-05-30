@@ -705,6 +705,8 @@ main(int argc, char **argv)
 		;
 
 	if (Sflag) {
+		if (ofile && !freopen(ofile, "w", stdout))
+			err(EXIT_FAILURE, "open %s", ofile);
 		print_dump(argc - optind, argv + optind);
 		return error_exit;
 	}
