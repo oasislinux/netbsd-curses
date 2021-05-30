@@ -418,6 +418,7 @@ _ti_findterm(TERMINAL *term, const char *name, int flags)
 			return r;
 		}
 	}
+#endif
 
 	if ((e = getenv("TERMINFO_DIRS")) != NULL)
 		return _ti_dbgettermp(term, e, name, flags);
@@ -430,7 +431,6 @@ _ti_findterm(TERMINAL *term, const char *name, int flags)
 	}
 	if (r != 1)
 		r = _ti_dbgettermp(term, _PATH_TERMINFO, name, flags);
-#endif
 
 	return r;
 #endif
