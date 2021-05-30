@@ -307,4 +307,8 @@ clean:
 		tabs $(TABS_OBJ)\
 		tic $(TIC_OBJ)\
 		tput $(TPUT_OBJ)\
-		tset $(TSET_OBJ)
+		tset $(TSET_OBJ)\
+		lib/libterminfo/compiled_terms.c\
+		lib/libterminfo/hash.c\
+		lib/libterminfo/termcap_hash.c\
+		terminfo.cdb
