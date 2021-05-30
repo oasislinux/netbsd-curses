@@ -214,7 +214,9 @@ process_entry(TBUF *buf, int flags)
 {
 	TERM *term;
 	TIC *tic;
+#ifdef TERMINFO_COMPAT
 	TBUF sbuf = *buf;
+#endif
 
 	if (buf->bufpos == 0)
 		return 0;
@@ -239,8 +241,10 @@ process_entry(TBUF *buf, int flags)
 	term->tic = tic;
 	alias_terms(term);
 
+#ifdef TERMINFO_COMPAT
 	if (tic->rtype == TERMINFO_RTYPE)
 		return process_entry(&sbuf, flags | TIC_COMPAT_V1);
+#endif
 
 	return 0;
 }
@@ -329,6 +333,7 @@ merge(TIC *rtic, TIC *utic, int flags)
 	}
 }
 
+#ifdef TERMINFO_COMPAT
 static int
 dup_tbuf(TBUF *dst, const TBUF *src)
 {
@@ -407,6 +412,7 @@ err:
 	free(tic);
 	return -1;
 }
+#endif
 
 static size_t
 merge_use(int flags)
@@ -417,7 +423,9 @@ merge_use(int flags)
 	uint16_t num;
 	TIC *rtic, *utic;
 	TERM *term, *uterm;
+#ifdef TERMINFO_COMPAT
 	bool promoted;
+#endif
 
 	skipped = merged = 0;
 	STAILQ_FOREACH(term, &terms, next) {
@@ -425,7 +433,9 @@ merge_use(int flags)
 			continue;
 		rtic = term->tic;
 		basename = _ti_getname(TERMINFO_RTYPE_O1, rtic->name);
+#ifdef TERMINFO_COMPAT
 		promoted = false;
+#endif
 		while ((cap = _ti_find_extra(rtic, &rtic->extras, "use"))
 		    != NULL) {
 			if (*cap++ != 's') {
@@ -464,6 +474,7 @@ merge_use(int flags)
 				break;
 			}
 
+#ifdef TERMINFO_COMPAT
 			/* If we need to merge in a term that requires
 			 * this term to be promoted, we need to duplicate
 			 * this term, promote it and append it to our list. */
@@ -472,6 +483,7 @@ merge_use(int flags)
 					err(EXIT_FAILURE, "promote");
 				promoted = true;
 			}
+#endif
 
 			merge(rtic, utic, flags);
 	remove:

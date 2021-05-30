@@ -724,9 +724,11 @@ _ti_compile(char *cap, int flags)
 			if (cnum > INT16_MAX) {
 				if (flags & TIC_COMPAT_V1)
 					cnum = INT16_MAX;
+#ifdef TERMINFO_COMPAT
 				else if (tic->rtype == TERMINFO_RTYPE_O1)
 					if (_ti_promote(tic) == -1)
 						goto error;
+#endif
 			}
 
 			num = (int)cnum;
