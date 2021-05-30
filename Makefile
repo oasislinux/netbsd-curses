@@ -28,13 +28,10 @@ HOSTCC=$(CC)
 HOSTCFLAGS=$(CFLAGS)
 HOSTLDFLAGS=$(LDFLAGS)
 
-TERM=ansi dumb vt100 vt220 wsvt25 xterm xterm-256color
+TERM_BUILTIN=ansi dumb vt100 vt220 wsvt25 xterm xterm-256color
 ENABLE_WCHAR=1
 
 -include config.mk
-
-TERMINFO=\
-	share/terminfo/terminfo
 
 LIBCURSES_SRC=\
 	acs.c addbytes.c addch.c addchnstr.c addnstr.c attributes.c\
@@ -232,8 +229,10 @@ libmenu.a: $(LIBMENU_OBJ)
 libpanel.a: $(LIBPANEL_OBJ)
 	$(AR) $(ARFLAGS) $@ $(LIBPANEL_OBJ)
 
-lib/libterminfo/compiled_terms.c: $(TERMINFO) host-tic
-	./host-tic -Sx $(TERMINFO) $(TERM) >$@.tmp && mv $@.tmp $@
+lib/libterminfo/compiled_terms.c: share/terminfo/terminfo host-tic
+	./host-tic -Sx share/terminfo/terminfo $(TERM_BUILTIN) >$@.tmp && mv $@.tmp $@
+terminfo.cdb: share/terminfo/terminfo host-tic
+	./host-tic -x -o $@.tmp share/terminfo/terminfo && mv $@.tmp $@
 lib/libterminfo/hash.c: lib/libterminfo/genhash lib/libterminfo/term.h host-nbperf
 	TOOL_NBPERF=./host-nbperf lib/libterminfo/genhash\
 		lib/libterminfo/term.h >$@.tmp && mv $@.tmp $@
@@ -261,10 +260,17 @@ tset: $(TSET_OBJ)
 	$(CC) $(LDFLAGS) -o $@ $(TSET_OBJ)
 
 .PHONY: install
-install: $(LIBS) $(BINS)
-	mkdir -p $(DESTDIR)$(LIBDIR) $(DESTDIR)$(BINDIR) $(DESTDIR)$(INCDIR) $(DESTDIR)$(MAN1DIR) $(DESTDIR)$(MAN3DIR)
+install: $(LIBS) $(BINS) terminfo.cdb
+	mkdir -p\
+		$(DESTDIR)$(LIBDIR)\
+		$(DESTDIR)$(BINDIR)\
+		$(DESTDIR)$(DATADIR)/misc\
+		$(DESTDIR)$(INCDIR)\
+		$(DESTDIR)$(MAN1DIR)\
+		$(DESTDIR)$(MAN3DIR)
 	cp $(LIBS) $(DESTDIR)$(LIBDIR)/
 	cp $(BINS) $(DESTDIR)$(BINDIR)/
+	cp share/terminfo/terminfo terminfo.cdb $(DESTDIR)$(DATADIR)/misc/
 	cp\
 		$(LIBCURSES_HDR:%=lib/libcurses/%)\
 		$(LIBFORM_HDR:%=lib/libform/%)\
