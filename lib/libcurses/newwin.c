@@ -1,4 +1,4 @@
-/*	$NetBSD: newwin.c,v 1.59 2021/05/15 11:06:07 uwe Exp $	*/
+/*	$NetBSD: newwin.c,v 1.60 2021/06/01 00:59:01 mcf Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
