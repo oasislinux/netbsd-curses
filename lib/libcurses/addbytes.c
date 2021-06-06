@@ -1,4 +1,4 @@
-/*	$NetBSD: addbytes.c,v 1.54 2021/02/13 14:30:37 rillig Exp $	*/
+/*	$NetBSD: addbytes.c,v 1.55 2021/06/06 05:06:44 blymn Exp $	*/
 
 /*
  * Copyright (c) 1987, 1993, 1994
@@ -161,6 +161,15 @@ _cursesi_waddbytes(WINDOW *win, const char *bytes, int count, attr_t attr,
 		} else if (wc == 0) {
 			break;
 		}
+
+		/* if scrollok is false and we are at the bottom of
+		 * screen and this character would take us past the
+		 * end of the line then we are done.
+		 */
+		if ((win->curx + n >= win->maxx) && 
+		    (!(win->flags & __SCROLLOK)) &&
+		    (win->cury == win->scr_b))
+			break;
 #ifdef DEBUG
 		__CTRACE(__CTRACE_INPUT,
 		    "ADDBYTES WIDE(0x%x [%s], %x) at (%d, %d), ate %d bytes\n",
@@ -205,6 +214,19 @@ _cursesi_addbyte(WINDOW *win, __LINE **lp, int *y, int *x, int c,
 		case '\t':
 			tabsize = win->screen->TABSIZE;
 			newx = tabsize - (*x % tabsize);
+			/* if at the bottom of the window and
+			   not allowed to scroll then just do
+			   what we can */
+			if ((*y == win->scr_b) &&
+			    !(win->flags & __SCROLLOK)) {
+				if ((*lp)->flags & __ISPASTEOL) {
+					return OK;
+				}
+
+				if (*x + newx > win->maxx - 1)
+					newx = win->maxx - *x - 1;
+			}
+
 			for (i = 0; i < newx; i++) {
 				if (waddbytes(win, blank, 1) == ERR)
 					return ERR;
@@ -357,6 +379,20 @@ _cursesi_addwchar(WINDOW *win, __LINE **lnp, int *y, int *x,
 			cc.attributes = win->wattr;
 			tabsize = win->screen->TABSIZE;
 			newx = tabsize - (*x % tabsize);
+
+			/* if at the bottom of the window and
+			   not allowed to scroll then just do
+			   what we can */
+			if ((*y == win->scr_b) &&
+			    !(win->flags & __SCROLLOK)) {
+				if ((*lnp)->flags & __ISPASTEOL) {
+					return OK;
+				}
+
+				if (*x + newx > win->maxx - 1)
+					newx = win->maxx - *x - 1;
+			}
+
 			for (i = 0; i < newx; i++) {
 				if (wadd_wch(win, &cc) == ERR)
 					return ERR;
