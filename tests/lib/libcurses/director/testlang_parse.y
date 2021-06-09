@@ -906,7 +906,7 @@ check_function_table(char *function, const char *table[], int nfunctions)
 static void
 compare_streams(const char *filename, bool discard)
 {
-	char check_file[PATH_MAX], drain[100], ref, data;
+	char check_file[PATH_MAX], drain[100], ref, data, *end;
 	struct pollfd fds[2];
 	int nfd, check_fd;
 	ssize_t result;
@@ -917,19 +917,16 @@ compare_streams(const char *filename, bool discard)
 	 * path.
 	 */
 	if (filename[0] != '/') {
-		if (strlcpy(check_file, check_path, sizeof(check_file))
-		    >= sizeof(check_file))
+		end = memccpy(check_file, check_path, '\0', sizeof(check_file));
+		if (!end)
 			errx(2, "CHECK_PATH too long");
-
-		if (strlcat(check_file, "/", sizeof(check_file))
-		    >= sizeof(check_file))
-			errx(2, "Could not append / to check file path");
+		end[-1] = '/';
 	} else {
-		check_file[0] = '\0';
+		end = check_file;
 	}
 
-	if (strlcat(check_file, filename, sizeof(check_file))
-	    >= sizeof(check_file))
+	end = memccpy(end, filename, '\0', sizeof(check_file) - (end - check_file));
+	if (!end)
 		errx(2, "Path to check file path overflowed");
 
 	int create_check_file = 0;
