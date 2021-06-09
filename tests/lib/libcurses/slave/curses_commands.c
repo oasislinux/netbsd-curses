@@ -77,11 +77,14 @@ set_short(char *arg, short *x)
 int
 set_win(char *arg, WINDOW **x)
 {
-	if (sscanf(arg, "%p", x) == 0) {
+	void *p;
+
+	if (sscanf(arg, "%p", &p) == 0) {
 		report_count(1);
 		report_error("BAD ARGUMENT");
 		return -1;
 	}
+	*x = p;
 
 	return 0;
 }
@@ -89,11 +92,14 @@ set_win(char *arg, WINDOW **x)
 int
 set_scrn(char *arg, SCREEN **x)
 {
-	if (sscanf(arg, "%p", x) == 0) {
+	void *p;
+
+	if (sscanf(arg, "%p", &p) == 0) {
 		report_count(1);
 		report_error("BAD ARGUMENT");
 		return -1;
 	}
+	*x = p;
 
 	return 0;
 }

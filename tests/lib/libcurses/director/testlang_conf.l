@@ -268,7 +268,7 @@ include		BEGIN(incl);
 			if (sscanf(yytext, "%lx", &val) != 1)
 				errx(1, "Bad hex conversion");
 
-			if (asprintf(&yylval.string, "%ld", val) == -1)
+			if (asprintf(&yylval.string, "%lu", val) == -1)
 				err(1, "Cannot allocate numeric string");
 			return numeric;
 		}
