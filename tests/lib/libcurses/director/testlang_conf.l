@@ -94,7 +94,7 @@ dequote(const char *s, size_t *len)
 			switch (*p) {
 			case 'e':
 				/* escape */
-				*q++ = '\e';
+				*q++ = '\033';
 				p++;
 				break;
 
