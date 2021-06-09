@@ -1,15 +1,17 @@
 .POSIX:
 
-PREFIX=/usr/local
-BINDIR=$(PREFIX)/bin
-LIBDIR=$(PREFIX)/lib
-INCDIR=$(PREFIX)/include
-DATADIR=$(PREFIX)/share
-MANDIR=$(DATADIR)/man
-MAN1DIR=$(MANDIR)/man1
-MAN3DIR=$(MANDIR)/man3
+-include config.mk
 
-ARFLAGS=-cr
+PREFIX?=/usr/local
+BINDIR?=$(PREFIX)/bin
+LIBDIR?=$(PREFIX)/lib
+INCDIR?=$(PREFIX)/include
+DATADIR?=$(PREFIX)/share
+MANDIR?=$(DATADIR)/man
+MAN1DIR?=$(MANDIR)/man1
+MAN3DIR?=$(MANDIR)/man3
+
+ARFLAGS?=-cr
 CFLAGS+=\
 	-Wall\
 	-Wpedantic\
@@ -24,14 +26,12 @@ CFLAGS+=\
 	-I lib/libform\
 	-I lib/libmenu\
 	-I lib/libpanel
-HOSTCC=$(CC)
-HOSTCFLAGS=$(CFLAGS)
-HOSTLDFLAGS=$(LDFLAGS)
+HOSTCC?=$(CC)
+HOSTCFLAGS?=$(CFLAGS)
+HOSTLDFLAGS?=$(LDFLAGS)
 
-TERM_BUILTIN=ansi dumb vt100 vt220 xterm xterm-256color
-ENABLE_WCHAR=1
-
--include config.mk
+TERM_BUILTIN?=ansi dumb vt100 vt220 xterm xterm-256color
+ENABLE_WCHAR?=1
 
 LIBCURSES_SRC=\
 	acs.c addbytes.c addch.c addchnstr.c addnstr.c attributes.c\
