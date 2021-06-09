@@ -198,6 +198,9 @@ main(int argc, char *argv[])
 	if (setenv("TERM", term, 1) != 0)
 		err(2, "Failed to set TERM variable");
 
+	if (unsetenv("ESCDELAY") != 0)
+		err(2, "Failed to unset ESCDELAY variable");
+
 	if (stat(termpath, &st) == -1)
 		err(1, "Cannot stat %s", termpath);
 
