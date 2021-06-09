@@ -4048,7 +4048,7 @@ cmd_wins_wstr(int nargs, char **args)
 void
 cmd_get_wch(int nargs, char **args)
 {
-	wchar_t ch;
+	wint_t ch;
 	ARGC(0);
 
 	report_count(2);
@@ -4071,7 +4071,7 @@ cmd_unget_wch(int nargs, char **args)
 void
 cmd_mvget_wch(int nargs, char **args)
 {
-	wchar_t ch;
+	wint_t ch;
 
 	ARGC(2);
 	ARG_INT(0, y);
@@ -4086,7 +4086,7 @@ cmd_mvget_wch(int nargs, char **args)
 void
 cmd_mvwget_wch(int nargs, char **args)
 {
-	wchar_t ch;
+	wint_t ch;
 
 	ARGC(1);	/* FIXME: 3 */
 	ARG_WINDOW(0, win);
@@ -4102,7 +4102,7 @@ cmd_mvwget_wch(int nargs, char **args)
 void
 cmd_wget_wch(int nargs, char **args)
 {
-	wchar_t ch;
+	wint_t ch;
 
 	ARGC(1);
 	ARG_WINDOW(0, win);
