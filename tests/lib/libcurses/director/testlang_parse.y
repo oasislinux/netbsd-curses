@@ -31,6 +31,7 @@
 
 #include <assert.h>
 #include <curses.h>
+#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <err.h>
@@ -42,7 +43,6 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <time.h>
-#include <vis.h>
 #include <stdint.h>
 #include "returns.h"
 #include "director.h"
@@ -482,13 +482,25 @@ excess(const char *fname, size_t lineno, const char *func, const char *comment,
     const void *data, size_t datalen)
 {
 	size_t dstlen = datalen * 4 + 1;
-	char *dst = malloc(dstlen);
+	char *dst = malloc(dstlen), *pos = dst;
+	const char *src = data, *end = src + datalen;
+	int c;
 
 	if (dst == NULL)
 		err(1, "malloc");
 
-	if (strnvisx(dst, dstlen, data, datalen, VIS_WHITE | VIS_OCTAL) == -1)
-		err(1, "strnvisx");
+	while (src < end) {
+		c = *src++;
+		if (isgraph(c) && c != ' ') {
+			*pos++ = c;
+		} else {
+			c = *src;
+			*pos++ = '\\';
+			*pos++ = '0' + ((unsigned)c >> 6 & 3);
+			*pos++ = '0' + ((unsigned)c >> 3 & 7);
+			*pos++ = '0' + ((unsigned)c & 7);
+		}
+	}
 
 	warnx("%s:%zu: [%s] Excess %zu bytes%s [%s]",
 	    fname, lineno, func, datalen, comment, dst);
