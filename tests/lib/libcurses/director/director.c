@@ -104,11 +104,11 @@ slave_died(int signo)
 
 
 static void
-usage(void)
+usage(const char *argv0)
 {
 	fprintf(stderr, "Usage: %s [-vgf] [-I include-path] [-C check-path] "
 	    "[-T terminfo-file] [-s pathtoslave] [-t term] "
-	    "commandfile\n", getprogname());
+	    "commandfile\n", argv0 ? argv0 : "director");
 	fprintf(stderr, " where:\n");
 	fprintf(stderr, "    -v enables verbose test output\n");
 	fprintf(stderr, "    -g generates check-files if they do not exist\n");
@@ -167,15 +167,15 @@ main(int argc, char *argv[])
 			break;
 		case '?':
 		default:
-			usage();
+			usage(argv[0]);
 			break;
 		}
 	}
 
+	if (argc != optind + 1)
+		usage(argv[0]);
 	argc -= optind;
 	argv += optind;
-	if (argc != 1)
-		usage();
 
 	if (termpath == NULL)
 		termpath = DEF_TERMPATH;

@@ -171,7 +171,7 @@ int
 main(int argc, char *argv[])
 {
 	if (argc != 3) {
-		fprintf(stderr, "usage: %s <in_fd> <out_fd>\n", getprogname());
+		fprintf(stderr, "usage: %s <in_fd> <out_fd>\n", argv[0] ? argv[0] : "slave");
 		return 0;
 	}
 	sscanf(argv[1], "%d", &from_director);
