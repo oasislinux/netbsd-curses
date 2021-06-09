@@ -204,9 +204,11 @@ include		BEGIN(incl);
 			}
 		}
 
-		if (asprintf(&inc_file, "%.*s%s",
-		    dir_len, dir_begin, yytext) == -1)
+		inc_file = malloc(dir_len + strlen(yytext) + 1);
+		if (!inc_file)
 			err(2, "Cannot construct include path");
+		memcpy(inc_file, dir_begin, dir_len);
+		strcpy(inc_file + dir_len, yytext);
 
 		yyin = fopen(inc_file, "r");
 
@@ -268,8 +270,10 @@ include		BEGIN(incl);
 			if (sscanf(yytext, "%lx", &val) != 1)
 				errx(1, "Bad hex conversion");
 
-			if (asprintf(&yylval.string, "%lu", val) == -1)
+			yylval.string = malloc((CHAR_BIT * sizeof(val) + 2) / 3 + 1);
+			if (!yylval.string)
 				err(1, "Cannot allocate numeric string");
+			sprintf(yylval.string, "%lu", val);
 			return numeric;
 		}
 
