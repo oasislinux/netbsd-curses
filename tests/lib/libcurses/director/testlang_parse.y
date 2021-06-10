@@ -1483,7 +1483,7 @@ init_parse_variables(int initial)
 static void
 validate(int i, void *data)
 {
-	char *response;
+	char *response = NULL;
 	ct_data_t *byte_response;
 
 	byte_response = data;
@@ -1929,7 +1929,7 @@ write_cmd_pipe_args(data_enum_t type, void *data)
 	var_t *var_data;
 	args_t *arg_data;
 	int len, send_type;
-	void *cmd;
+	void *cmd = NULL;
 
 	arg_data = data;
 	switch (type) {
