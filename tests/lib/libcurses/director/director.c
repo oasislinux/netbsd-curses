@@ -1,4 +1,4 @@
-/*	$NetBSD: director.c,v 1.28 2021/02/13 09:18:12 rillig Exp $	*/
+/*	$NetBSD: director.c,v 1.29 2021/06/10 07:21:07 mcf Exp $	*/
 
 /*-
  * Copyright 2009 Brett Lymn <blymn@NetBSD.org>

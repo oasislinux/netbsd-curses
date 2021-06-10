@@ -1,4 +1,4 @@
-/*	$NetBSD: setterm.c,v 1.68 2018/10/26 22:22:24 uwe Exp $	*/
+/*	$NetBSD: setterm.c,v 1.69 2021/06/10 07:15:40 mcf Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
