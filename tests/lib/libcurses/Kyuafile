@@ -1,0 +1,3 @@
+syntax(2)
+test_suite("netbsd-curses")
+atf_test_program{name="t_curses"}

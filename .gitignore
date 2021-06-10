@@ -16,3 +16,7 @@
 /tic
 /tput
 /tset
+/tests/lib/libcurses/t_curses
+/tests/lib/libcurses/director/testlang_conf.c
+/tests/lib/libcurses/director/testlang_parse.c
+/tests/lib/libcurses/director/testlang_parse.h

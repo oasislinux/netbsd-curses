@@ -26,6 +26,7 @@ CFLAGS+=\
 	-I lib/libform\
 	-I lib/libmenu\
 	-I lib/libpanel
+YFLAGS+=-d
 HOSTCC?=$(CC)
 HOSTCFLAGS?=$(CFLAGS)
 HOSTLDFLAGS?=$(LDFLAGS)
@@ -259,6 +260,44 @@ tput: $(TPUT_OBJ)
 tset: $(TSET_OBJ)
 	$(CC) $(LDFLAGS) -o $@ $(TSET_OBJ)
 
+tests/lib/libcurses/director/testlang_parse.h: tests/lib/libcurses/director/testlang_parse.c
+	mv -f y.tab.h $@
+tests/lib/libcurses/director/testlang_parse.o: tests/lib/libcurses/director/testlang_parse.c
+tests/lib/libcurses/director/testlang_conf.o: tests/lib/libcurses/director/testlang_parse.h
+
+TEST_DIRECTOR_OBJ=\
+	tests/lib/libcurses/director/testlang_parse.o\
+	tests/lib/libcurses/director/testlang_conf.o\
+	tests/lib/libcurses/director/director.o
+
+TEST_SLAVE_OBJ=\
+	tests/lib/libcurses/slave/slave.o\
+	tests/lib/libcurses/slave/commands.o\
+	tests/lib/libcurses/slave/curses_commands.o
+
+tests/lib/libcurses/t_curses: tests/lib/libcurses/t_curses.sh
+	{ echo '#!/usr/bin/env atf-sh'; cat tests/lib/libcurses/t_curses.sh; } >$@
+	chmod +x $@
+
+tests/lib/libcurses/slave/slave.o: tests/lib/libcurses/slave/slave.c
+	$(CC) $(CFLAGS) -I tests/lib/libcurses/director -c -o $@ tests/lib/libcurses/slave/slave.c
+
+tests/lib/libcurses/slave/commands.o: tests/lib/libcurses/slave/commands.c
+	$(CC) $(CFLAGS) -I tests/lib/libcurses/director -c -o $@ tests/lib/libcurses/slave/commands.c
+
+tests/lib/libcurses/terminfo.cdb: host-tic tests/lib/libcurses/atf.terminfo
+	./host-tic -o $@ tests/lib/libcurses/atf.terminfo
+
+tests/lib/libcurses/director/director: $(TEST_DIRECTOR_OBJ)
+	$(CC) $(LDFLAGS) -o $@ $(TEST_DIRECTOR_OBJ)
+
+tests/lib/libcurses/slave/slave: $(TEST_SLAVE_OBJ) libcurses.a libterminfo.a
+	$(CC) $(LDFLAGS) -o $@ $(TEST_SLAVE_OBJ) libcurses.a libterminfo.a
+
+.PHONY: check
+check: tests/lib/libcurses/t_curses tests/lib/libcurses/director/director tests/lib/libcurses/slave/slave tests/lib/libcurses/terminfo.cdb
+	kyua test -k tests/lib/libcurses/Kyuafile
+
 .PHONY: install
 install: $(LIBS) $(BINS) terminfo.cdb
 	mkdir -p\
@@ -311,4 +350,11 @@ clean:
 		lib/libterminfo/compiled_terms.c\
 		lib/libterminfo/hash.c\
 		lib/libterminfo/termcap_hash.c\
-		terminfo.cdb
+		terminfo.cdb\
+		tests/lib/libcurses/t_curses\
+		tests/lib/libcurses/terminfo.cdb\
+		tests/lib/libcurses/director/director $(TEST_DIRECTOR_OBJ)\
+		tests/lib/libcurses/director/testlang_conf.c\
+		tests/lib/libcurses/director/testlang_parse.c\
+		tests/lib/libcurses/director/testlang_parse.h\
+		tests/lib/libcurses/slave/slave $(TEST_SLAVE_OBJ)
