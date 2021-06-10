@@ -94,7 +94,7 @@ _cursesi_setterm(char *type, SCREEN *screen)
 		t_lines(screen->term) = 1;
 	}
 #ifdef DEBUG
-	__CTRACE(__CTRACE_INIT, "setterm: filtered %d", screen->filtered);
+	__CTRACE(__CTRACE_INIT, "setterm: filtered %d\n", screen->filtered);
 #endif
 
 	if ((p = getenv("ESCDELAY")) != NULL)
