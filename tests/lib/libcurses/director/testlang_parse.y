@@ -495,7 +495,6 @@ excess(const char *fname, size_t lineno, const char *func, const char *comment,
 		if (isgraph(c) && c != ' ') {
 			*pos++ = c;
 		} else {
-			c = *src;
 			*pos++ = '\\';
 			*pos++ = '0' + ((unsigned)c >> 6 & 3);
 			*pos++ = '0' + ((unsigned)c >> 3 & 7);
