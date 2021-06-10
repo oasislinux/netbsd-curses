@@ -5,8 +5,7 @@ h_run()
 		export LC_ALL=C
 		r_run $file
 	else
-		locale=`locale -a | grep -i $2`
-		if [ -z "${locale}" ]; then
+		if command -v locale >/dev/null && [ -z "$(locale -a | grep -i $2)" ]; then
 			atf_fail "test ${file} failed because locale ${locale} not available"
 		else
 			# export the locale and shift the parametes by two and pass the rest
