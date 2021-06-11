@@ -33,7 +33,6 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <sys/wait.h>
-#include <sys/ttydefaults.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <ctype.h>
@@ -42,9 +41,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <util.h>
 #include <err.h>
-#include <pty.h>
-#include <utmp.h>
 #include "returns.h"
 #include "director.h"
 
@@ -137,7 +135,6 @@ main(int argc, char *argv[])
 	struct termios term_attr;
 	struct stat st;
 	int pipe_to_slave[2], pipe_from_slave[2];
-	int slave_fd;
 
 	termpath = term = slave = NULL;
 	verbose = 0;
@@ -249,16 +246,11 @@ main(int argc, char *argv[])
 	term_attr.c_cc[VERASE] = '\b';
 	term_attr.c_cc[VKILL] = '\025'; /* ^U */
 
-	if (openpty(&master, &slave_fd, NULL, &term_attr, NULL) < 0)
-		err(1, "Open pty for slave failed\n");
-	slave_pid = fork();
-	if (slave_pid < 0)
-		err(1, "Fork of slave failed\n");
+	if ((slave_pid = forkpty(&master, NULL, &term_attr, NULL)) < 0)
+		err(1, "Fork of pty for slave failed\n");
 
 	if (slave_pid == 0) {
 		/* slave side, just exec the slave process */
-		close(master);
-		login_tty(slave_fd);
 		if (asprintf(&arg1, "%d", pipe_to_slave[0]) < 0)
 			err(1, "arg1 conversion failed");
 		close(pipe_to_slave[1]);
@@ -273,7 +265,6 @@ main(int argc, char *argv[])
 		/* NOT REACHED */
 	}
 
-	(void)close(slave_fd);
 	(void)close(pipe_to_slave[0]);
 	(void)close(pipe_from_slave[1]);
 
