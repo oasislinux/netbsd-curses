@@ -33,6 +33,7 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <sys/wait.h>
+#include <sys/ttydefaults.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <ctype.h>
@@ -41,8 +42,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <util.h>
 #include <err.h>
+#if !defined(HAVE_PTY_H) || HAVE_PTY_H
+#include <pty.h>
+#else
+#include <util.h>
+#endif
 #include "returns.h"
 #include "director.h"
 
