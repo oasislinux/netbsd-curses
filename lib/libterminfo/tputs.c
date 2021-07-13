@@ -132,7 +132,6 @@ ti_puts(const TERMINAL *term, const char *str, int affcnt,
 	char pc;
 
 	assert(term != NULL);
-	assert(str != NULL);
 	assert(outc != NULL);
 
 	dodelay = (str == t_bell(term) ||
@@ -163,7 +162,6 @@ ti_putp(const TERMINAL *term, const char *str)
 	PUTCFUNC fn = {putchar};
 
 	assert(term != NULL);
-	assert(str != NULL);
 	return ti_puts(term, str, 1, _ti_putcfunc, &fn);
 }
 
@@ -172,7 +170,6 @@ tputs(const char *str, int affcnt, int (*outc)(int))
 {
 	PUTCFUNC fn = {outc};
 
-	assert(str != NULL);
 	assert(outc != NULL);
 	return _ti_puts(1, ospeed, PC, str, affcnt, _ti_putcfunc, &fn);
 }
@@ -181,6 +178,5 @@ int
 putp(const char *str)
 {
 
-	assert(str != NULL);
 	return tputs(str, 1, putchar);
 }
