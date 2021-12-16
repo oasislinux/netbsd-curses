@@ -1,4 +1,4 @@
-/*	$NetBSD: erase.c,v 1.32 2020/03/15 01:18:43 uwe Exp $	*/
+/*	$NetBSD: erase.c,v 1.33 2021/09/06 07:03:49 rin Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -60,9 +60,7 @@ werase(WINDOW *win)
 	wchar_t	bch;
 	attr_t	battr;
 
-#ifdef DEBUG
 	__CTRACE(__CTRACE_ERASE, "werase: (%p)\n", (void *)win);
-#endif
 #ifdef HAVE_WCHAR
 	bch = (wchar_t)btowc((int)win->bch);
 #else

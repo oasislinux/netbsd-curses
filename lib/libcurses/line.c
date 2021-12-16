@@ -1,4 +1,4 @@
-/*	$NetBSD: line.c,v 1.16 2020/07/01 02:57:01 uwe Exp $	*/
+/*	$NetBSD: line.c,v 1.17 2021/09/06 07:03:50 rin Exp $	*/
 
 /*-
  * Copyright (c) 1998-1999 Brett Lymn
@@ -221,17 +221,13 @@ int whline_set(WINDOW *win, const cchar_t *wch, int n)
 	if ( ( win->maxx - win->curx ) < cw )
 		return ERR;
 	wcn = min( n, ( win->maxx - win->curx ) / cw );
-#ifdef DEBUG
 	__CTRACE(__CTRACE_LINE, "whline_set: line of %d\n", wcn);
-#endif /* DEBUG */
 	ocury = win->cury;
 	ocurx = win->curx;
 
 	for (i = 0; i < wcn; i++ ) {
-#ifdef DEBUG
 		__CTRACE(__CTRACE_LINE, "whline_set: (%d,%d)\n",
 		   ocury, ocurx + i * cw);
-#endif /* DEBUG */
 		mvwadd_wch(win, ocury, ocurx + i * cw, &cc);
 	}
 
@@ -280,9 +276,7 @@ int wvline_set(WINDOW *win, const cchar_t *wch, int n)
 	cchar_t cc;
 
 	wcn = min(n, win->maxy - win->cury);
-#ifdef DEBUG
 	__CTRACE(__CTRACE_LINE, "wvline_set: line of %d\n", wcn);
-#endif /* DEBUG */
 	ocury = win->cury;
 	ocurx = win->curx;
 
@@ -293,10 +287,8 @@ int wvline_set(WINDOW *win, const cchar_t *wch, int n)
 	}
 	for (i = 0; i < wcn; i++) {
 		mvwadd_wch(win, ocury + i, ocurx, &cc);
-#ifdef DEBUG
 		__CTRACE(__CTRACE_LINE, "wvline_set: (%d,%d)\n",
 		    ocury + i, ocurx);
-#endif /* DEBUG */
 	}
 
 	wmove(win, ocury, ocurx);

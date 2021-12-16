@@ -1,4 +1,4 @@
-/*	$NetBSD: tstp.c,v 1.44 2018/10/18 07:53:13 roy Exp $	*/
+/*	$NetBSD: tstp.c,v 1.45 2021/09/06 07:03:50 rin Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -98,9 +98,7 @@ void
 __set_stophandler(void)
 {
 
-#ifdef DEBUG
 	__CTRACE(__CTRACE_MISC, "__set_stophandler: %d\n", tstp_set);
-#endif
 	if (!tstp_set) {
 		otstpfn = signal(SIGTSTP, __stop_signal_handler);
 		tstp_set = 1;
@@ -114,9 +112,7 @@ void
 __restore_stophandler(void)
 {
 
-#ifdef DEBUG
 	__CTRACE(__CTRACE_MISC, "__restore_stophandler: %d\n", tstp_set);
-#endif
 	if (tstp_set) {
 		(void)signal(SIGTSTP, otstpfn);
 		tstp_set = 0;
@@ -158,9 +154,7 @@ void
 __set_winchhandler(void)
 {
 
-#ifdef DEBUG
 	__CTRACE(__CTRACE_MISC, "__set_winchhandler: %d\n", winch_set);
-#endif
 	if (!winch_set) {
 		struct sigaction sa;
 
@@ -169,11 +163,9 @@ __set_winchhandler(void)
 		sigemptyset(&sa.sa_mask);
 		sigaction(SIGWINCH, &sa, &owsa);
 		winch_set = 1;
-#ifdef DEBUG
 		__CTRACE(__CTRACE_MISC,
 		    "__set_winchhandler: owsa.sa_handler=%p\n",
 		    (void *)(uintptr_t)owsa.sa_handler);
-#endif
 	}
 }
 
@@ -184,9 +176,7 @@ void
 __restore_winchhandler(void)
 {
 
-#ifdef DEBUG
 	__CTRACE(__CTRACE_MISC, "__restore_winchhandler: %d\n", winch_set);
-#endif
 	if (winch_set > 0) {
 		struct sigaction cwsa;
 
@@ -200,10 +190,8 @@ __restore_winchhandler(void)
 			 * so don't restore the previous one.
 			 */
 			winch_set = -1;
-#ifdef DEBUG
 			__CTRACE(__CTRACE_MISC, "cwsa.sa_handler = %p\n",
 			    (void *)(uintptr_t)cwsa.sa_handler);
-#endif
 		}
 	}
 }
@@ -215,9 +203,7 @@ int
 __stopwin(void)
 {
 
-#ifdef DEBUG
 	__CTRACE(__CTRACE_MISC, "__stopwin\n");
-#endif
 	if (_cursesi_screen == NULL)
 		return ERR;
 	if (_cursesi_screen->endwin)
@@ -260,9 +246,7 @@ __restartwin(void)
 	struct winsize win;
 	int nlines, ncols;
 
-#ifdef DEBUG
 	__CTRACE(__CTRACE_MISC, "__restartwin\n");
-#endif
 	if (!_cursesi_screen->endwin)
 		return;
 

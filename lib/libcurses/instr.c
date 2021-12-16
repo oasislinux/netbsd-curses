@@ -1,4 +1,4 @@
-/*	$NetBSD: instr.c,v 1.7 2019/06/09 07:40:14 blymn Exp $	*/
+/*	$NetBSD: instr.c,v 1.8 2021/08/15 15:12:36 rillig Exp $	*/
 
 /*
  * Copyright 2001 Wasabi Systems, Inc.

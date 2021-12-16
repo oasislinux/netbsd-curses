@@ -1,4 +1,4 @@
-/*	$NetBSD: overwrite.c,v 1.18 2007/01/21 13:25:36 jdc Exp $	*/
+/*	$NetBSD: overwrite.c,v 1.19 2021/09/06 07:03:50 rin Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -42,10 +42,8 @@
 int
 overwrite(const WINDOW *win1, WINDOW *win2)
 {
-#ifdef DEBUG
 	__CTRACE(__CTRACE_WINDOW, "overwrite: (%p, %p);\n",
 	    (void *)win1, (void *)win2);
-#endif
 	return copywin(win1, win2,
 			win2->begy - win1->begy, win2->begx - win1->begx,
 			0, 0, win2->maxy - 1, win2->maxx - 1, FALSE);

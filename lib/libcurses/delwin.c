@@ -1,4 +1,4 @@
-/*	$NetBSD: delwin.c,v 1.21 2019/04/01 11:39:15 roy Exp $	*/
+/*	$NetBSD: delwin.c,v 1.22 2021/09/06 07:03:49 rin Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -45,9 +45,7 @@ delwin(WINDOW *win)
 	struct __winlist *wl, *pwl;
 	SCREEN *screen;
 
-#ifdef DEBUG
 	__CTRACE(__CTRACE_WINDOW, "delwin(%p)\n", (void *)win);
-#endif
 
 	if (win == NULL)
 		return OK;

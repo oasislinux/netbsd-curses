@@ -1,4 +1,4 @@
-/*   $NetBSD: inwstr.c,v 1.8 2019/06/09 07:40:14 blymn Exp $ */
+/*   $NetBSD: inwstr.c,v 1.9 2021/08/15 15:12:36 rillig Exp $ */
 
 /*
  * Copyright (c) 2005 The NetBSD Foundation Inc.

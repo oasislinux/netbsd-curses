@@ -1,4 +1,4 @@
-/*	$NetBSD: underscore.c,v 1.12 2017/01/06 13:53:18 roy Exp $	*/
+/*	$NetBSD: underscore.c,v 1.13 2021/09/06 07:03:50 rin Exp $	*/
 
 /*-
  * Copyright (c) 1999 The NetBSD Foundation, Inc.
@@ -71,9 +71,7 @@ wunderscore(WINDOW *win)
 	if ((enter_underline_mode != NULL && exit_underline_mode != NULL) ||
 	    underline_char != NULL)
 	{
-#ifdef DEBUG
 		__CTRACE(__CTRACE_ATTR, "wunderscore\n");
-#endif
 		win->wattr |= __UNDERSCORE;
 	}
 	return 1;
@@ -88,9 +86,7 @@ wunderend(WINDOW *win)
 {
 
 	if (exit_underline_mode != NULL) {
-#ifdef DEBUG
 		__CTRACE(__CTRACE_ATTR, "wunderend\n");
-#endif
 		win->wattr &= ~__UNDERSCORE;
 	}
         return 1;

@@ -1,4 +1,4 @@
-/*	$NetBSD: commands.c,v 1.14 2021/02/15 07:06:27 rillig Exp $	*/
+/*	$NetBSD: commands.c,v 1.17 2021/12/06 22:45:42 rillig Exp $	*/
 
 /*-
  * Copyright 2009 Brett Lymn <blymn@NetBSD.org>
@@ -54,32 +54,32 @@ command_execute(char *func, int nargs, char **args)
 {
 	size_t i, j;
 
-	i = 0;
-	while (i < ncmds) {
-		if (strcmp(func, commands[i].name) == 0) {
-			/* Check only restricted set of functions is called before
-			 * initscr/newterm */
-			if (!initdone) {
-				j = 0;
-				while (j < nrcmds) {
-					if (strcmp(func, restricted_commands[j]) == 0) {
-						if (strcmp(func, "initscr") == 0  ||
-							strcmp(func, "newterm") == 0)
-							initdone = 1;
-						/* matched function */
-						commands[i].func(nargs, args);
-						return;
-					}
-					j++;
-				}
-				report_status("YOU NEED TO CALL INITSCR/NEWTERM FIRST");
-				return;
-			}
+	for (i = 0; i < ncmds; i++) {
+		if (strcmp(func, commands[i].name) != 0)
+			continue;
+
+		/* Check only restricted set of functions is called before
+		 * initscr/newterm */
+		if (initdone) {
 			/* matched function */
 			commands[i].func(nargs, args);
 			return;
 		}
-		i++;
+
+		for (j = 0; j < nrcmds; j++) {
+			if (strcmp(func, restricted_commands[j]) != 0)
+				continue;
+
+			if (strcmp(func, "initscr") == 0  ||
+			    strcmp(func, "newterm") == 0)
+				initdone = 1;
+
+			/* matched function */
+			commands[i].func(nargs, args);
+			return;
+		}
+		report_status("YOU NEED TO CALL INITSCR/NEWTERM FIRST");
+		return;
 	}
 
 	report_status("UNKNOWN_FUNCTION");
@@ -99,7 +99,7 @@ write_to_director(const void *mem, size_t size)
 static void
 write_to_director_int(int i)
 {
-	write_to_director(&i, sizeof i);
+	write_to_director(&i, sizeof(i));
 }
 
 static void
@@ -109,7 +109,7 @@ write_to_director_type(data_enum_t return_type)
 }
 
 /*
- * Report an pointer value back to the director
+ * Report a pointer value back to the director
  */
 void
 report_ptr(void *ptr)
@@ -219,7 +219,7 @@ report_nstr(chtype *string)
 	for (p = string; (*p & __CHARTEXT) != 0; p++)
 		continue;
 
-	size = (size_t)(p + 1 - string) * sizeof *p;
+	size = (size_t)(p + 1 - string) * sizeof(*p);
 
 	write_to_director_type(data_byte);
 	write_to_director_int(size);
@@ -234,8 +234,8 @@ report_cchar(cchar_t c)
 {
 
 	write_to_director_type(data_cchar);
-	write_to_director_int(sizeof c);
-	write_to_director(&c, sizeof c);
+	write_to_director_int(sizeof(c));
+	write_to_director(&c, sizeof(c));
 }
 
 /*
@@ -263,7 +263,7 @@ report_wstr(wchar_t *wstr)
 
 	for (p = wstr; *p != L'\0'; p++)
 		continue;
-	size = (size_t)(p + 1 - wstr) * sizeof *p;
+	size = (size_t)(p + 1 - wstr) * sizeof(*p);
 
 
 	write_to_director_type(data_wchar);

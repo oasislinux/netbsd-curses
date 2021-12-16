@@ -1,4 +1,4 @@
-/*	$NetBSD: addch.c,v 1.21 2019/06/09 07:40:14 blymn Exp $	*/
+/*	$NetBSD: addch.c,v 1.23 2021/09/06 07:45:48 rin Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -84,11 +84,9 @@ waddch(WINDOW *win, chtype ch)
 	cchar_t cc;
 
 	__cursesi_chtype_to_cchar(ch, &cc);
-#ifdef DEBUG
 	__CTRACE(__CTRACE_INPUT,
-		 "addch: %d : 0x%x (adding char as wide char)\n",
-		 cc.vals[0], cc.attributes);
-#endif
+	    "addch: %d : 0x%x (adding char as wide char)\n",
+	    cc.vals[0], cc.attributes);
 
 	return wadd_wch(win, &cc);
 }
@@ -106,9 +104,7 @@ waddch(WINDOW *win, chtype ch)
 
 	buf.ch = (wchar_t)ch & __CHARTEXT;
 	buf.attr = (attr_t)ch & __ATTRIBUTES;
-#ifdef DEBUG
 	__CTRACE(__CTRACE_INPUT, "addch: %d : 0x%x\n", buf.ch, buf.attr);
-#endif
 	return __waddch(win, &buf);
 }
 #endif /* !HAVE_WCHAR */

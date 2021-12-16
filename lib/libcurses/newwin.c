@@ -1,4 +1,4 @@
-/*	$NetBSD: newwin.c,v 1.60 2021/06/01 00:59:01 mcf Exp $	*/
+/*	$NetBSD: newwin.c,v 1.63 2021/10/19 06:41:03 blymn Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -142,9 +142,7 @@ __newwin(SCREEN *screen, int nlines, int ncols, int by, int bx, int ispad,
 	win->reqy = nlines;
 	win->reqx = ncols;
 
-#ifdef DEBUG
 	__CTRACE(__CTRACE_WINDOW, "newwin: win->ch_off = %d\n", win->ch_off);
-#endif
 
 	for (i = 0; i < maxy; i++) {
 		lp = win->alines[i];
@@ -162,8 +160,7 @@ __newwin(SCREEN *screen, int nlines, int ncols, int by, int bx, int ispad,
 			SET_WCOL(*sp, 1);
 #endif /* HAVE_WCHAR */
 		}
-		lp->hash = __hash((char *)(void *)lp->line,
-				  (size_t)(maxx * __LDATASIZE));
+		lp->hash = __hash_line(lp->line, maxx);
 	}
 	return (win);
 }
@@ -183,10 +180,8 @@ __subwin(WINDOW *orig, int nlines, int ncols, int by, int bx, int ispad)
 	WINDOW *win;
 	int	maxy, maxx;
 
-#ifdef	DEBUG
 	__CTRACE(__CTRACE_WINDOW, "subwin: (%p, %d, %d, %d, %d, %d)\n",
 	    (void *)orig, nlines, ncols, by, bx, ispad);
-#endif
 	if (orig == NULL)
 		return NULL;
 
@@ -222,11 +217,6 @@ __set_subwin(WINDOW *orig, WINDOW *win)
 {
 	int     i;
 	__LINE *lp, *olp;
-#ifdef HAVE_WCHAR
-	__LDATA *cp;
-	int j;
-	nschar_t *np;
-#endif /* HAVE_WCHAR */
 
 	win->ch_off = win->begx - orig->begx;
 	/* Point line pointers to line space. */
@@ -239,32 +229,11 @@ __set_subwin(WINDOW *orig, WINDOW *win)
 		lp->line = &olp->line[win->ch_off];
 		lp->firstchp = &olp->firstch;
 		lp->lastchp = &olp->lastch;
-#ifndef HAVE_WCHAR
-		lp->hash = __hash((char *)(void *)lp->line,
-				  (size_t)(win->maxx * __LDATASIZE));
-#else
-		lp->hash = 0;
-		for (cp = lp->line, j = 0; j < win->maxx; j++, cp++) {
-			lp->hash = __hash_more( &cp->ch,
-			    sizeof( wchar_t ), lp->hash );
-			lp->hash = __hash_more( &cp->attr,
-			    sizeof( wchar_t ), lp->hash );
-			if ( cp->nsp ) {
-				np = cp->nsp;
-				while ( np ) {
-					lp->hash = __hash_more( &np->ch,
-					    sizeof( wchar_t ), lp->hash );
-					np = np->next;
-				}
-			}
-		}
-#endif /* HAVE_WCHAR */
+		lp->hash = __hash_line(lp->line, win->maxx);
 	}
 
-#ifdef DEBUG
 	__CTRACE(__CTRACE_WINDOW, "__set_subwin: win->ch_off = %d\n",
 	    win->ch_off);
-#endif
 }
 /*
  * __makenew --
@@ -280,18 +249,14 @@ __makenew(SCREEN *screen, int nlines, int ncols, int by, int bx, int sub,
 	int			 i;
 
 
-#ifdef	DEBUG
 	__CTRACE(__CTRACE_WINDOW, "makenew: (%d, %d, %d, %d)\n",
 	    nlines, ncols, by, bx);
-#endif
 	if (nlines <= 0 || ncols <= 0)
 		return NULL;
 
 	if ((win = malloc(sizeof(WINDOW))) == NULL)
 		return NULL;
-#ifdef DEBUG
 	__CTRACE(__CTRACE_WINDOW, "makenew: win = %p\n", (void *)win);
-#endif
 	win->fp = NULL;
 	win->buf = NULL;
 	win->buflen = 0;
@@ -361,9 +326,7 @@ __makenew(SCREEN *screen, int nlines, int ncols, int by, int bx, int sub,
 			}
 		}
 	}
-#ifdef DEBUG
 	__CTRACE(__CTRACE_WINDOW, "makenew: ncols = %d\n", ncols);
-#endif
 	win->screen = screen;
 	win->cury = win->curx = 0;
 	win->maxy = nlines;
@@ -393,7 +356,8 @@ __makenew(SCREEN *screen, int nlines, int ncols, int by, int bx, int sub,
 		win->smaxx = 0;
 	} else
 		__swflags(win);
-#ifdef DEBUG
+	__CTRACE(__CTRACE_WINDOW, "makenew: sub = %d\n", sub);
+	__CTRACE(__CTRACE_WINDOW, "makenew: ispad = %d\n", ispad);
 	__CTRACE(__CTRACE_WINDOW, "makenew: win->wattr = %08x\n", win->wattr);
 	__CTRACE(__CTRACE_WINDOW, "makenew: win->flags = %#.4x\n", win->flags);
 	__CTRACE(__CTRACE_WINDOW, "makenew: win->maxy = %d\n", win->maxy);
@@ -402,7 +366,6 @@ __makenew(SCREEN *screen, int nlines, int ncols, int by, int bx, int sub,
 	__CTRACE(__CTRACE_WINDOW, "makenew: win->begx = %d\n", win->begx);
 	__CTRACE(__CTRACE_WINDOW, "makenew: win->scr_t = %d\n", win->scr_t);
 	__CTRACE(__CTRACE_WINDOW, "makenew: win->scr_b = %d\n", win->scr_b);
-#endif
 	return win;
 }
 

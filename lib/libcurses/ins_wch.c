@@ -1,4 +1,4 @@
-/*   $NetBSD: ins_wch.c,v 1.15 2020/07/06 22:46:50 uwe Exp $ */
+/*   $NetBSD: ins_wch.c,v 1.17 2021/09/06 07:03:49 rin Exp $ */
 
 /*
  * Copyright (c) 2005 The NetBSD Foundation Inc.
@@ -90,24 +90,15 @@ wins_wch(WINDOW *win, const cchar_t *wch)
 	if (!wch)
 		return OK;
 	cw = wcwidth(wch->vals[0]);
+	__CTRACE(__CTRACE_INPUT, "wins_wch: wcwidth %d\n", cw);
 	if (cw < 0)
 		cw = 1;
 	if (!cw)
 		return wadd_wch( win, wch );
 
-#ifdef DEBUG
-	__CTRACE(__CTRACE_INPUT, "--before--\n");
-	for (x = 0; x < win->maxx; x++)
-		__CTRACE(__CTRACE_INPUT, "wins_wch: (0,%d)=(%x,%x,%p)\n", x,
-		    win->alines[0]->line[x].ch,
-		    win->alines[0]->line[x].attr,
-		    (void *)win->alines[0]->line[x].nsp);
-#endif /* DEBUG */
 	x = win->curx;
 	y = win->cury;
-#ifdef DEBUG
 	__CTRACE(__CTRACE_INPUT, "wins_wch: (%d,%d)\n", y, x);
-#endif /* DEBUG */
 	switch (wch->vals[0]) {
 		case L'\b':
 			if (--x < 0)
@@ -151,16 +142,12 @@ wins_wch(WINDOW *win, const cchar_t *wch)
 		*lnp->firstchp = newx;
 
 	/* shift all complete characters */
-#ifdef DEBUG
 	__CTRACE(__CTRACE_INPUT, "wins_wch: shift all characters\n");
-#endif /* DEBUG */
 	temp1 = &win->alines[y]->line[win->maxx - 1];
 	temp2 = temp1 - cw;
 	pcw = WCOL(*(temp2 + 1));
 	if (pcw < 0) {
-#ifdef DEBUG
 		__CTRACE(__CTRACE_INPUT, "wins_wch: clear EOL\n");
-#endif /* DEBUG */
 		temp2 += pcw;
 		while (temp1 > temp2 + cw) {
 			np = temp1->nsp;
@@ -200,10 +187,8 @@ wins_wch(WINDOW *win, const cchar_t *wch)
 			start->nsp = np;
 		}
 	}
-#ifdef DEBUG
 	__CTRACE(__CTRACE_INPUT, "wins_wch: insert (%x,%x,%p)\n",
 	    start->ch, start->attr, (void *)start->nsp);
-#endif /* DEBUG */
 	temp1 = start + 1;
 	ex = x + 1;
 	while (ex - x < cw) {
@@ -212,17 +197,7 @@ wins_wch(WINDOW *win, const cchar_t *wch)
 		temp1->nsp = NULL;
 		ex++, temp1++;
 	}
-#ifdef DEBUG
-	{
-		__CTRACE(__CTRACE_INPUT, "--after---\n");
-		for (x = 0; x < win->maxx; x++)
-			__CTRACE(__CTRACE_INPUT,
-			    "wins_wch: (0,%d)=(%x,%x,%p)\n", x,
-			    win->alines[0]->line[x].ch,
-			    win->alines[0]->line[x].attr,
-			    (void *)win->alines[0]->line[x].nsp);
-	}
-#endif /* DEBUG */
+
 	newx = win->maxx - 1 + win->ch_off;
 	if (newx > *lnp->lastchp)
 		*lnp->lastchp = newx;

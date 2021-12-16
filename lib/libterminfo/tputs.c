@@ -1,4 +1,4 @@
-/* $NetBSD: tputs.c,v 1.5 2019/10/03 18:02:05 christos Exp $ */
+/* $NetBSD: tputs.c,v 1.6 2021/12/15 21:07:12 blymn Exp $ */
 
 /*
  * Copyright (c) 2009 The NetBSD Foundation, Inc.
@@ -133,6 +133,9 @@ ti_puts(const TERMINAL *term, const char *str, int affcnt,
 
 	assert(term != NULL);
 	assert(outc != NULL);
+
+	if (str == NULL)
+		return OK;
 
 	dodelay = (str == t_bell(term) ||
 	    str == t_flash_screen(term) ||

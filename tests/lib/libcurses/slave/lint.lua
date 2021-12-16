@@ -1,16 +1,16 @@
 #! /usr/bin/lua
--- $NetBSD: lint.lua,v 1.2 2021/02/13 18:24:11 rillig Exp $
+-- $NetBSD: lint.lua,v 1.6 2021/06/13 19:50:18 rillig Exp $
 
 --[[
 
 usage: lua ./lint.lua
 
-Check that the boilerplate code does not contain unintended
+Check that the argument handling code does not contain unintended
 inconsistencies.
 
 ]]
 
-
+---@return string[]
 local function load_lines(fname)
   local lines = {}
 
@@ -24,18 +24,10 @@ local function load_lines(fname)
   return lines
 end
 
-
-local function new_errors()
-  local errors = {}
-  errors.add = function(self, fmt, ...)
-    table.insert(self, string.format(fmt, ...))
-  end
-  errors.print = function(self)
-    for _, msg in ipairs(self) do
-      print(msg)
-    end
-  end
-  return errors
+local had_errors = false
+local function print_error(fmt, ...)
+  print(fmt:format(...))
+  had_errors = true
 end
 
 
@@ -46,49 +38,36 @@ end
 
 
 -- After each macro ARGC, there must be the corresponding macros for ARG.
-local function check_args(errors)
+local function check_args()
   local fname = "curses_commands.c"
   local lines = load_lines(fname)
-  local argi, argc
+  local curr_argc, curr_arg ---@type number|nil, number|nil
 
   for lineno, line in ipairs(lines) do
 
-    local c = num(line:match("^\tARGC%((%d)"))
-    if c ~= nil and c > 0 then
-      argc, argi = c, 0
+    local line_argc = num(line:match("^\tARGC%((%d+)"))
+    if line_argc and line_argc > 0 then
+      curr_argc, curr_arg = line_argc, 0
+      goto next
     end
 
-    local i = num(line:match("^\tARG_[%w_]+%((%d+)"))
-    if i ~= nil and argi == nil then
-      errors:add("%s:%d: ARG without preceding ARGC", fname, lineno)
-    end
-
-    if i == nil and argi ~= nil and c == nil then
-      errors:add("%s:%d: expecting ARG %d, got %s", fname, lineno, argi, line)
-      argc, argi = nil, nil
-    end
-
-    if i ~= nil and argi ~= nil and i ~= argi then
-      errors:add("%s:%d: expecting ARG %d, not %d", fname, lineno, argi, i)
-      argi = i
-    end
-
-    if i ~= nil and argi ~= nil and i == argi then
-      argi = argi + 1
-      if argi == argc then
-        argc, argi = nil, nil
+    local line_arg = line:match("^\tARG_[%w_]+%(")
+    if line_arg and curr_arg then
+      curr_arg = curr_arg + 1
+      if curr_arg == curr_argc then
+        curr_argc, curr_arg = nil, nil
       end
+    elseif line_arg then
+      print_error("%s:%d: ARG without preceding ARGC", fname, lineno)
+    elseif curr_arg then
+      print_error("%s:%d: expecting ARG %d, got %s",
+        fname, lineno, curr_arg, line)
+      curr_argc, curr_arg = nil, nil
     end
+
+    ::next::
   end
 end
 
-
-local function main(arg)
-  local errors = new_errors()
-  check_args(errors)
-  errors:print()
-  return #errors == 0
-end
-
-
-os.exit(main(arg))
+check_args()
+os.exit(not had_errors)

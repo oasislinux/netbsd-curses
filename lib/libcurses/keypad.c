@@ -1,4 +1,4 @@
-/*	$NetBSD: keypad.c,v 1.14 2017/01/06 13:53:18 roy Exp $  */
+/*	$NetBSD: keypad.c,v 1.15 2021/09/06 07:03:49 rin Exp $  */
 
 /*-
  * Copyright (c) 1998-1999 Brett Lymn (blymn@baea.com.au, brett_lymn@yahoo.com)
@@ -37,10 +37,8 @@
 int
 keypad(WINDOW *win, bool bf)
 {
-#ifdef DEBUG
 	__CTRACE(__CTRACE_MISC,
 	    "keypad: win %p, %s\n", (void *)win, bf ? "TRUE" : "FALSE");
-#endif
 	if (bf) {
 		win->flags |= __KEYPAD;
 		if (!(curscr->flags & __KEYPAD)) {

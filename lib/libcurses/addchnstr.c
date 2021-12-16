@@ -1,4 +1,4 @@
-/*	$NetBSD: addchnstr.c,v 1.8 2019/06/09 07:40:14 blymn Exp $	*/
+/*	$NetBSD: addchnstr.c,v 1.9 2021/09/06 07:03:49 rin Exp $	*/
 
 /*
  * Copyright (c) 2003 The NetBSD Foundation, Inc.
@@ -132,10 +132,8 @@ waddchnstr(WINDOW *win, const chtype *chstr, int n)
 	char	*ocp, *cp, *start;
 	int i, ret, ox, oy;
 
-#ifdef DEBUG
 	__CTRACE(__CTRACE_INPUT, "waddchnstr: win = %p, chstr = %p, n = %d\n",
 	    (void *)win, (void *)chstr, n);
-#endif
 
 	if (n >= 0)
 		for (chp = chstr, len = 0; n-- && *chp++; ++len);

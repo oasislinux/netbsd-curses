@@ -218,6 +218,9 @@ host-tic: $(HOST_TIC_OBJ)
 .c.o:
 	$(CC) $(CFLAGS) -c -o $@ $<
 
+lib/libcurses/fileio.h: lib/libcurses/genfileioh.awk lib/libcurses/shlib_version
+	awk -f lib/libcurses/genfileioh.awk lib/libcurses/shlib_version >$@.tmp && mv $@.tmp $@
+lib/libcurses/fileio.o: lib/libcurses/fileio.h
 libcurses.a: $(LIBCURSES_OBJ)
 	$(AR) $(ARFLAGS) $@ $(LIBCURSES_OBJ)
 

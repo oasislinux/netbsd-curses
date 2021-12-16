@@ -1,4 +1,4 @@
-/*   $NetBSD: get_wstr.c,v 1.8 2019/06/09 07:40:14 blymn Exp $ */
+/*   $NetBSD: get_wstr.c,v 1.10 2021/09/06 07:03:49 rin Exp $ */
 
 /*
  * Copyright (c) 2005 The NetBSD Foundation Inc.
@@ -162,11 +162,9 @@ __wgetn_wstr(WINDOW *win, wchar_t *wstr, int n)
 
 	while (wget_wch(win, &wc) != ERR
 	       && wc != L'\n' && wc != L'\r') {
-#ifdef DEBUG
 		__CTRACE(__CTRACE_INPUT,
 		    "__wgetn_wstr: win %p, char 0x%x, remain %d\n",
 		    (void *)win, wc, remain);
-#endif
 		*wstr = wc;
 		touchline(win, win->cury, 1);
 		if (wc == ec || wc == KEY_BACKSPACE || wc == KEY_LEFT) {

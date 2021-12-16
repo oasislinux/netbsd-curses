@@ -1,4 +1,4 @@
-/*	$NetBSD: screen.c,v 1.35 2018/11/16 10:12:00 blymn Exp $	*/
+/*	$NetBSD: screen.c,v 1.36 2021/09/06 07:03:50 rin Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -103,10 +103,8 @@ set_term(SCREEN *new)
 	_cursesi_reset_wacs(new);
 #endif /* HAVE_WCHAR */
 
-#ifdef DEBUG
 	__CTRACE(__CTRACE_SCREEN, "set_term: LINES = %d, COLS = %d\n",
 	    LINES, COLS);
-#endif
 
 	return old_screen;
 }
@@ -129,9 +127,7 @@ newterm(char *type, FILE *outfd, FILE *infd)
 	if ((new_screen = calloc(1, sizeof(SCREEN))) == NULL)
 		return NULL;
 
-#ifdef DEBUG
 	__CTRACE(__CTRACE_INIT, "newterm\n");
-#endif
 
 	new_screen->infd = infd;
 	/*
@@ -219,10 +215,8 @@ newterm(char *type, FILE *outfd, FILE *infd)
 		set_term(new_screen);
 	}
 
-#ifdef DEBUG
 	__CTRACE(__CTRACE_SCREEN, "newterm: LINES = %d, COLS = %d\n",
 	    LINES, COLS);
-#endif
 	__startwin(new_screen);
 
 	return new_screen;
@@ -244,9 +238,7 @@ void
 delscreen(SCREEN *screen)
 {
 
-#ifdef DEBUG
 	__CTRACE(__CTRACE_SCREEN, "delscreen(%p)\n", (void *)screen);
-#endif
 
 	__delscreen(screen);
 

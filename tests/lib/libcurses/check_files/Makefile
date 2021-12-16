@@ -1,4 +1,4 @@
-# $NetBSD: Makefile,v 1.7 2021/06/06 04:57:58 blymn Exp $
+# $NetBSD: Makefile,v 1.9 2021/11/16 21:02:06 blymn Exp $
 
 NOMAN=		# defined
 
@@ -122,6 +122,9 @@ FILES+=		ins_wch2.chk
 FILES+=		ins_wch3.chk
 FILES+=		ins_wstr1.chk
 FILES+=		ins_wstr2.chk
+FILES+=		ins_wstr3.chk
+FILES+=		ins_wstr4.chk
+FILES+=		ins_wstr5.chk
 FILES+=		insch.chk
 FILES+=		insch1.chk
 FILES+=		insch2.chk
@@ -188,7 +191,11 @@ FILES+=		mvwaddwstr2.chk
 FILES+=		mvwaddwstr3.chk
 FILES+=		mvwchgat1.chk
 FILES+=		mvwchgat2.chk
+FILES+=		mvwins_nwstr1.chk
+FILES+=		mvwins_nwstr2.chk
 FILES+=		mvwins_wch.chk
+FILES+=		mvwins_wstr1.chk
+FILES+=		mvwins_wstr2.chk
 FILES+=		notimeout.chk
 FILES+=		overlay1.chk
 FILES+=		overlay2.chk
@@ -256,8 +263,13 @@ FILES+=		window_hierarchy.chk
 FILES+=		wins_wch1.chk
 FILES+=		wins_wch2.chk
 FILES+=		wins_wch3.chk
+FILES+=		wins_nwstr1.chk
+FILES+=		wins_nwstr2.chk
 FILES+=		wins_wstr1.chk
 FILES+=		wins_wstr2.chk
+FILES+=		wins_wstr3.chk
+FILES+=		wins_wstr4.chk
+FILES+=		wins_wstr5.chk
 FILES+=		winsch1.chk
 FILES+=		winsch2.chk
 FILES+=		wprintw_refresh.chk

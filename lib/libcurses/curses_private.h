@@ -1,4 +1,4 @@
-/*	$NetBSD: curses_private.h,v 1.73 2020/03/15 01:12:47 uwe Exp $	*/
+/*	$NetBSD: curses_private.h,v 1.76 2021/09/07 01:23:09 rin Exp $	*/
 
 /*-
  * Copyright (c) 1998-2000 Brett Lymn
@@ -335,6 +335,8 @@ extern SCREEN   *_cursesi_screen;       /* The current screen in use */
 #define __CTRACE_FILEIO		0x00001000
 #define __CTRACE_ALL		0x7fffffff
 void	 __CTRACE(int, const char *, ...) __attribute__((__format__(__printf__, 2, 3)));
+#else
+#define	__CTRACE(area, fmt, ...)	__nothing
 #endif
 
 /* Common erase logic */
@@ -365,6 +367,7 @@ void     _cursesi_resetterm(SCREEN *);
 int      _cursesi_setterm(char *, SCREEN *);
 int	 __delay(void);
 unsigned int	 __hash_more(const void *, size_t, unsigned int);
+unsigned int	 __hash_line(const __LDATA *, int);
 #define	__hash(s, len)	__hash_more((s), (len), 0u)
 void	 __id_subwins(WINDOW *);
 void	 __init_getch(SCREEN *);

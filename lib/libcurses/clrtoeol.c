@@ -1,4 +1,4 @@
-/*	$NetBSD: clrtoeol.c,v 1.31 2020/03/15 01:18:43 uwe Exp $	*/
+/*	$NetBSD: clrtoeol.c,v 1.32 2021/09/06 07:03:49 rin Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -102,12 +102,10 @@ wclrtoeol(WINDOW *win)
 #endif
 	}
 
-#ifdef DEBUG
 	__CTRACE(__CTRACE_ERASE, "CLRTOEOL: y = %d, minx = %d, maxx = %d, "
 	    "firstch = %d, lastch = %d\n",
 	    y, minx, (int)(maxx - win->alines[y]->line),
 	    *win->alines[y]->firstchp, *win->alines[y]->lastchp);
-#endif
 	/* Update firstch and lastch for the line. */
 	__touchline(win, y, x, (int)win->maxx - 1);
 	__sync(win);

@@ -1,4 +1,4 @@
-/*	$NetBSD: pause.c,v 1.10 2017/01/06 13:53:18 roy Exp $	*/
+/*	$NetBSD: pause.c,v 1.11 2021/09/06 07:03:50 rin Exp $	*/
 
 /*-
  * Copyright (c) 1999 The NetBSD Foundation, Inc.
@@ -29,7 +29,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <limits.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <time.h>
@@ -46,9 +45,7 @@ napms(int ms)
 {
 	struct timespec	ts;
 
-#ifdef DEBUG
 	__CTRACE(__CTRACE_MISC, "napms: %d\n", ms);
-#endif
 	ts.tv_sec = ms / 1000;
 	ts.tv_nsec = (ms % 1000) * 1000000;
 	(void)nanosleep(&ts, NULL);
@@ -65,9 +62,7 @@ delay_output(int ms)
 	char delstr[(sizeof(int) * CHAR_BIT + 2) / 3 + 1];
 	int ret;
 
-#ifdef DEBUG
 	__CTRACE(__CTRACE_MISC, "delay_output: %d\n", ms);
-#endif
 	if (!_cursesi_screen->padchar)
 		return napms(ms);
 

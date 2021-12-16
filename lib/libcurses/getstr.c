@@ -1,4 +1,4 @@
-/*	$NetBSD: getstr.c,v 1.27 2019/06/09 07:40:14 blymn Exp $	*/
+/*	$NetBSD: getstr.c,v 1.29 2021/09/06 07:03:49 rin Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -156,11 +156,9 @@ __wgetnstr(WINDOW *win, char *str, int n)
 	remain = n - 1;
 
 	while ((c = wgetch(win)) != ERR && c != '\n' && c != '\r') {
-#ifdef DEBUG
 		__CTRACE(__CTRACE_INPUT,
 		    "__wgetnstr: win %p, char 0x%x, remain %d\n",
 		    (void *)win, c, remain);
-#endif
 		*str = c;
 		__touchline(win, win->cury, 0, (int) win->maxx - 1);
 		if (c == ec || c == KEY_BACKSPACE || c == KEY_LEFT) {

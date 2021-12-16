@@ -1,4 +1,4 @@
-/*   $NetBSD: add_wchstr.c,v 1.8 2019/06/09 07:40:14 blymn Exp $ */
+/*   $NetBSD: add_wchstr.c,v 1.10 2021/09/06 07:45:48 rin Exp $ */
 
 /*
  * Copyright (c) 2005 The NetBSD Foundation Inc.
@@ -137,11 +137,9 @@ wadd_wchnstr(WINDOW *win, const cchar_t *wchstr, int n)
 	nschar_t *np, *tnp;
 	__LINE *lnp;
 
-#ifdef DEBUG
 	__CTRACE(__CTRACE_INPUT,
 	    "wadd_wchnstr: win = %p, wchstr = %p, n = %d\n",
 	    (void *)win, (void *)wchstr, n);
-#endif
 
 	if (!wchstr)
 		return OK;
@@ -154,9 +152,7 @@ wadd_wchnstr(WINDOW *win, const cchar_t *wchstr, int n)
 			n--, chp++, ++cnt);
 	else
 		for (chp = wchstr, cnt = 0; chp->vals[0]; chp++, ++cnt);
-#ifdef DEBUG
 	__CTRACE(__CTRACE_INPUT, "wadd_wchnstr: len=%d\n", cnt);
-#endif /* DEBUG */
 	chp = wchstr;
 	x = win->curx;
 	y = win->cury;
@@ -194,18 +190,14 @@ wadd_wchnstr(WINDOW *win, const cchar_t *wchstr, int n)
 	while (cnt) {
 		x = ex;
 		wc = chp->vals[0];
-#ifdef DEBUG
 		__CTRACE(__CTRACE_INPUT, "wadd_wchnstr: adding %x", wc);
-#endif /* DEBUG */
 		cw = wcwidth(wc);
 		if (cw < 0)
 			cw = 1;
 		if (cw) {
 			/* spacing character */
-#ifdef DEBUG
 			__CTRACE(__CTRACE_INPUT,
 			    " as a spacing char(width=%d)\n", cw);
-#endif /* DEBUG */
 			if (cw > win->maxx - ex) {
 				/* clear to EOL */
 				while (ex < win->maxx) {
@@ -247,11 +239,9 @@ wadd_wchnstr(WINDOW *win, const cchar_t *wchstr, int n)
 				}
 			}
 			lp++, ex++;
-#ifdef DEBUG
 			__CTRACE(__CTRACE_INPUT,
-				"wadd_wchnstr: ex = %d, x = %d, cw = %d\n",
-				 ex, x, cw);
-#endif /* DEBUG */
+			    "wadd_wchnstr: ex = %d, x = %d, cw = %d\n",
+			    ex, x, cw);
 			while (ex - x <= cw - 1) {
 				np = lp->nsp;
 				if (np) {
@@ -269,10 +259,8 @@ wadd_wchnstr(WINDOW *win, const cchar_t *wchstr, int n)
 			}
 		} else {
 			/* non-spacing character */
-#ifdef DEBUG
 			__CTRACE(__CTRACE_INPUT,
-				"wadd_wchnstr: as non-spacing char");
-#endif /* DEBUG */
+			    "wadd_wchnstr: as non-spacing char");
 			for (i = 0; i < chp->elements; i++) {
 				np = malloc(sizeof(nschar_t));
 				if (!np)

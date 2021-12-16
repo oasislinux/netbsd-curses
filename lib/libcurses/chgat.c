@@ -1,4 +1,4 @@
-/*	$NetBSD: chgat.c,v 1.5 2012/09/28 06:05:19 blymn Exp $	*/
+/*	$NetBSD: chgat.c,v 1.8 2021/11/22 21:25:25 blymn Exp $	*/
 
 /*
  * Copyright (c) 2009 The NetBSD Foundation, Inc.
@@ -68,11 +68,9 @@ mvwchgat(WINDOW *win , int y, int x, int count, attr_t attr, short color,
 	if (count < 0 || count > win->maxx - x)
 		count = win->maxx - x;
 
-#ifdef DEBUG
 	__CTRACE(__CTRACE_ATTR, "mvwchgat: x: %d y: %d count: %d attr: 0x%x "
-		 "color pair %d\n", x, y, count, (attr & ~__COLOR),
-		 PAIR_NUMBER(color));
-#endif
+	    "color pair %d\n", x, y, count, (attr & ~__COLOR),
+	    PAIR_NUMBER(color));
 	lp = win->alines[y];
 	lc = &lp->line[x];
 
@@ -81,8 +79,9 @@ mvwchgat(WINDOW *win , int y, int x, int count, attr_t attr, short color,
 	if (x + win->ch_off + count > *lp->lastchp)
 		*lp->lastchp = x + win->ch_off + count;
 
+	lp->flags |= __ISDIRTY;
+
 	while (count-- > 0) {
-		lp->flags |= __ISDIRTY;
 #ifdef HAVE_WCHAR
 		lc->attr = (lc->attr & ~WA_ATTRIBUTES) | attr;
 #else

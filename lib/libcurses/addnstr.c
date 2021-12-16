@@ -1,4 +1,4 @@
-/*	$NetBSD: addnstr.c,v 1.17 2019/06/09 07:40:14 blymn Exp $	*/
+/*	$NetBSD: addnstr.c,v 1.20 2021/10/19 06:41:03 blymn Exp $	*/
 
 /*
  * Copyright (c) 1993, 1994
@@ -126,10 +126,9 @@ waddnstr(WINDOW *win, const char *s, int n)
 	size_t  len;
 	const char *p;
 
-#ifdef DEBUG
-		__CTRACE(__CTRACE_INPUT, "ADDNSTR: win %p, length %d\n",
-			 (void *)win, n);
-#endif
+	__CTRACE(__CTRACE_INPUT, "ADDNSTR: win %p, length %d\n",
+	    (void *)win, n);
+	__CTRACE(__CTRACE_INPUT, "ADDNSTR: string %s\n", s);
 	/*
 	 * behavior changed from traditional BSD curses, for better XCURSES
 	 * conformance.

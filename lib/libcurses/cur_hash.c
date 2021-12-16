@@ -1,4 +1,4 @@
-/*	$NetBSD: cur_hash.c,v 1.13 2017/01/06 09:14:07 roy Exp $	*/
+/*	$NetBSD: cur_hash.c,v 1.14 2021/09/07 01:23:09 rin Exp $	*/
 
 /*
  * Copyright (c) 1992, 1993
@@ -53,4 +53,26 @@ __hash_more(const void  *v_s, size_t len, unsigned int h)
 		i++;
 	}
 	return h;
+}
+
+unsigned int
+__hash_line(const __LDATA *cp, int ncols)
+{
+#ifdef HAVE_WCHAR
+	unsigned int h;
+	const nschar_t *np;
+	int x;
+
+	h = 0;
+	for (x = 0; x < ncols; x++) {
+		h = __hash_more(&cp->ch, sizeof(cp->ch), h);
+		h = __hash_more(&cp->attr, sizeof(cp->attr), h);
+		for (np = cp->nsp; np != NULL; np = np->next)
+			h = __hash_more(&np->ch, sizeof(np->ch), h);
+		cp++;
+	}
+	return h;
+#else
+	return __hash(cp, (size_t)(ncols * __LDATASIZE));
+#endif
 }
