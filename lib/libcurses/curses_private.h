@@ -336,7 +336,7 @@ extern SCREEN   *_cursesi_screen;       /* The current screen in use */
 #define __CTRACE_ALL		0x7fffffff
 void	 __CTRACE(int, const char *, ...) __attribute__((__format__(__printf__, 2, 3)));
 #else
-#define	__CTRACE(area, fmt, ...)	__nothing
+#define	__CTRACE(area, fmt, ...)
 #endif
 
 /* Common erase logic */
