@@ -1,4 +1,4 @@
-/*	$NetBSD: attributes.c,v 1.35 2022/10/25 06:20:01 blymn Exp $	*/
+/*	$NetBSD: attributes.c,v 1.34 2022/04/12 07:03:04 blymn Exp $	*/
 
 /*-
  * Copyright (c) 1999 The NetBSD Foundation, Inc.
@@ -138,9 +138,6 @@ attrset(int attr)
 int
 wattr_get(WINDOW *win, attr_t *attr, short *pair, void *opts)
 {
-	if (__predict_false(win == NULL))
-		return ERR;
-
 	__CTRACE(__CTRACE_ATTR, "wattr_get: win %p\n", (void *)win);
 	if (attr != NULL) {
 		*attr = win->wattr;
@@ -228,9 +225,6 @@ wcolor_set(WINDOW *win, short pair, void *opts)
 chtype
 getattrs(WINDOW *win)
 {
-	if (__predict_false(win == NULL))
-		return ERR;
-
 	__CTRACE(__CTRACE_ATTR, "getattrs: win %p\n", (void *)win);
 	return((chtype) win->wattr);
 }
@@ -364,12 +358,7 @@ term_attrs(void)
 static int
 __wattr_on(WINDOW *win, attr_t attr)
 {
-	const TERMINAL *t;
-
-	if (__predict_false(win == NULL))
-		return ERR;
-
-	t = win->screen->term;
+	const TERMINAL *t = win->screen->term;
 
 	__CTRACE(__CTRACE_ATTR, "wattr_on: win %p, attr %08x\n",
 	    (void *)win, attr);
@@ -417,12 +406,7 @@ __wattr_on(WINDOW *win, attr_t attr)
 static int
 __wattr_off(WINDOW *win, attr_t attr)
 {
-	const TERMINAL *t;
-
-	if (__predict_false(win == NULL))
-		return ERR;
-
-	t = win->screen->term;
+	const TERMINAL *t = win->screen->term;
 
 	__CTRACE(__CTRACE_ATTR, "wattr_off: win %p, attr %08x\n",
 	    (void *)win, attr);
@@ -470,12 +454,7 @@ __wattr_off(WINDOW *win, attr_t attr)
 static void
 __wcolor_set(WINDOW *win, attr_t attr)
 {
-	const TERMINAL *t;
-
-	if (__predict_false(win == NULL))
-		return;
-
-	t = win->screen->term;
+	const TERMINAL *t = win->screen->term;
 
 	/* If another color pair is set, turn that off first. */
 	win->wattr &= ~__COLOR;
