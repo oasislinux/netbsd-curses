@@ -1,4 +1,4 @@
-/*	$NetBSD: scroll.c,v 1.29 2024/12/23 02:58:04 blymn Exp $	*/
+/*	$NetBSD: scroll.c,v 1.28 2024/12/05 04:08:12 blymn Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -92,9 +92,6 @@ wscrl(WINDOW *win, int nlines)
 	__CTRACE(__CTRACE_WINDOW, "wscrl: (%p) lines=%d\n",
 	    (void *)win, nlines);
 
-	if (__predict_false(win == NULL))
-		return ERR;
-
 	if (!(win->flags & __SCROLLOK))
 		return ERR;
 	if (!nlines)
@@ -122,9 +119,6 @@ wscrl(WINDOW *win, int nlines)
 int
 wsetscrreg(WINDOW *win, int top, int bottom)
 {
-	if (__predict_false(win == NULL))
-		return ERR;
-
 	if (top < 0 || bottom >= win->maxy || bottom - top < 1)
 		return ERR;
 	win->scr_t = top;
@@ -139,9 +133,6 @@ wsetscrreg(WINDOW *win, int top, int bottom)
 int
 wgetscrreg(WINDOW *win, int *top, int *bottom)
 {
-	if (__predict_false(win == NULL))
-		return ERR;
-
 	*top = win->scr_t;
 	*bottom = win->scr_b;
 	return OK;

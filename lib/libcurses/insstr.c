@@ -1,4 +1,4 @@
-/*   $NetBSD: insstr.c,v 1.12 2024/12/23 02:58:03 blymn Exp $ */
+/*   $NetBSD: insstr.c,v 1.11 2022/10/19 06:09:27 blymn Exp $ */
 
 /*
  * Copyright (c) 2005 The NetBSD Foundation Inc.
@@ -144,9 +144,6 @@ winsnstr(WINDOW *win, const char *str, int n)
 #ifdef HAVE_WCHAR
 	nschar_t *np, *tnp;
 #endif /* HAVE_WCHAR */
-
-	if (__predict_false(win == NULL))
-		return ERR;
 
 	/* find string length */
 	if (n > 0)

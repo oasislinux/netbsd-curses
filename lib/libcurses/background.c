@@ -1,4 +1,4 @@
-/*	$NetBSD: background.c,v 1.34 2024/12/23 02:58:03 blymn Exp $	*/
+/*	$NetBSD: background.c,v 1.33 2022/10/19 06:09:27 blymn Exp $	*/
 
 /*-
  * Copyright (c) 2000 The NetBSD Foundation, Inc.
@@ -64,9 +64,6 @@ wbkgdset(WINDOW *win, chtype ch)
 	__CTRACE(__CTRACE_ATTR, "wbkgdset: (%p), '%s', %08x\n",
 	    (void *)win, unctrl(ch & __CHARTEXT), ch & __ATTRIBUTES);
 
-	if (__predict_false(win == NULL))
-		return;
-
 	/* Background character. */
 	if (ch & __CHARTEXT)
 		win->bch = (wchar_t) ch & __CHARTEXT;
@@ -89,10 +86,6 @@ wbkgd(WINDOW *win, chtype ch)
 
 	__CTRACE(__CTRACE_ATTR, "wbkgd: (%p), '%s', %08x\n",
 	    (void *)win, unctrl(ch & __CHARTEXT), ch & __ATTRIBUTES);
-
-	if (__predict_false(win == NULL))
-		return ERR;
-
 	wbkgdset(win, ch);
 
 	for (y = 0; y < win->maxy; y++) {
@@ -122,9 +115,6 @@ chtype
 getbkgd(WINDOW *win)
 {
 	attr_t	battr;
-
-	if (__predict_false(win == NULL))
-		return ERR;
 
 	/* Background attributes (check colour). */
 	battr = win->battr & A_ATTRIBUTES;
@@ -169,9 +159,6 @@ wbkgrndset(WINDOW *win, const cchar_t *wch)
 
 	__CTRACE(__CTRACE_ATTR, "wbkgrndset: (%p), '%s', %x\n",
 		(void *)win, (const char *) wunctrl(wch), wch->attributes);
-
-	if (__predict_false(win == NULL))
-		return;
 
 	/* ignore multi-column characters */
 	if (!wch->elements || wcwidth(wch->vals[0]) > 1)
@@ -264,9 +251,6 @@ wbkgrnd(WINDOW *win, const cchar_t *wch)
 	__CTRACE(__CTRACE_ATTR, "wbkgrnd: (%p), '%s', %x\n",
 		(void *)win, (const char *) wunctrl(wch), wch->attributes);
 
-	if (__predict_false(win == NULL))
-		return ERR;
-
 	/* ignore multi-column characters */
 	if (!wch->elements || wcwidth( wch->vals[ 0 ]) > 1)
 		return ERR;
@@ -281,9 +265,6 @@ int
 wgetbkgrnd(WINDOW *win, cchar_t *wch)
 {
 	nschar_t *np;
-
-	if (__predict_false(win == NULL))
-		return ERR;
 
 	/* Background attributes (check colour). */
 	wch->attributes = win->battr & WA_ATTRIBUTES;

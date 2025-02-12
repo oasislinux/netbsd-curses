@@ -1,4 +1,4 @@
-/*	$NetBSD: clrtobot.c,v 1.32 2024/12/23 02:58:03 blymn Exp $	*/
+/*	$NetBSD: clrtobot.c,v 1.31 2022/10/19 06:09:27 blymn Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -58,9 +58,6 @@ wclrtobot(WINDOW *win)
 	__LDATA	*sp, *end, *maxx;
 	wchar_t bch;
 	attr_t	battr;
-
-	if (__predict_false(win == NULL))
-		return ERR;
 
 	bch = win->bch;
 	if (win != curscr)

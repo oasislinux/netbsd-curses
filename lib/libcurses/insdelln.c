@@ -1,4 +1,4 @@
-/*	$NetBSD: insdelln.c,v 1.24 2024/12/23 02:58:03 blymn Exp $	*/
+/*	$NetBSD: insdelln.c,v 1.23 2022/10/19 06:09:27 blymn Exp $	*/
 
 /*
  * Copyright (c) 2000 The NetBSD Foundation, Inc.
@@ -72,9 +72,6 @@ winsdelln(WINDOW *win, int nlines)
 
 	__CTRACE(__CTRACE_LINE, "winsdelln: (%p) cury=%d lines=%d\n",
 	    (void *)win, win->cury, nlines);
-
-	if (__predict_false(win == NULL))
-		return ERR;
 
 	if (!nlines)
 		return OK;

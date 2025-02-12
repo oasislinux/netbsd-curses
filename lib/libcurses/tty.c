@@ -1,4 +1,4 @@
-/*	$NetBSD: tty.c,v 1.51 2024/12/23 02:58:04 blymn Exp $	*/
+/*	$NetBSD: tty.c,v 1.50 2023/10/09 21:14:29 blymn Exp $	*/
 
 /*-
  * Copyright (c) 1992, 1993, 1994
@@ -490,9 +490,6 @@ qiflush(void)
 int
 intrflush(WINDOW *win, bool bf)
 {
-	if (__predict_false(win == NULL))
-		return ERR;
-
 	/* Check if we need to restart ... */
 	if (_cursesi_screen->endwin)
 		__restartwin();

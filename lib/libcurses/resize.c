@@ -1,4 +1,4 @@
-/*	$NetBSD: resize.c,v 1.37 2024/12/23 02:58:04 blymn Exp $	*/
+/*	$NetBSD: resize.c,v 1.36 2022/10/19 06:09:27 blymn Exp $	*/
 
 /*
  * Copyright (c) 2001
@@ -46,7 +46,7 @@ wresize(WINDOW *win, int req_nlines, int req_ncols)
 	int	nlines = req_nlines;
 	int	ncols = req_ncols;
 
-	if (__predict_false(win == NULL))
+	if (win == NULL)
 		return ERR;
 
 	__CTRACE(__CTRACE_WINDOW, "wresize: (%p, %d, %d)\n",

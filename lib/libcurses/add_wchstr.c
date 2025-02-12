@@ -1,4 +1,4 @@
-/*   $NetBSD: add_wchstr.c,v 1.15 2024/12/23 02:58:03 blymn Exp $ */
+/*   $NetBSD: add_wchstr.c,v 1.14 2022/10/19 06:09:27 blymn Exp $ */
 
 /*
  * Copyright (c) 2005 The NetBSD Foundation Inc.
@@ -140,9 +140,6 @@ wadd_wchnstr(WINDOW *win, const cchar_t *wchstr, int n)
 	__CTRACE(__CTRACE_INPUT,
 	    "wadd_wchnstr: win = %p, wchstr = %p, n = %d\n",
 	    (void *)win, (void *)wchstr, n);
-
-	if (__predict_false(win == NULL))
-		return ERR;
 
 	if (!wchstr)
 		return OK;

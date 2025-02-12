@@ -1,4 +1,4 @@
-/*	$NetBSD: fileio.c,v 1.10 2024/12/23 02:58:03 blymn Exp $	*/
+/*	$NetBSD: fileio.c,v 1.9 2021/09/07 12:36:57 rin Exp $	*/
 
 /*-
  * Copyright (c) 2008 The NetBSD Foundation, Inc.
@@ -81,7 +81,7 @@ putwin(WINDOW *win, FILE *fp)
 
 	__CTRACE(__CTRACE_FILEIO, "putwin: win %p\n", (void *)win);
 
-	if (__predict_false(win == NULL))
+	if (win == NULL)
 		return ERR;
 
 	/* win can't be a subwin */

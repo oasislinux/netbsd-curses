@@ -1,4 +1,4 @@
-/*	$NetBSD: toucholap.c,v 1.19 2024/12/23 02:58:04 blymn Exp $	*/
+/*	$NetBSD: toucholap.c,v 1.18 2021/09/06 07:03:50 rin Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -43,10 +43,6 @@ touchoverlap(WINDOW *win1, WINDOW *win2)
 
 	__CTRACE(__CTRACE_WINDOW, "touchoverlap: (%p, %p);\n",
 	    (void *)win1, (void *)win2);
-
-        if (__predict_false(win1 == NULL) || __predict_false(win2 == NULL))
-                return ERR;
-
 	starty = max(win1->begy, win2->begy);
 	startx = max(win1->begx, win2->begx);
 	endy = min(win1->maxy + win1->begy, win2->maxy + win2->begy);

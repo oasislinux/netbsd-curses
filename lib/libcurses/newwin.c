@@ -1,4 +1,4 @@
-/*	$NetBSD: newwin.c,v 1.68 2024/12/23 02:58:04 blymn Exp $	*/
+/*	$NetBSD: newwin.c,v 1.67 2022/05/03 07:25:34 blymn Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -74,9 +74,6 @@ WINDOW *
 dupwin(WINDOW *win)
 {
 	WINDOW *new_one;
-
-	if (__predict_false(win == NULL))
-		return NULL;
 
 	if ((new_one = __newwin(_cursesi_screen, win->maxy, win->maxx,
 				win->begy, win->begx, FALSE,
@@ -189,9 +186,8 @@ __subwin(WINDOW *orig, int nlines, int ncols, int by, int bx, int ispad)
 
 	__CTRACE(__CTRACE_WINDOW, "subwin: (%p, %d, %d, %d, %d, %d)\n",
 	    (void *)orig, nlines, ncols, by, bx, ispad);
-
-        if (__predict_false(orig == NULL))
-                return NULL;
+	if (orig == NULL)
+		return NULL;
 
 	/* Make sure window fits inside the original one. */
 	maxy = nlines > 0 ? nlines : orig->maxy + orig->begy - by + nlines;
@@ -408,9 +404,6 @@ __swflags(WINDOW *win)
 bool
 is_pad(const WINDOW *win)
 {
-
-	if (__predict_false(win == NULL))
-		return false;
 
 	return win->flags & __ISPAD ? true : false;
 }

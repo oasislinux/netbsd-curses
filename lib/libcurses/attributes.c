@@ -1,4 +1,4 @@
-/*	$NetBSD: attributes.c,v 1.36 2024/12/23 02:58:03 blymn Exp $	*/
+/*	$NetBSD: attributes.c,v 1.35 2022/10/25 06:20:01 blymn Exp $	*/
 
 /*-
  * Copyright (c) 1999 The NetBSD Foundation, Inc.
@@ -194,9 +194,6 @@ wattr_set(WINDOW *win, attr_t attr, short pair, void *opts)
 	__CTRACE(__CTRACE_ATTR, "wattr_set: win %p, attr %08x, pair %d\n",
 	    (void *)win, attr, pair);
 
-	if (__predict_false(opts != NULL))
-		return ERR;
-
 	/*
 	 * This overwrites any colour setting from the attributes
 	 * and is compatible with ncurses.
@@ -218,10 +215,6 @@ wcolor_set(WINDOW *win, short pair, void *opts)
 {
 	__CTRACE(__CTRACE_COLOR, "wolor_set: win %p, pair %d\n",
 	    (void *)win, pair);
-
-	if (__predict_false(opts != NULL))
-		return ERR;
-
 	__wcolor_set(win, (attr_t) COLOR_PAIR(pair));
 	return OK;
 }

@@ -1,4 +1,4 @@
-/*	$NetBSD: addbytes.c,v 1.70 2024/12/23 02:58:03 blymn Exp $	*/
+/*	$NetBSD: addbytes.c,v 1.69 2023/10/05 06:15:03 blymn Exp $	*/
 
 /*
  * Copyright (c) 1987, 1993, 1994
@@ -119,9 +119,6 @@ _cursesi_waddbytes(WINDOW *win, const char *bytes, int count, attr_t attr,
 #ifdef DEBUG
 	int             i;
 
-	if (__predict_false(win == NULL))
-		return ERR;
-
 	for (i = 0; i < win->maxy; i++) {
 		assert(win->alines[i]->sentinel == SENTINEL_VALUE);
 	}
@@ -199,9 +196,6 @@ _cursesi_addbyte(WINDOW *win, __LINE **lp, int *y, int *x, int c,
 	int		 tabsize;
 	int		 newx, i, wcols;
 	attr_t		 attributes;
-
-	if (__predict_false(win == NULL))
-		return ERR;
 
 	if (char_interp) {
 		switch (c) {
@@ -346,9 +340,6 @@ _cursesi_addwchar(WINDOW *win, __LINE **lnp, int *y, int *x,
 	nschar_t *np = NULL;
 	cchar_t cc;
 	attr_t attributes;
-
-	if (__predict_false(win == NULL))
-		return ERR;
 
 	if (char_interp) {
 		/* special characters handling */

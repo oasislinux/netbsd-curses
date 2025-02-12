@@ -1,4 +1,4 @@
-/*	$NetBSD: idlok.c,v 1.13 2024/12/23 02:58:03 blymn Exp $	*/
+/*	$NetBSD: idlok.c,v 1.12 2017/01/06 13:53:18 roy Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -40,9 +40,6 @@
 int
 idlok(WINDOW *win, bool bf)
 {
-	if (__predict_false(win == NULL))
-		return ERR;
-
 	if (bf)
 		win->flags |= __IDLINE;
 	else

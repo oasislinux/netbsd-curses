@@ -1,4 +1,4 @@
-/*	$NetBSD: clear.c,v 1.14 2024/12/23 02:58:03 blymn Exp $	*/
+/*	$NetBSD: clear.c,v 1.13 2003/08/07 16:44:19 agc Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -53,9 +53,6 @@ clear(void)
 int
 wclear(WINDOW *win)
 {
-	if (__predict_false(win == NULL))
-		return ERR;
-
 	if (werase(win) == OK) {
 		win->flags |= __CLEAROK;
 		return (OK);

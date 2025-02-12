@@ -1,4 +1,4 @@
-/*	$NetBSD: erase.c,v 1.38 2024/12/23 02:58:03 blymn Exp $	*/
+/*	$NetBSD: erase.c,v 1.37 2022/10/19 06:09:27 blymn Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -61,9 +61,6 @@ werase(WINDOW *win)
 	attr_t	battr;
 
 	__CTRACE(__CTRACE_ERASE, "werase: (%p)\n", (void *)win);
-
-	if (__predict_false(win == NULL))
-		return ERR;
 
 	bch = win->bch;
 	if (win != curscr)

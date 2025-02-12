@@ -65,9 +65,6 @@ wborder(WINDOW *win, chtype left, chtype right, chtype top, chtype bottom,
 	int	 endy, endx, i;
 	__LDATA	*fp, *lp;
 
-	if (__predict_false(win == NULL))
-		return ERR;
-
 	if (!(left & __CHARTEXT))
 		left |= ACS_VLINE;
 	if (!(right & __CHARTEXT))
@@ -202,9 +199,6 @@ int wborder_set(WINDOW *win, const cchar_t *ls, const cchar_t *rs,
 	int	 endy, endx, i, j, k, cw, pcw, tlcw, blcw, trcw, brcw;
 	cchar_t left, right, bottom, top, topleft, topright, botleft, botright;
 	nschar_t *np, *tnp;
-
-	if (__predict_false(win == NULL))
-		return ERR;
 
 	if (ls && wcwidth(ls->vals[0]))
 		memcpy(&left, ls, sizeof(cchar_t));

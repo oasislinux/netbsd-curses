@@ -1,4 +1,4 @@
-/*	$NetBSD: clrtoeol.c,v 1.36 2024/12/23 02:58:03 blymn Exp $	*/
+/*	$NetBSD: clrtoeol.c,v 1.35 2022/05/12 22:25:38 blymn Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -58,9 +58,6 @@ wclrtoeol(WINDOW *win)
 	__LDATA *end, *maxx, *sp;
 	wchar_t bch;
 	attr_t	battr;
-
-	if (__predict_false(win == NULL))
-		return ERR;
 
 	bch = win->bch;
 	if (win != curscr)

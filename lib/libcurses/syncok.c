@@ -1,4 +1,4 @@
-/*	$NetBSD: syncok.c,v 1.3 2024/12/23 02:58:04 blymn Exp $	*/
+/*	$NetBSD: syncok.c,v 1.2 2017/01/06 13:53:18 roy Exp $	*/
 
 /*-
  * Copyright (c) 2017 The NetBSD Foundation, Inc.
@@ -33,15 +33,12 @@
 #include "curses_private.h"
 
 /*
- * syncok --
+ * immedok --
  *	Refresh the window when changed.
  */
 int
 syncok(WINDOW *win, bool bf)
 {
-
-	if (__predict_false(win == NULL))
-		return ERR;
 
 	if (bf)
 		win->flags |= __SYNCOK;

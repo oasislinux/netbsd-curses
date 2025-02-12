@@ -1,4 +1,4 @@
-/*	$NetBSD: delch.c,v 1.31 2024/12/23 02:58:03 blymn Exp $	*/
+/*	$NetBSD: delch.c,v 1.30 2022/10/19 06:09:27 blymn Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -79,9 +79,6 @@ int
 wdelch(WINDOW *win)
 {
 	__LDATA *end, *temp1, *temp2;
-
-	if (__predict_false(win == NULL))
-		return ERR;
 
 #ifndef HAVE_WCHAR
 	end = &win->alines[win->cury]->line[win->maxx - 1];

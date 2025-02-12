@@ -1,4 +1,4 @@
-/*	$NetBSD: clearok.c,v 1.6 2024/12/23 02:58:03 blymn Exp $	*/
+/*	$NetBSD: clearok.c,v 1.5 2008/04/28 20:23:01 martin Exp $	*/
 
 /*-
  * Copyright (c) 1999 The NetBSD Foundation, Inc.
@@ -39,9 +39,6 @@
 int
 clearok(WINDOW *win, bool bf)
 {
-	if (__predict_false(win == NULL))
-		return ERR;
-
 	if (bf)
 		win->flags |= __CLEAROK;
 	else

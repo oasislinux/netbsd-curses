@@ -1,4 +1,4 @@
-/*	$NetBSD: refresh.c,v 1.129 2024/12/23 02:58:04 blymn Exp $	*/
+/*	$NetBSD: refresh.c,v 1.128 2023/06/24 05:18:13 msaitoh Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -100,9 +100,6 @@ pnoutrefresh(WINDOW *pad, int pbegy, int pbegx, int sbegy, int sbegx,
 	    "pnoutrefresh: (%d, %d), (%d, %d), (%d, %d)\n",
 	    pbegy, pbegx, sbegy, sbegx, smaxy, smaxx);
 
-	if (__predict_false(pad == NULL))
-		return ERR;
-
 	/* SUS says if these are negative, they should be treated as zero */
 	if (pbegy < 0)
 		pbegy = 0;
@@ -156,9 +153,6 @@ _wnoutrefresh(WINDOW *win, int begy, int begx, int wbegy, int wbegx,
 	__CTRACE(__CTRACE_REFRESH,
 	    "_wnoutrefresh: (%d, %d), (%d, %d), (%d, %d)\n",
 	    begy, begx, wbegy, wbegx, maxy, maxx);
-
-	if (__predict_false(win == NULL))
-		return ERR;
 
 	if (screen->curwin)
 		return OK;
@@ -467,9 +461,6 @@ wrefresh(WINDOW *win)
 
 	__CTRACE(__CTRACE_REFRESH, "wrefresh: win %p\n", (void *)win);
 
-	if (__predict_false(win == NULL))
-		return ERR;
-
 	_cursesi_screen->curwin = (win == _cursesi_screen->curscr);
 	if (!_cursesi_screen->curwin) {
 		pbegx = pbegy = 0;
@@ -507,9 +498,6 @@ prefresh(WINDOW *pad, int pbegy, int pbegx, int sbegy, int sbegx,
 
 	__CTRACE(__CTRACE_REFRESH, "prefresh: pad %p, flags 0x%08x\n",
 	    (void *)pad, pad->flags);
-
-	if (__predict_false(pad == NULL))
-		return ERR;
 
 	/* Retain values in case pechochar() is called. */
 	pad->pbegy = pbegy;

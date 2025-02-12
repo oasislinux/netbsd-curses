@@ -1,4 +1,4 @@
-/*	$NetBSD: meta.c,v 1.11 2024/12/23 02:58:03 blymn Exp $	*/
+/*	$NetBSD: meta.c,v 1.10 2021/09/06 07:03:50 rin Exp $	*/
 
 /*-
  * Copyright (c) 1998-2000 Brett Lymn
@@ -39,8 +39,6 @@
 int
 meta(/*ARGSUSED*/ WINDOW *win, bool bf)
 {
-	if (__predict_false(win == NULL))
-		return ERR;
 
 	if (bf == TRUE) {
 		if (meta_on != NULL) {

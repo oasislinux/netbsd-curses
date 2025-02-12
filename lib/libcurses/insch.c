@@ -1,4 +1,4 @@
-/*	$NetBSD: insch.c,v 1.29 2024/12/23 02:58:03 blymn Exp $	*/
+/*	$NetBSD: insch.c,v 1.28 2022/10/19 06:09:27 blymn Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -84,9 +84,6 @@ winsch(WINDOW *win, chtype ch)
 {
 	__LDATA	*end, *temp1, *temp2;
 	attr_t attr;
-
-	if (__predict_false(win == NULL))
-		return ERR;
 
 	if (__using_color)
 		attr = win->battr & __COLOR;
