@@ -1,5 +1,6 @@
 *.o
 /config.mk
+/lib/libcurses/fileio.h
 /lib/libterminfo/compiled_terms.c
 /lib/libterminfo/hash.c
 /lib/libterminfo/termcap_hash.c
