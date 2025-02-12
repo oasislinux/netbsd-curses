@@ -1,4 +1,4 @@
-/*   $NetBSD: get_wstr.c,v 1.10 2021/09/06 07:03:49 rin Exp $ */
+/*   $NetBSD: get_wstr.c,v 1.12 2024/12/23 02:58:03 blymn Exp $ */
 
 /*
  * Copyright (c) 2005 The NetBSD Foundation Inc.
@@ -149,12 +149,15 @@ __wgetn_wstr(WINDOW *win, wchar_t *wstr, int n)
 	wint_t wc;
 	cchar_t cc;
 
+	if (__predict_false(win == NULL))
+		return ERR;
+
 	ostr = wstr;
 	if (erasewchar(&ec) == ERR)
 		return ERR;
 	if (killwchar(&kc) == ERR)
 		return ERR;
-	sc[0] = (wchar_t)btowc( ' ' );
+	sc[0] = win->bch;
 	sc[1] = L'\0';
 	setcchar(&cc, sc, win->wattr, 0, NULL);
 	oldx = win->curx;

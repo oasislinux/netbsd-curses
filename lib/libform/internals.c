@@ -1,4 +1,4 @@
-/*	$NetBSD: internals.c,v 1.42 2021/10/25 06:25:18 blymn Exp $	*/
+/*	$NetBSD: internals.c,v 1.43 2023/08/01 07:56:23 mrg Exp $	*/
 
 /*-
  * Copyright (c) 1998-1999 Brett Lymn
@@ -3383,7 +3383,7 @@ _formi_calculate_tabs(_FORMI_FIELD_LINES *row)
 	for (i = 0, j = 0; i < row->length; i++, j++) {
 		if (row->string[i] == '\t') {
 			if (*tsp == NULL) {
-				if ((*tsp = malloc(sizeof(*tsp))) == NULL)
+				if ((*tsp = malloc(sizeof(**tsp))) == NULL)
 					return;
 				(*tsp)->back = old_ts;
 				(*tsp)->fwd = NULL;

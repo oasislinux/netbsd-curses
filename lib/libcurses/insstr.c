@@ -1,4 +1,4 @@
-/*   $NetBSD: insstr.c,v 1.9 2021/09/06 07:03:49 rin Exp $ */
+/*   $NetBSD: insstr.c,v 1.12 2024/12/23 02:58:03 blymn Exp $ */
 
 /*
  * Copyright (c) 2005 The NetBSD Foundation Inc.
@@ -145,6 +145,9 @@ winsnstr(WINDOW *win, const char *str, int n)
 	nschar_t *np, *tnp;
 #endif /* HAVE_WCHAR */
 
+	if (__predict_false(win == NULL))
+		return ERR;
+
 	/* find string length */
 	if (n > 0)
 		for (scp = str, len = 0; n-- && *scp++; ++len);
@@ -181,8 +184,10 @@ winsnstr(WINDOW *win, const char *str, int n)
 	{
 		temp1->ch = (wchar_t)*scp & __CHARTEXT;
 		temp1->attr = win->wattr;
+		temp1->cflags &= ~CA_BACKGROUND;
+		temp1->cflags &= ~CA_CONTINUATION;
 #ifdef HAVE_WCHAR
-		SET_WCOL(*temp1, 1);
+		temp1->wcols = 1;
 #endif /* HAVE_WCHAR */
 	}
 #ifdef DEBUG

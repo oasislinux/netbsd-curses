@@ -9,6 +9,10 @@ export INCLUDE_PATH
 #
 CURSES_TRACE_FILE="/tmp/ctrace"
 SLAVE="${BASEDIR}/slave"
+#
+# Force localisation to UTF-8 to be consistent with atf runs
+#
+export LC_ALL=en_US.UTF-8
 
 usage() {
 	echo "Set up the environment to run the test frame.  Option flags:"
@@ -22,10 +26,13 @@ usage() {
 	echo "         ${CURSES_TRACE_FILE}"
 	echo "	  -L : Add the argument as a prefix to LD_LIBRARY_PATH to"
 	echo "	       use an alternate libcurses version"
+	echo "    -n : Add the nofail option to the director invocation"
+	echo "       : so the director won't exit on check_file mismatch"
 	echo "    -s : Specify the slave command.  Defaults to \"../slave/slave\""
 	echo "    -v : Enable verbose output"
 	echo "    -g : Enable check file generation if the file does not exists"
 	echo "    -f : Forces check file generation if -g flag is set"
+	echo "    -t : Specify the TERM to use for the tests"
 	echo
 }
 
@@ -37,7 +44,7 @@ usage() {
 #ARGS="-T ${BASEDIR} -I ${INCLUDE_PATH} -C ${CHECK_PATH}"
 ARGS="-T ${BASEDIR} -C ${CHECK_PATH}"
 #
-while getopts cf:L:s:vg opt
+while getopts cf:F:L:ns:t:vg opt
 do
     case "${opt}" in
 	c)
@@ -56,8 +63,16 @@ do
 	    LD_LIBRARY_PATH=${OPTARG}:${LD_LIBRARY_PATH}
 	    ;;
 
+	n)
+	    ARGS="-n ${ARGS} "
+	    ;;
+
 	s)
 	    SLAVE=${OPTARG}
+	    ;;
+
+	t)
+	    ARGS="-t ${OPTARG} ${ARGS}"
 	    ;;
 
 	v)

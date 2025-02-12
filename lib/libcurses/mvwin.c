@@ -1,4 +1,4 @@
-/*	$NetBSD: mvwin.c,v 1.23 2021/09/06 07:45:48 rin Exp $	*/
+/*	$NetBSD: mvwin.c,v 1.25 2024/12/23 02:58:04 blymn Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -46,7 +46,7 @@ mvderwin(WINDOW *win, int dy, int dx)
 	int x, i;
 	__LINE *plp;
 
-	if (win == NULL)
+	if (__predict_false(win == NULL))
 		return ERR;
 
 	parent = win->orig;
@@ -93,6 +93,9 @@ mvwin(WINDOW *win, int by, int bx)
 	WINDOW *orig;
 	int     dy, dx;
 
+	if (__predict_false(win == NULL))
+		return ERR;
+
 	if (by < 0 || by + win->maxy > win->screen->LINES ||
 	    bx < 0 || bx + win->maxx > win->screen->COLS)
 		return ERR;
@@ -117,6 +120,6 @@ mvwin(WINDOW *win, int by, int bx)
 		__swflags(win);
 		__set_subwin(orig, win);
 	}
-	__touchwin(win);
+	__touchwin(win, 0);
 	return OK;
 }

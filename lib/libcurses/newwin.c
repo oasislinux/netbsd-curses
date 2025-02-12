@@ -1,4 +1,4 @@
-/*	$NetBSD: newwin.c,v 1.63 2021/10/19 06:41:03 blymn Exp $	*/
+/*	$NetBSD: newwin.c,v 1.68 2024/12/23 02:58:04 blymn Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -75,6 +75,9 @@ dupwin(WINDOW *win)
 {
 	WINDOW *new_one;
 
+	if (__predict_false(win == NULL))
+		return NULL;
+
 	if ((new_one = __newwin(_cursesi_screen, win->maxy, win->maxx,
 				win->begy, win->begx, FALSE,
 				win == stdscr ? TRUE : FALSE)) == NULL)
@@ -133,7 +136,12 @@ __newwin(SCREEN *screen, int nlines, int ncols, int by, int bx, int ispad,
 	if ((win = __makenew(screen, maxy, maxx, by, bx, 0, ispad)) == NULL)
 		return NULL;
 
+#ifdef HAVE_WCHAR
+	win->bch = (wchar_t) btowc((int) ' ');
+#else
 	win->bch = ' ';
+#endif
+
 	if (__using_color)
 		win->battr |= __default_color;
 	win->nextp = win;
@@ -152,12 +160,11 @@ __newwin(SCREEN *screen, int nlines, int ncols, int by, int bx, int ispad,
 			lp->flags = 0;
 		for (sp = lp->line, j = 0; j < maxx; j++, sp++) {
 			sp->attr = 0;
-#ifndef HAVE_WCHAR
+			sp->cflags = CA_BACKGROUND;
 			sp->ch = win->bch;
-#else
-			sp->ch = (wchar_t)btowc((int) win->bch);
+#ifdef HAVE_WCHAR
 			sp->nsp = NULL;
-			SET_WCOL(*sp, 1);
+			sp->wcols = 1;
 #endif /* HAVE_WCHAR */
 		}
 		lp->hash = __hash_line(lp->line, maxx);
@@ -182,8 +189,9 @@ __subwin(WINDOW *orig, int nlines, int ncols, int by, int bx, int ispad)
 
 	__CTRACE(__CTRACE_WINDOW, "subwin: (%p, %d, %d, %d, %d, %d)\n",
 	    (void *)orig, nlines, ncols, by, bx, ispad);
-	if (orig == NULL)
-		return NULL;
+
+        if (__predict_false(orig == NULL))
+                return NULL;
 
 	/* Make sure window fits inside the original one. */
 	maxy = nlines > 0 ? nlines : orig->maxy + orig->begy - by + nlines;
@@ -266,7 +274,7 @@ __makenew(SCREEN *screen, int nlines, int ncols, int by, int bx, int sub,
 		free(win);
 		return NULL;
 	}
-	if ((win->lspace = malloc(nlines * sizeof(__LINE))) == NULL) {
+	if ((win->lspace = calloc(nlines, sizeof(__LINE))) == NULL) {
 		free(win->alines);
 		free(win);
 		return NULL;
@@ -279,7 +287,7 @@ __makenew(SCREEN *screen, int nlines, int ncols, int by, int bx, int sub,
 		 * Allocate window space in one chunk.
 		 */
 		if ((win->wspace =
-			malloc(ncols * nlines * sizeof(__LDATA))) == NULL) {
+			calloc(ncols * nlines, sizeof(__LDATA))) == NULL) {
 			free(win->lspace);
 			free(win->alines);
 			free(win);
@@ -342,7 +350,7 @@ __makenew(SCREEN *screen, int nlines, int ncols, int by, int bx, int sub,
 	win->battr = 0;
 #ifdef HAVE_WCHAR
 	win->bnsp = NULL;
-	SET_BGWCOL(*win, 1);
+	win->wcols = 1;
 #endif /* HAVE_WCHAR */
 	win->scr_t = 0;
 	win->scr_b = win->maxy - 1;
@@ -400,6 +408,9 @@ __swflags(WINDOW *win)
 bool
 is_pad(const WINDOW *win)
 {
+
+	if (__predict_false(win == NULL))
+		return false;
 
 	return win->flags & __ISPAD ? true : false;
 }

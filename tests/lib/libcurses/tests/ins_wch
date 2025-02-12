@@ -12,7 +12,12 @@ call OK refresh
 
 # test shifting of above added characters, test do not wrap property
 call OK move 10 10
+# these two inserts should result in one A at the end of the line
 call OK ins_wch $ch1
+call OK ins_wch $ch1
+call OK refresh
+call2 10 10 getyx STDSCR
+# This should push the last A off
 call OK ins_wch $ch1
 call OK refresh
 call2 10 10 getyx STDSCR
@@ -30,4 +35,5 @@ call2 10 76 getyx STDSCR
 cchar CR 0x000 "\r"
 call OK ins_wch $CR
 call OK refresh
+call2 10 0 getyx STDSCR
 compare ins_wch3.chk

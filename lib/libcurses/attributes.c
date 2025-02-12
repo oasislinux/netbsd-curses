@@ -1,4 +1,4 @@
-/*	$NetBSD: attributes.c,v 1.33 2021/12/08 20:50:01 andvar Exp $	*/
+/*	$NetBSD: attributes.c,v 1.36 2024/12/23 02:58:03 blymn Exp $	*/
 
 /*-
  * Copyright (c) 1999 The NetBSD Foundation, Inc.
@@ -138,6 +138,9 @@ attrset(int attr)
 int
 wattr_get(WINDOW *win, attr_t *attr, short *pair, void *opts)
 {
+	if (__predict_false(win == NULL))
+		return ERR;
+
 	__CTRACE(__CTRACE_ATTR, "wattr_get: win %p\n", (void *)win);
 	if (attr != NULL) {
 		*attr = win->wattr;
@@ -190,7 +193,8 @@ wattr_set(WINDOW *win, attr_t attr, short pair, void *opts)
 {
 	__CTRACE(__CTRACE_ATTR, "wattr_set: win %p, attr %08x, pair %d\n",
 	    (void *)win, attr, pair);
-	if (opts != NULL)
+
+	if (__predict_false(opts != NULL))
 		return ERR;
 
 	/*
@@ -214,6 +218,10 @@ wcolor_set(WINDOW *win, short pair, void *opts)
 {
 	__CTRACE(__CTRACE_COLOR, "wolor_set: win %p, pair %d\n",
 	    (void *)win, pair);
+
+	if (__predict_false(opts != NULL))
+		return ERR;
+
 	__wcolor_set(win, (attr_t) COLOR_PAIR(pair));
 	return OK;
 }
@@ -227,6 +235,9 @@ wcolor_set(WINDOW *win, short pair, void *opts)
 chtype
 getattrs(WINDOW *win)
 {
+	if (__predict_false(win == NULL))
+		return ERR;
+
 	__CTRACE(__CTRACE_ATTR, "getattrs: win %p\n", (void *)win);
 	return((chtype) win->wattr);
 }
@@ -360,7 +371,12 @@ term_attrs(void)
 static int
 __wattr_on(WINDOW *win, attr_t attr)
 {
-	const TERMINAL *t = win->screen->term;
+	const TERMINAL *t;
+
+	if (__predict_false(win == NULL))
+		return ERR;
+
+	t = win->screen->term;
 
 	__CTRACE(__CTRACE_ATTR, "wattr_on: win %p, attr %08x\n",
 	    (void *)win, attr);
@@ -408,7 +424,12 @@ __wattr_on(WINDOW *win, attr_t attr)
 static int
 __wattr_off(WINDOW *win, attr_t attr)
 {
-	const TERMINAL *t = win->screen->term;
+	const TERMINAL *t;
+
+	if (__predict_false(win == NULL))
+		return ERR;
+
+	t = win->screen->term;
 
 	__CTRACE(__CTRACE_ATTR, "wattr_off: win %p, attr %08x\n",
 	    (void *)win, attr);
@@ -456,11 +477,16 @@ __wattr_off(WINDOW *win, attr_t attr)
 static void
 __wcolor_set(WINDOW *win, attr_t attr)
 {
-	const TERMINAL *t = win->screen->term;
+	const TERMINAL *t;
+
+	if (__predict_false(win == NULL))
+		return;
+
+	t = win->screen->term;
 
 	/* If another color pair is set, turn that off first. */
 	win->wattr &= ~__COLOR;
 	/* If can do color video, set the color pair bits. */
-	if (t_max_colors(t) != 0 && attr & __COLOR)
+	if (t_max_colors(t) != 0)
 		win->wattr |= attr & __COLOR;
 }

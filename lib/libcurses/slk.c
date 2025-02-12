@@ -1,4 +1,4 @@
-/*	$NetBSD: slk.c,v 1.16 2021/09/06 07:45:48 rin Exp $	*/
+/*	$NetBSD: slk.c,v 1.21 2022/12/20 04:57:01 blymn Exp $	*/
 
 /*-
  * Copyright (c) 2017 The NetBSD Foundation, Inc.
@@ -32,6 +32,7 @@
 #include "curses.h"
 #include "curses_private.h"
 
+#include <limits.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
@@ -812,6 +813,9 @@ __slk_draw(SCREEN *screen, int labnum)
 	wchar_t wc[2];
 #endif
 
+	__CTRACE(__CTRACE_INPUT, "__slk_draw: screen %p, label %d\n", screen,
+	    labnum);
+
 	if (screen->slk_hidden)
 		return OK;
 
@@ -827,7 +831,7 @@ __slk_draw(SCREEN *screen, int labnum)
 		    (screen->slk_window->flags & __SCROLLOK) ||
 		    ((l->x + screen->slk_label_len) < screen->slk_window->maxx)) {
 			retval = mvwaddnstr(screen->slk_window, 0, l->x,
-			    l->label, screen->slk_label_len);
+			    l->label, strlen(l->label));
 		} else {
 			lcnt = 0;
 			tx = 0;

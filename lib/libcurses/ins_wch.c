@@ -1,4 +1,4 @@
-/*   $NetBSD: ins_wch.c,v 1.17 2021/09/06 07:03:49 rin Exp $ */
+/*   $NetBSD: ins_wch.c,v 1.21 2024/12/23 02:58:03 blymn Exp $ */
 
 /*
  * Copyright (c) 2005 The NetBSD Foundation Inc.
@@ -86,6 +86,9 @@ wins_wch(WINDOW *win, const cchar_t *wch)
 	nschar_t *np, *tnp;
 	wchar_t ws[] = L"		";
 
+	if (__predict_false(win == NULL))
+		return ERR;
+
 	/* check for non-spacing characters */
 	if (!wch)
 		return OK;
@@ -129,7 +132,7 @@ wins_wch(WINDOW *win, const cchar_t *wch)
 	lnp = win->alines[y];
 	start = &win->alines[y]->line[x];
 	sx = x;
-	pcw = WCOL(*start);
+	pcw = start->wcols;
 	if (pcw < 0) {
 		start += pcw;
 		sx += pcw;
@@ -145,7 +148,7 @@ wins_wch(WINDOW *win, const cchar_t *wch)
 	__CTRACE(__CTRACE_INPUT, "wins_wch: shift all characters\n");
 	temp1 = &win->alines[y]->line[win->maxx - 1];
 	temp2 = temp1 - cw;
-	pcw = WCOL(*(temp2 + 1));
+	pcw = (temp2 + 1)->wcols;
 	if (pcw < 0) {
 		__CTRACE(__CTRACE_INPUT, "wins_wch: clear EOL\n");
 		temp2 += pcw;
@@ -159,11 +162,11 @@ wins_wch(WINDOW *win, const cchar_t *wch)
 				}
 				temp1->nsp = NULL;
 			}
-			temp1->ch = (wchar_t)btowc((int)win->bch );
+			temp1->ch = win->bch;
 			if (_cursesi_copy_nsp(win->bnsp, temp1) == ERR)
 				return ERR;
 			temp1->attr = win->battr;
-			SET_WCOL(*temp1, 1);
+			temp1->wcols = 1;
 			temp1--;
 		}
 	}
@@ -176,7 +179,7 @@ wins_wch(WINDOW *win, const cchar_t *wch)
 	start->nsp = NULL;
 	start->ch = wch->vals[0];
 	start->attr = wch->attributes & WA_ATTRIBUTES;
-	SET_WCOL(*start, cw);
+	start->wcols = cw;
 	if (wch->elements > 1) {
 		for (i = 1; i < wch->elements; i++) {
 			np = malloc(sizeof(nschar_t));
@@ -193,8 +196,9 @@ wins_wch(WINDOW *win, const cchar_t *wch)
 	ex = x + 1;
 	while (ex - x < cw) {
 		temp1->ch = wch->vals[0];
-		SET_WCOL(*temp1, x - ex);
+		temp1->wcols = x - ex;
 		temp1->nsp = NULL;
+		temp1->cflags |= CA_CONTINUATION;
 		ex++, temp1++;
 	}
 

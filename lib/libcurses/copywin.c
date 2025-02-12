@@ -1,4 +1,4 @@
-/*	$NetBSD: copywin.c,v 1.20 2021/09/06 07:03:49 rin Exp $	*/
+/*	$NetBSD: copywin.c,v 1.22 2024/12/23 02:58:03 blymn Exp $	*/
 
 /*-
  * Copyright (c) 1998-1999 Brett Lymn
@@ -58,6 +58,9 @@ int copywin(const WINDOW *srcwin, WINDOW *dstwin,
 	    "copywin %s mode: from (%d,%d) to (%d,%d-%d,%d)\n",
 	    dooverlay ? "overlay" : "overwrite",
 	    sminrow, smincol, dminrow, dmincol, dmaxrow, dmaxcol);
+
+	if ((srcwin == NULL) || (dstwin == NULL))
+		return ERR;
 
 	/* overwrite() and overlay() can come here with -ve srcwin coords */
 	if (sminrow < 0) {
@@ -129,6 +132,6 @@ int copywin(const WINDOW *srcwin, WINDOW *dstwin,
 			}
 		}
 	}
-	__touchwin(dstwin);
+	__touchwin(dstwin, 0);
 	return OK;
 }

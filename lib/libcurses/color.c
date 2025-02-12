@@ -1,4 +1,4 @@
-/*	$NetBSD: color.c,v 1.44 2021/09/06 07:45:48 rin Exp $	*/
+/*	$NetBSD: color.c,v 1.48 2024/07/11 07:13:41 blymn Exp $	*/
 
 /*
  * Copyright (c) 2000 The NetBSD Foundation, Inc.
@@ -34,6 +34,7 @@
 
 /* Have we initialised colours? */
 int	__using_color = 0;
+int	__do_color_init = 0; /* force refresh to init color in all cells */
 
 /* Default colour number */
 attr_t	__default_color = 0;
@@ -105,7 +106,11 @@ start_color(void)
 			COLOR_PAIRS = (max_pairs > MAX_PAIRS - 1 ?
 			    MAX_PAIRS - 1 : max_pairs);
 			 /* Use the last colour pair for curses default. */
+#ifdef __OLD_DEFAULT_COLOR
 			__default_color = COLOR_PAIR(MAX_PAIRS - 1);
+#else
+			__default_color = COLOR_PAIR(0);
+#endif
 		}
 	}
 	if (!COLORS)
@@ -113,6 +118,7 @@ start_color(void)
 
 	_cursesi_screen->COLORS = COLORS;
 	_cursesi_screen->COLOR_PAIRS = COLOR_PAIRS;
+	_cursesi_screen->curpair = -1;
 
 	/* Reset terminal colour and colour pairs. */
 	if (orig_colors != NULL)
@@ -230,6 +236,7 @@ start_color(void)
 	    __default_pair.flags;
 
 	__using_color = 1;
+	__do_color_init = 1;
 
 	/* Set all positions on all windows to curses default colours. */
 	for (wlp = _cursesi_screen->winlistp; wlp != NULL; wlp = wlp->nextp) {
@@ -238,12 +245,13 @@ start_color(void)
 			/* Set color attribute on other windows */
 			win->battr |= __default_color;
 			for (y = 0; y < win->maxy; y++) {
+				win->alines[y]->flags |= __ISFORCED;
 				for (x = 0; x < win->maxx; x++) {
 					win->alines[y]->line[x].attr &= ~__COLOR;
 					win->alines[y]->line[x].attr |= __default_color;
 				}
 			}
-			__touchwin(win);
+			__touchwin(win, 0);
 		}
 	}
 
@@ -518,15 +526,20 @@ __set_color( /*ARGSUSED*/ WINDOW *win, attr_t attr)
 {
 	short	pair;
 
-	if ((curscr->wattr & __COLOR) == (attr & __COLOR))
+	if ((__do_color_init != 1) &&
+	    ((curscr->wattr & __COLOR) == (attr & __COLOR)))
 		return;
 
 	pair = PAIR_NUMBER((uint32_t)attr);
+
+	if (pair == _cursesi_screen->curpair)
+		return;
+
 	__CTRACE(__CTRACE_COLOR, "__set_color: %d, %d, %d\n", pair,
 	    _cursesi_screen->colour_pairs[pair].fore,
 	    _cursesi_screen->colour_pairs[pair].back);
 	switch (_cursesi_screen->color_type) {
-	/* Set ANSI forground and background colours */
+	/* Set ANSI foreground and background colours */
 	case COLOR_ANSI:
 		if (_cursesi_screen->colour_pairs[pair].fore < 0 ||
 		    _cursesi_screen->colour_pairs[pair].back < 0)
@@ -560,6 +573,8 @@ __set_color( /*ARGSUSED*/ WINDOW *win, attr_t attr)
 			    0, __cputchar);
 		break;
 	}
+
+	_cursesi_screen->curpair = pair;
 	curscr->wattr &= ~__COLOR;
 	curscr->wattr |= attr & __COLOR;
 }
@@ -573,7 +588,7 @@ __unset_color(WINDOW *win)
 {
 	__CTRACE(__CTRACE_COLOR, "__unset_color\n");
 	switch (_cursesi_screen->color_type) {
-	/* Clear ANSI forground and background colours */
+	/* Clear ANSI foreground and background colours */
 	case COLOR_ANSI:
 		if (orig_pair != NULL) {
 			tputs(orig_pair, 0, __cputchar);
@@ -593,6 +608,8 @@ __unset_color(WINDOW *win)
 		}
 		break;
 	}
+
+	_cursesi_screen->curpair = -1;
 }
 
 /*
@@ -602,6 +619,12 @@ __unset_color(WINDOW *win)
 void
 __restore_colors(void)
 {
+	/*
+	 * forget foreground/background colour just in case it was
+	 * changed.  We will reset them if required.
+	 */
+	_cursesi_screen->curpair = -1;
+
 	if (can_change != 0)
 		switch (_cursesi_screen->color_type) {
 		case COLOR_HP:
@@ -660,6 +683,7 @@ __change_pair(short pair)
 						 */
 						if (*lp->firstchp > x)
 							*lp->firstchp = x;
+
 						if (*lp->lastchp < x)
 							*lp->lastchp = x;
 					}

@@ -1,4 +1,4 @@
-/*	$NetBSD: nbperf.c,v 1.7 2021/01/12 14:21:18 joerg Exp $	*/
+/*	$NetBSD: nbperf.c,v 1.9 2024/09/22 20:34:26 christos Exp $	*/
 /*-
  * Copyright (c) 2009 The NetBSD Foundation, Inc.
  * All rights reserved.
@@ -120,7 +120,7 @@ main(int argc, char **argv)
 	size_t line_allocated;
 	const void **keys = NULL;
 	size_t *keylens = NULL;
-	uint32_t max_iterations = 0xffffffU;
+	uint32_t max_iterations = ~0U;
 	long long tmp;
 	int looped, ch;
 	int (*build_hash)(struct nbperf *) = chm_compute;
@@ -139,7 +139,7 @@ main(int argc, char **argv)
 			         strcmp(optarg, "bdz") == 0)
 				build_hash = bpz_compute;
 			else
-				errx(1, "Unsupport algorithm: %s", optarg);
+				errx(1, "Unsupported algorithm: %s", optarg);
 			break;
 		case 'c':
 			errno = 0;
@@ -252,7 +252,7 @@ main(int argc, char **argv)
 		if (!looped)
 			nbperf.check_duplicates = 1;
 		looped = 1;
-		if (max_iterations == 0xffffffffU)
+		if (max_iterations == ~0U)
 			continue;
 		if (--max_iterations == 0) {
 			fputc('\n', stderr);

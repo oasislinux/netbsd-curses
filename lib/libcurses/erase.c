@@ -1,4 +1,4 @@
-/*	$NetBSD: erase.c,v 1.33 2021/09/06 07:03:49 rin Exp $	*/
+/*	$NetBSD: erase.c,v 1.38 2024/12/23 02:58:03 blymn Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -61,11 +61,11 @@ werase(WINDOW *win)
 	attr_t	battr;
 
 	__CTRACE(__CTRACE_ERASE, "werase: (%p)\n", (void *)win);
-#ifdef HAVE_WCHAR
-	bch = (wchar_t)btowc((int)win->bch);
-#else
+
+	if (__predict_false(win == NULL))
+		return ERR;
+
 	bch = win->bch;
-#endif
 	if (win != curscr)
 		battr = win->battr & __ATTRIBUTES;
 	else
@@ -79,11 +79,13 @@ werase(WINDOW *win)
 				continue;
 
 			sp->ch = bch;
+			sp->cflags |= CA_BACKGROUND;
+			sp->cflags &= ~CA_CONTINUATION;
 			sp->attr = battr | (sp->attr & __ALTCHARSET);
 #ifdef HAVE_WCHAR
 			if (_cursesi_copy_nsp(win->bnsp, sp) == ERR)
 				return ERR;
-			SET_WCOL(*sp, 1);
+			sp->wcols = 1;
 #endif
 		}
 	}
@@ -92,7 +94,7 @@ werase(WINDOW *win)
 	 * Mark the whole window as changed in case we have overlapping
 	 * windows - this will result in the (intended) clearing of the
 	 * screen over the area covered by the window. */
-	__touchwin(win);
+	__touchwin(win, 0);
 	wmove(win, 0, 0);
 	return OK;
 }

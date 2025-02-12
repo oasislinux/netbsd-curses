@@ -1,4 +1,4 @@
-/*   $NetBSD: get_wch.c,v 1.26 2021/09/06 07:45:48 rin Exp $ */
+/*   $NetBSD: get_wch.c,v 1.28 2024/12/23 02:58:03 blymn Exp $ */
 
 /*
  * Copyright (c) 2005 The NetBSD Foundation Inc.
@@ -130,7 +130,7 @@ inkey(wchar_t *wc, int to, int delay)
 			}
 
 			c = __fgetc_resize(infd);
-			if (ferror(infd)) {
+			if (c == ERR || ferror(infd)) {
 				clearerr(infd);
 				return c;
 			}
@@ -174,7 +174,7 @@ inkey(wchar_t *wc, int to, int delay)
 			}
 
 			c = __fgetc_resize(infd);
-			if (ferror(infd)) {
+			if (c == ERR || ferror(infd)) {
 				clearerr(infd);
 				return c;
 			}
@@ -435,6 +435,9 @@ wget_wch(WINDOW *win, wint_t *ch)
 	FILE *infd = _cursesi_screen->infd;
 	cchar_t wc;
 	wchar_t inp, ws[2];
+
+	if (__predict_false(win == NULL))
+		return ERR;
 
 	if (!(win->flags & __SCROLLOK)
 	    && (win->flags & __FULLWIN)

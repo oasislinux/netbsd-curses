@@ -1,4 +1,4 @@
-/*	$NetBSD: touchwin.c,v 1.33 2021/09/06 07:03:50 rin Exp $	*/
+/*	$NetBSD: touchwin.c,v 1.35 2024/12/23 02:58:04 blymn Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -41,6 +41,8 @@ static int _cursesi_touchline_force(WINDOW *, int, int, int, int);
 void
 __sync(WINDOW *win)
 {
+	if (__predict_false(win == NULL))
+		return;
 
 	if (win->flags & __IMMEDOK)
 		wrefresh(win);
@@ -55,6 +57,9 @@ __sync(WINDOW *win)
 bool
 is_linetouched(WINDOW *win, int line)
 {
+	if (__predict_false(win == NULL))
+		return ERR;
+
 	if (line > win->maxy)
 		return FALSE;
 
@@ -99,6 +104,9 @@ is_wintouched(WINDOW *win)
 
 	__CTRACE(__CTRACE_LINE, "is_wintouched: (%p, maxy %d)\n", (void *)win,
 	    win->maxy);
+	if (__predict_false(win == NULL))
+		return FALSE;
+
 	maxy = win->maxy;
 	for (y = 0; y < maxy; y++) {
 		if (is_linetouched(win, y) == TRUE)
@@ -154,6 +162,9 @@ wtouchln(WINDOW *win, int line, int n, int changed)
 
 	__CTRACE(__CTRACE_LINE, "wtouchln: (%p) %d, %d, %d\n",
 	    (void *)win, line, n, changed);
+	if (__predict_false(win == NULL))
+		return FALSE;
+
 	if (line < 0 || win->maxy <= line)
 		return ERR;
 	if (n < 0)
@@ -180,15 +191,20 @@ wtouchln(WINDOW *win, int line, int n, int changed)
 	return OK;
 }
 
+/*
+ * Touch all the lines in a window.  If force is set to 1 then screen
+ * update optimisation will disabled to force the change out.
+ */
 int
-__touchwin(WINDOW *win)
+__touchwin(WINDOW *win, int force)
 {
 	int	 y, maxy;
 
 	__CTRACE(__CTRACE_LINE, "__touchwin: (%p)\n", (void *)win);
 	maxy = win->maxy;
 	for (y = 0; y < maxy; y++)
-		__touchline(win, y, 0, (int) win->maxx - 1);
+		_cursesi_touchline_force(win, y, 0, (int) win->maxx - 1,
+		    force);
 	return OK;
 }
 
@@ -233,8 +249,11 @@ void
 wsyncup(WINDOW *win)
 {
 
+	if (__predict_false(win == NULL))
+		return;
+
 	do {
-		__touchwin(win);
+		__touchwin(win, 0);
 		win = win->orig;
 	} while (win);
 }
@@ -242,11 +261,14 @@ wsyncup(WINDOW *win)
 void
 wsyncdown(WINDOW *win)
 {
+	if (__predict_false(win == NULL))
+		return;
+
 	WINDOW *w = win->orig;
 
 	while (w) {
 		if (is_wintouched(w)) {
-			__touchwin(win);
+			__touchwin(win, 0);
 			break;
 		}
 		w = w->orig;

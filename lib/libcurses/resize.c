@@ -1,4 +1,4 @@
-/*	$NetBSD: resize.c,v 1.33 2021/09/07 01:23:09 rin Exp $	*/
+/*	$NetBSD: resize.c,v 1.37 2024/12/23 02:58:04 blymn Exp $	*/
 
 /*
  * Copyright (c) 2001
@@ -46,7 +46,7 @@ wresize(WINDOW *win, int req_nlines, int req_ncols)
 	int	nlines = req_nlines;
 	int	ncols = req_ncols;
 
-	if (win == NULL)
+	if (__predict_false(win == NULL))
 		return ERR;
 
 	__CTRACE(__CTRACE_WINDOW, "wresize: (%p, %d, %d)\n",
@@ -342,6 +342,7 @@ __resizewin(WINDOW *win, int nlines, int ncols)
 		lp = win->alines[i];
 		for (sp = lp->line, j = 0; j < win->maxx; j++, sp++) {
 			sp->attr = 0;
+			sp->cflags = CA_BACKGROUND;
 #ifndef HAVE_WCHAR
 			sp->ch = win->bch;
 #else
@@ -349,7 +350,7 @@ __resizewin(WINDOW *win, int nlines, int ncols)
 			sp->nsp = NULL;
 			if (_cursesi_copy_nsp(win->bnsp, sp) == ERR)
 				return ERR;
-			SET_WCOL(*sp, 1);
+			sp->wcols = 1;
 #endif /* HAVE_WCHAR */
 		}
 		lp->hash = __hash_line(lp->line, ncols);
@@ -382,7 +383,7 @@ __resizewin(WINDOW *win, int nlines, int ncols)
 			if (swin->begx + x > win->begx + win->maxx)
 				x = 0;
 			if (x <= 0)
-				x += win->begy + win->maxx - swin->begx;
+				x += win->begx + win->maxx - swin->begx;
 			if (x < 1)
 				x = 1;
 			__resizewin(swin, y, x);

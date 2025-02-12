@@ -1,4 +1,4 @@
-/*	$NetBSD: line.c,v 1.17 2021/09/06 07:03:50 rin Exp $	*/
+/*	$NetBSD: line.c,v 1.19 2024/12/23 02:58:03 blymn Exp $	*/
 
 /*-
  * Copyright (c) 1998-1999 Brett Lymn
@@ -82,6 +82,9 @@ int
 whline(WINDOW *win, chtype ch, int count)
 {
 #ifndef HAVE_WCHAR
+	if (__predict_false(win == NULL))
+		return ERR;
+
 	int ocury, ocurx, n, i;
 
 	n = min(count, win->maxx - win->curx);
@@ -116,7 +119,7 @@ vline(chtype ch, int count)
 
 /*
  * mvvline --
- *	Move to the given location an draw a vertical line of character ch.
+ *	Move to the given location and draw a vertical line of character ch.
  */
 int
 mvvline(int y, int x, chtype ch, int count)
@@ -151,6 +154,9 @@ wvline(WINDOW *win, chtype ch, int count)
 {
 #ifndef HAVE_WCHAR
 	int ocury, ocurx, n, i;
+
+	if (__predict_false(win == NULL))
+		return ERR;
 
 	n = min(count, win->maxy - win->cury);
 	ocury = win->cury;
@@ -208,6 +214,9 @@ int whline_set(WINDOW *win, const cchar_t *wch, int n)
 #else
 	int ocury, ocurx, wcn, i, cw;
 	cchar_t cc;
+
+	if (__predict_false(win == NULL))
+		return ERR;
 
 	cc = *wch;
 	if (!cc.vals[0]) {
@@ -274,6 +283,9 @@ int wvline_set(WINDOW *win, const cchar_t *wch, int n)
 #else
 	int ocury, ocurx, wcn, i;
 	cchar_t cc;
+
+	if (__predict_false(win == NULL))
+		return ERR;
 
 	wcn = min(n, win->maxy - win->cury);
 	__CTRACE(__CTRACE_LINE, "wvline_set: line of %d\n", wcn);

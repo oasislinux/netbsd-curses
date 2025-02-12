@@ -1,4 +1,4 @@
-/*	$NetBSD: standout.c,v 1.19 2017/01/10 23:49:20 roy Exp $	*/
+/*	$NetBSD: standout.c,v 1.20 2024/12/23 02:58:04 blymn Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -65,6 +65,9 @@ standend(void)
 int
 wstandout(WINDOW *win)
 {
+	if (__predict_false(win == NULL))
+		return ERR;
+
 	const TERMINAL *t = win->screen->term;
 
 	/*
@@ -85,6 +88,8 @@ wstandout(WINDOW *win)
 int
 wstandend(WINDOW *win)
 {
+	if (__predict_false(win == NULL))
+		return ERR;
 
 	// http://pubs.opengroup.org/onlinepubs/7908799/xcurses/wstandend.html
 	win->wattr = __NORMAL;

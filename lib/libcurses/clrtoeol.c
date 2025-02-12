@@ -1,4 +1,4 @@
-/*	$NetBSD: clrtoeol.c,v 1.32 2021/09/06 07:03:49 rin Exp $	*/
+/*	$NetBSD: clrtoeol.c,v 1.36 2024/12/23 02:58:03 blymn Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -59,11 +59,10 @@ wclrtoeol(WINDOW *win)
 	wchar_t bch;
 	attr_t	battr;
 
-#ifdef HAVE_WCHAR
-	bch = (wchar_t)btowc((int)win->bch);
-#else
+	if (__predict_false(win == NULL))
+		return ERR;
+
 	bch = win->bch;
-#endif
 	if (win != curscr)
 		battr = win->battr & __ATTRIBUTES;
 	else
@@ -86,6 +85,12 @@ wclrtoeol(WINDOW *win)
 	maxx = &win->alines[y]->line[x];
 
 	for (sp = maxx; sp < end; sp++) {
+		/*
+		 * It looks like ncurses makes the rest of line foreground
+		 * when it is cleared - this doesn't seem right but it
+		 * makes applicatins look right.
+		 */
+		sp->cflags &= ~CA_BACKGROUND;
 		if (!(__NEED_ERASE(sp, bch, battr)))
 			continue;
 
@@ -98,7 +103,7 @@ wclrtoeol(WINDOW *win)
 #ifdef HAVE_WCHAR
 		if (_cursesi_copy_nsp(win->bnsp, sp) == ERR)
 			return ERR;
-		SET_WCOL(*sp, 1);
+		sp->wcols = 1;
 #endif
 	}
 

@@ -1,4 +1,4 @@
-/*	$NetBSD: inchstr.c,v 1.11 2021/08/15 15:12:36 rillig Exp $	*/
+/*	$NetBSD: inchstr.c,v 1.12 2024/12/23 02:58:03 blymn Exp $	*/
 
 /*
  * Copyright 2001 Wasabi Systems, Inc.
@@ -123,6 +123,9 @@ winchnstr(WINDOW *win, chtype *chstr, int n)
 {
 	__LDATA	*end, *start;
 	int epos;
+
+	if (__predict_false(win == NULL))
+		return ERR;
 
 	if (chstr == NULL)
 		return ERR;

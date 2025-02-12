@@ -1,4 +1,4 @@
-/*	$NetBSD: leaveok.c,v 1.7 2017/01/06 13:53:18 roy Exp $	*/
+/*	$NetBSD: leaveok.c,v 1.8 2024/12/23 02:58:03 blymn Exp $	*/
 
 /*-
  * Copyright (c) 1999 The NetBSD Foundation, Inc.
@@ -39,6 +39,9 @@
 int
 leaveok(WINDOW *win, bool bf)
 {
+	if (__predict_false(win == NULL))
+		return ERR;
+
 	if (bf)
 		win->flags |= __LEAVEOK;
 	else
@@ -53,6 +56,8 @@ leaveok(WINDOW *win, bool bf)
 bool
 is_leaveok(const WINDOW *win)
 {
+	if (__predict_false(win == NULL))
+		return ERR;
 
 	return win->flags & __LEAVEOK ? true : false;
 }

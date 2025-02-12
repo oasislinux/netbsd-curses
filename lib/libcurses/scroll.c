@@ -1,4 +1,4 @@
-/*	$NetBSD: scroll.c,v 1.27 2021/09/06 07:03:50 rin Exp $	*/
+/*	$NetBSD: scroll.c,v 1.29 2024/12/23 02:58:04 blymn Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -67,6 +67,17 @@ setscrreg(int top, int bottom)
 	return wsetscrreg(stdscr, top, bottom);
 }
 
+/*
+ * getscrreg --
+ *	Get the top and bottom of the scrolling region for stdscr.
+ */
+int
+getscrreg(int *top, int *bottom)
+{
+
+	return wgetscrreg(stdscr, top, bottom);
+}
+
 #endif
 
 /*
@@ -80,6 +91,9 @@ wscrl(WINDOW *win, int nlines)
 
 	__CTRACE(__CTRACE_WINDOW, "wscrl: (%p) lines=%d\n",
 	    (void *)win, nlines);
+
+	if (__predict_false(win == NULL))
+		return ERR;
 
 	if (!(win->flags & __SCROLLOK))
 		return ERR;
@@ -108,10 +122,28 @@ wscrl(WINDOW *win, int nlines)
 int
 wsetscrreg(WINDOW *win, int top, int bottom)
 {
+	if (__predict_false(win == NULL))
+		return ERR;
+
 	if (top < 0 || bottom >= win->maxy || bottom - top < 1)
 		return ERR;
 	win->scr_t = top;
 	win->scr_b = bottom;
+	return OK;
+}
+
+/*
+ * wgetscrreg --
+ *	Get the top and bottom of the scrolling region for win.
+ */
+int
+wgetscrreg(WINDOW *win, int *top, int *bottom)
+{
+	if (__predict_false(win == NULL))
+		return ERR;
+
+	*top = win->scr_t;
+	*bottom = win->scr_b;
 	return OK;
 }
 

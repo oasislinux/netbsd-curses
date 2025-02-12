@@ -1,4 +1,4 @@
-/*	$NetBSD: insch.c,v 1.26 2020/07/06 22:46:50 uwe Exp $	*/
+/*	$NetBSD: insch.c,v 1.29 2024/12/23 02:58:03 blymn Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -85,6 +85,9 @@ winsch(WINDOW *win, chtype ch)
 	__LDATA	*end, *temp1, *temp2;
 	attr_t attr;
 
+	if (__predict_false(win == NULL))
+		return ERR;
+
 	if (__using_color)
 		attr = win->battr & __COLOR;
 	else
@@ -97,8 +100,14 @@ winsch(WINDOW *win, chtype ch)
 		temp1--, temp2--;
 	}
 	temp1->ch = (wchar_t)ch & __CHARTEXT;
-	if (temp1->ch == ' ')
+	if (temp1->ch == win->bch) {
 		temp1->ch = win->bch;
+		temp1->cflags &= ~CA_CONTINUATION;
+		temp1->cflags |= CA_BACKGROUND;
+	} else {
+		temp1->cflags &= ~ CA_BACKGROUND;
+	}
+
 	temp1->attr = (attr_t) ch & __ATTRIBUTES;
 	if (temp1->attr & __COLOR)
 		temp1->attr |= (win->battr & ~__COLOR);
@@ -107,7 +116,7 @@ winsch(WINDOW *win, chtype ch)
 #ifdef HAVE_WCHAR
 	if (_cursesi_copy_nsp(win->bnsp, temp1) == ERR)
 		return ERR;
-	SET_WCOL(*temp1, 1);
+	temp1->wcols = 1;
 #endif /* HAVE_WCHAR */
 	__touchline(win, (int)win->cury, (int)win->curx, (int)win->maxx - 1);
 	if (win->cury == LINES - 1 &&

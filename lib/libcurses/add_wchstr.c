@@ -1,4 +1,4 @@
-/*   $NetBSD: add_wchstr.c,v 1.10 2021/09/06 07:45:48 rin Exp $ */
+/*   $NetBSD: add_wchstr.c,v 1.15 2024/12/23 02:58:03 blymn Exp $ */
 
 /*
  * Copyright (c) 2005 The NetBSD Foundation Inc.
@@ -141,6 +141,9 @@ wadd_wchnstr(WINDOW *win, const cchar_t *wchstr, int n)
 	    "wadd_wchnstr: win = %p, wchstr = %p, n = %d\n",
 	    (void *)win, (void *)wchstr, n);
 
+	if (__predict_false(win == NULL))
+		return ERR;
+
 	if (!wchstr)
 		return OK;
 
@@ -159,18 +162,19 @@ wadd_wchnstr(WINDOW *win, const cchar_t *wchstr, int n)
 	lp = &win->alines[y]->line[x];
 	lnp = win->alines[y];
 
-	cw = WCOL(*lp);
+	cw = (*lp).wcols;
 	if (cw >= 0) {
 		sx = x;
 	} else {
 		if (wcwidth(chp->vals[0])) {
 			/* clear the partial character before cursor */
 			for (tp = lp + cw; tp < lp; tp++) {
-				tp->ch = (wchar_t) btowc((int) win->bch);
+				tp->ch = win->bch;
 				if (_cursesi_copy_nsp(win->bnsp, tp) == ERR)
 					return ERR;
 				tp->attr = win->battr;
-				SET_WCOL(*tp, 1);
+				tp->wcols = 1;
+				tp->cflags = CA_BACKGROUND;
 				np = tp->nsp;
 			}
 		} else {
@@ -182,7 +186,7 @@ wadd_wchnstr(WINDOW *win, const cchar_t *wchstr, int n)
 	}
 	lnp->flags |= __ISDIRTY;
 	newx = sx + win->ch_off;
-	if (newx < *lnp->firstchp)
+	if (newx < *lnp->firstchp) 
 		*lnp->firstchp = newx;
 
 	/* add characters in the string */
@@ -201,13 +205,13 @@ wadd_wchnstr(WINDOW *win, const cchar_t *wchstr, int n)
 			if (cw > win->maxx - ex) {
 				/* clear to EOL */
 				while (ex < win->maxx) {
-					lp->ch = (wchar_t)
-						btowc((int) win->bch);
+					lp->ch = win->bch;
 					if (_cursesi_copy_nsp(win->bnsp, lp)
 					    == ERR)
 						return ERR;
 					lp->attr = win->battr;
-					SET_WCOL(*lp, 1);
+					lp->cflags = CA_BACKGROUND;
+					(*lp).wcols = 1;
 					lp++, ex++;
 				}
 				ex = win->maxx - 1;
@@ -226,7 +230,8 @@ wadd_wchnstr(WINDOW *win, const cchar_t *wchstr, int n)
 			}
 			lp->ch = chp->vals[0];
 			lp->attr = chp->attributes & WA_ATTRIBUTES;
-			SET_WCOL(*lp, cw);
+			lp->cflags &= ~CA_BACKGROUND;
+			(*lp).wcols = cw;
 			if (chp->elements > 1) {
 				for (i = 1; i < chp->elements; i++) {
 					np = (nschar_t *)
@@ -254,7 +259,9 @@ wadd_wchnstr(WINDOW *win, const cchar_t *wchstr, int n)
 				}
 				lp->ch = chp->vals[0];
 				lp->attr = chp->attributes & WA_ATTRIBUTES;
-				SET_WCOL(*lp, x - ex);
+				lp->cflags &= ~CA_BACKGROUND;
+				lp->cflags |= CA_CONTINUATION;
+				(*lp).wcols = x - ex;
 				lp++, ex++;
 			}
 		} else {

@@ -1,4 +1,4 @@
-/*	$NetBSD: move.c,v 1.23 2021/10/19 06:41:03 blymn Exp $	*/
+/*	$NetBSD: move.c,v 1.26 2024/12/23 02:58:04 blymn Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -54,10 +54,21 @@ int
 wmove(WINDOW *win, int y, int x)
 {
 	__CTRACE(__CTRACE_MISC, "wmove: win %p, (%d, %d)\n", win, y, x);
+	if (__predict_false(win == NULL))
+		return ERR;
+
 	if (x < 0 || y < 0)
 		return ERR;
-	if (x >= win->maxx || y >= win->maxy)
+	if (x > win->maxx || y >= win->maxy)
 		return ERR;
+
+	/* clear the EOL flags for both where we were and where we are going */
+	if (win->cury < win->maxy)
+		win->alines[win->cury]->flags &= ~ __ISPASTEOL;
+	win->alines[y]->flags &= ~ __ISPASTEOL;
+
+	if (x == win->maxx)
+		win->alines[y]->flags |= __ISPASTEOL;
 
 	win->curx = x;
 	win->cury = y;
@@ -68,6 +79,9 @@ wmove(WINDOW *win, int y, int x)
 void
 wcursyncup(WINDOW *win)
 {
+
+	if (__predict_false(win == NULL))
+		return;
 
 	while (win->orig) {
 		wmove(win->orig, win->cury + win->begy - win->orig->begy,

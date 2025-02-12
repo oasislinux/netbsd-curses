@@ -1,4 +1,4 @@
-/* $NetBSD: tic.c,v 1.40 2020/03/30 00:09:06 roy Exp $ */
+/* $NetBSD: tic.c,v 1.42 2024/05/20 14:41:37 christos Exp $ */
 
 /*
  * Copyright (c) 2009, 2010, 2020 The NetBSD Foundation, Inc.
@@ -481,7 +481,7 @@ merge_use(int flags)
 			if (!promoted && rtic->rtype != TERMINFO_RTYPE) {
 				if (promote(rtic, utic) == -1)
 					err(EXIT_FAILURE, "promote");
-				promoted = true;
+				promoted = rtic->rtype == TERMINFO_RTYPE;
 			}
 #endif
 
@@ -587,6 +587,7 @@ write_database(const char *dbname, int argc, char **argv)
 	char *tmp_dbname;
 	TERM *term;
 	int fd, i;
+	mode_t m;
 
 	db = cdbw_open();
 	if (db == NULL)
@@ -618,7 +619,9 @@ write_database(const char *dbname, int argc, char **argv)
 	if (cdbw_output(db, fd, "NetBSD terminfo", cdbw_stable_seeder))
 		err(EXIT_FAILURE,
 		    "writing temporary database %s failed", tmp_dbname);
-	if (fchmod(fd, 0666))
+	m = umask(0);
+	(void)umask(m);
+	if (fchmod(fd, 0666 & ~m))
 		err(EXIT_FAILURE, "fchmod failed");
 	if (close(fd))
 		err(EXIT_FAILURE,

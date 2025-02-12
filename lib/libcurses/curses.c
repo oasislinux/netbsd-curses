@@ -1,4 +1,4 @@
-/*	$NetBSD: curses.c,v 1.28 2017/01/31 09:17:53 roy Exp $	*/
+/*	$NetBSD: curses.c,v 1.31 2022/10/19 06:09:27 blymn Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -69,7 +69,58 @@ char	 __GT;				/* Gtty indicates tabs. */
 char	 __NONL;			/* Term can't hack LF doing a CR. */
 char	 __UPPERCASE;			/* Terminal is uppercase only. */
 
+/* compare two cells on screen, must have the same foreground/background,
+ * and for wide characters the same sequence of non-spacing characters
+ */
+int
+_cursesi_celleq(__LDATA *x, __LDATA *y)
+{
 #ifdef HAVE_WCHAR
+	nschar_t *xnp = x->nsp, *ynp = y->nsp;
+#endif /* HAVE_WCHAR */
+	int ret = ( x->ch == y->ch ) && ( x->attr == y->attr );
+
+#ifdef HAVE_WCHAR
+	if (!ret)
+		return 0;
+
+	if ((x->cflags & CA_CONTINUATION) != (y->cflags & CA_CONTINUATION))
+		return 0;
+
+	if (!xnp && !ynp)
+		return 1;
+
+	if ((xnp && !ynp) || (!xnp && ynp))
+		return 0;
+
+	while (xnp && ynp) {
+		if (xnp->ch != ynp->ch)
+			return 0;
+		xnp = xnp->next;
+		ynp = ynp->next;
+	}
+
+	return !xnp && !ynp;
+#else
+	return ret;
+#endif /* HAVE_WCHAR */
+}
+
+#ifdef HAVE_WCHAR
+/*
+ * Copy a complex character from source to destination.
+ *
+ */
+void
+_cursesi_copy_wchar(__LDATA *src, __LDATA *dest)
+{
+	dest->ch = src->ch;
+	dest->attr = src->attr;
+	dest->cflags = src->cflags;
+	dest->wcols = src->wcols;
+	_cursesi_copy_nsp(src->nsp, dest);
+}
+
 /*
  * Copy the non-spacing character list (src_nsp) to the given character,
  * allocate or free storage as required.

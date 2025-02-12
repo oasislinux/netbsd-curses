@@ -1,4 +1,4 @@
-/*	$NetBSD: chgat.c,v 1.8 2021/11/22 21:25:25 blymn Exp $	*/
+/*	$NetBSD: chgat.c,v 1.10 2024/12/23 02:58:03 blymn Exp $	*/
 
 /*
  * Copyright (c) 2009 The NetBSD Foundation, Inc.
@@ -58,6 +58,9 @@ mvwchgat(WINDOW *win , int y, int x, int count, attr_t attr, short color,
 	__LINE *lp;
 	__LDATA *lc;
 
+	if (__predict_false(win == NULL))
+		return ERR;
+
 	if (x < 0 || y < 0)
 		return (ERR);
 	if (x >= win->maxx || y >= win->maxy)
@@ -76,6 +79,7 @@ mvwchgat(WINDOW *win , int y, int x, int count, attr_t attr, short color,
 
 	if (x + win->ch_off < *lp->firstchp)
 		*lp->firstchp = x + win->ch_off;
+
 	if (x + win->ch_off + count > *lp->lastchp)
 		*lp->lastchp = x + win->ch_off + count;
 

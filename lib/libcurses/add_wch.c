@@ -1,4 +1,4 @@
-/*   $NetBSD: add_wch.c,v 1.9 2019/06/09 07:40:14 blymn Exp $ */
+/*   $NetBSD: add_wch.c,v 1.10 2024/12/23 02:58:03 blymn Exp $ */
 
 /*
  * Copyright (c) 2005 The NetBSD Foundation Inc.
@@ -89,6 +89,9 @@ wadd_wch(WINDOW *win, const cchar_t *wch)
 {
 	int y = win->cury;
 	__LINE *lnp = NULL;
+
+	if (__predict_false(win == NULL))
+		return ERR;
 
 #ifdef DEBUG
 	int i;

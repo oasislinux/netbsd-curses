@@ -1,4 +1,4 @@
-/*   $NetBSD: in_wch.c,v 1.7 2019/06/09 07:40:14 blymn Exp $ */
+/*   $NetBSD: in_wch.c,v 1.9 2024/12/23 02:58:03 blymn Exp $ */
 
 /*
  * Copyright (c) 2005 The NetBSD Foundation Inc.
@@ -77,9 +77,12 @@ mvwin_wch(WINDOW *win, int y, int x, cchar_t *wcval)
 int
 win_wch(WINDOW *win, cchar_t *wcval)
 {
+	if (__predict_false(win == NULL))
+		return ERR;
+
 	nschar_t *np;
 	__LDATA *lp = &win->alines[win->cury]->line[win->curx];
-	int cw = WCOL(*lp);
+	int cw = lp->wcols;
 
 	if (cw < 0)
 		lp += cw;

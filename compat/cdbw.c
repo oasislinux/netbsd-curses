@@ -1,4 +1,4 @@
-/*	$NetBSD: cdbw.c,v 1.7 2021/01/07 14:41:50 joerg Exp $	*/
+/*	$NetBSD: cdbw.c,v 1.9 2023/08/08 10:34:08 riastradh Exp $	*/
 /*-
  * Copyright (c) 2009, 2010, 2015 The NetBSD Foundation, Inc.
  * All rights reserved.
@@ -440,7 +440,7 @@ compute_size(uint32_t size)
 			return -1;				\
 		cur_pos = 0;					\
 	}							\
-} while (/* CONSTCOND */ 0)
+} while (0)
 
 static void
 le32enc(uint8_t *buf, uint32_t num)
@@ -513,7 +513,7 @@ print_hash(struct cdbw *cdbw, struct state *state, int fd, const char *descr)
 }
 
 int
-cdbw_output(struct cdbw *cdbw, int fd, const char descr[16],
+cdbw_output(struct cdbw *cdbw, int fd, const char *descr,
     uint32_t (*seedgen)(void))
 {
 	struct state state;

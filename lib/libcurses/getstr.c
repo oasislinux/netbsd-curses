@@ -1,4 +1,4 @@
-/*	$NetBSD: getstr.c,v 1.29 2021/09/06 07:03:49 rin Exp $	*/
+/*	$NetBSD: getstr.c,v 1.30 2024/12/23 02:58:03 blymn Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -147,6 +147,9 @@ __wgetnstr(WINDOW *win, char *str, int n)
 {
 	char *ostr, ec, kc;
 	int c, xpos, oldx, remain;
+
+	if (__predict_false(win == NULL))
+		return ERR;
 
 	ostr = str;
 	ec = erasechar();
