@@ -1,4 +1,4 @@
-/*	$NetBSD: refresh.c,v 1.128 2023/06/24 05:18:13 msaitoh Exp $	*/
+/*	$NetBSD: refresh.c,v 1.130 2026/02/14 15:46:55 hgutch Exp $	*/
 
 /*
  * Copyright (c) 1981, 1993, 1994
@@ -1067,7 +1067,7 @@ putchbr(__LDATA *nsp, __LDATA *csp, __LDATA *psp, int wy, int wx)
 	/* We need to insert characters. */
 #ifdef HAVE_WCHAR
 	cw = nsp->wcols;
-	pcw = psp->wcols;
+	pcw = (psp == NULL) ? 0 : psp->wcols;
 	if (cw < 1 || pcw < 1)
 		return ERR; /* Nothing to insert */
 
