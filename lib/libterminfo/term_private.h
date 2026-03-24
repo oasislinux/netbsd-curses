@@ -70,12 +70,6 @@
  * always stored as little endian.
  */
 
-#if HAVE_NBTOOL_CONFIG_H
-# include "nbtool_config.h"
-#endif
-#if !HAVE_NBTOOL_CONFIG_H || HAVE_SYS_ENDIAN_H
-# include <sys/endian.h>
-#endif
 #include <sys/types.h>
 #include <assert.h>
 #include <limits.h>
